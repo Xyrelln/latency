@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"op-latency-mobile/src/adb"
 )
 
 // App struct
@@ -24,4 +26,13 @@ func (a *App) startup(ctx context.Context) {
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
+}
+
+func (a *App) ListDevices() ([]*adb.Device, error) {
+	devices, err := adb.Devices()
+	if err != nil {
+		log.Fatalf("ListDevices failed: %v", err)
+		return nil, err
+	}
+	return devices, nil
 }

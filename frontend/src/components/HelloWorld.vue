@@ -1,15 +1,23 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
-import {Greet} from '../../wailsjs/go/main/App'
+import {Greet, ListDevices} from '../../wailsjs/go/main/App'
 
 const data = reactive({
   name: "",
+  devices: [],
   resultText: "Please enter your name below 👇",
 })
 
 function greet() {
   Greet(data.name).then(result => {
     data.resultText = result
+  })
+}
+
+function listDevices() {
+  ListDevices().then(result => {
+    console.log(result)
+    data.devices = result
   })
 }
 
@@ -21,6 +29,7 @@ function greet() {
     <div id="input" class="input-box">
       <input id="name" v-model="data.name" autocomplete="off" class="input" type="text"/>
       <button class="btn" @click="greet">Greet</button>
+       <button class="btn" @click="listDevices">listDevices</button>
     </div>
   </main>
 </template>

@@ -1,8 +1,11 @@
-module changeme
+module op-latency-mobile
 
 go 1.17
 
-require github.com/wailsapp/wails/v2 v2.0.0-beta.44.2
+require (
+	github.com/corona10/goimagehash v1.1.0
+	github.com/wailsapp/wails/v2 v2.0.0-beta.44.2
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
@@ -17,6 +20,7 @@ require (
 	github.com/leaanthony/slicer v1.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pkg/browser v0.0.0-20210706143420-7d21f8c997e2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.5 // indirect
