@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {Greet, ListDevices} from '../../wailsjs/go/main/App'
+import {adb} from '../../wailsjs/go/models';
 
-const data = reactive({
+const data: {name: string, devices: Array<adb.Device>, resultText: string} = reactive({
   name: "",
-  devices: [],
+  devices: [{Serial: "", State: 0, abi: ""}],
   resultText: "Please enter your name below 👇",
 })
+
 
 function greet() {
   Greet(data.name).then(result => {
