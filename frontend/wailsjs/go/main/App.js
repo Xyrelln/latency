@@ -9,3 +9,11 @@ export function Greet(arg1) {
 export function ListDevices() {
   return window['go']['main']['App']['ListDevices']();
 }
+
+export function StartRecord(arg1) {
+  return window['go']['main']['App']['StartRecord'](arg1);
+}
+
+export function StopRecord(arg1) {
+  return window['go']['main']['App']['StopRecord'](arg1);
+}

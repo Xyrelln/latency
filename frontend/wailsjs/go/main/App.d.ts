@@ -5,3 +5,7 @@ import {adb} from '../models';
 export function Greet(arg1:string):Promise<string>;
 
 export function ListDevices():Promise<Array<adb.Device>>;
+
+export function StartRecord(arg1:string):void;
+
+export function StopRecord(arg1:string):void;
