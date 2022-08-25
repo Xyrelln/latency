@@ -39,7 +39,7 @@ var ErrDeviceNotRooted = errors.New("Device is not rooted")
 type Device struct {
 	Serial string      `json:"Serial"`
 	State  DeviceState `json:"State"`
-	abi    string
+	abi    string      `json:"abi"`
 }
 
 // Command returns a new Cmd that will run the command with the specified name

@@ -2,7 +2,7 @@
 import {reactive, ref, inject, Ref, onMounted, computed} from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
 
-import {ListDevices, StartRecord, StopRecord, StopProcessing} from '../../wailsjs/go/main/App'
+import {ListDevices, StartRecord, StopRecord, StopProcessing, StartTransform, StartAnalyse} from '../../wailsjs/go/main/App'
 import {adb} from '../../wailsjs/go/models'
 
 
@@ -81,6 +81,15 @@ function handleStopProcessing() {
   StopProcessing()
 }
 
+function handleToImage() {
+  StartTransform()
+}
+
+function handleImageAnalyse() {
+  StartAnalyse()
+}
+
+
 </script>
 
 <template>
@@ -110,11 +119,10 @@ function handleStopProcessing() {
       <el-button v-if="processStatus===2" type="danger"  @click="processStatus=0" style="width: 100%">停止: 10</el-button>
     </el-row>
     <el-row>
-      <el-button @click="handleStartRecord">录制</el-button>
-      <el-button @click="handleStopProcessing">停止处理</el-button>
-      <el-button>转图片</el-button>
-      <el-button>准备</el-button>
-      <el-button>解析</el-button>
+      <el-button @click="handleStartRecord">rec</el-button>
+      <el-button @click="handleStopProcessing">stop</el-button>
+      <el-button @click="handleToImage">to_img</el-button>
+      <el-button @click="handleImageAnalyse">ana</el-button>
     </el-row>
 
     <el-tabs 

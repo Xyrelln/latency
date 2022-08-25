@@ -1,6 +1,6 @@
 package adb
 
-func SetPointerLocationOn(d *Device) error {
+func (d *Device) SetPointerLocationOn() error {
 	cmd := Cmd{Args: []string{
 		"-s", d.Serial,
 		"settings put system pointer_location 1",
@@ -9,7 +9,7 @@ func SetPointerLocationOn(d *Device) error {
 	return err
 }
 
-func SetPointerLocationOff(d *Device) error {
+func (d *Device) SetPointerLocationOff() error {
 	// c := strings.Split("settings put system pointer_location 0", " ")
 	cmd := Cmd{Args: []string{
 		"-s", d.Serial,
@@ -17,4 +17,8 @@ func SetPointerLocationOff(d *Device) error {
 	}}
 	err := cmd.Run()
 	return err
+}
+
+func GetDevice(serial string) *Device {
+	return &Device{Serial: serial}
 }

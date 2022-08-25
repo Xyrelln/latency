@@ -6,7 +6,7 @@ import (
 	"log"
 	"op-latency-mobile/src/adb"
 	"op-latency-mobile/src/cmd"
-	"syscall"
+	"op-latency-mobile/src/core"
 )
 
 // App struct
@@ -38,49 +38,48 @@ func (a *App) ListDevices() ([]*adb.Device, error) {
 }
 
 func SetPointerLocationOn(serial string) {
-
+	device := adb.GetDevice(serial)
+	device.SetPointerLocationOn()
 }
 
 func SetPointerLocationOff(serial string) {
-
+	device := adb.GetDevice(serial)
+	device.SetPointerLocationOn()
 }
 
 func (a *App) StartRecord(serial string) {
-	// timeout := 10
-	// a.Cmd.Ctx, a.Cmd.Cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
-	// a.Cmd.Ctx, a.Cmd.Cancel = context.WithCancel(context.Background())
-	// defer a.Cmd.Cancel()
-	cmd, _ := cmd.StartScrcpyRecord(serial, "/Users/jason/Developer/epc/op-latency-mobile/out/video/1.mp4")
+	cmd, _ := cmd.StartScrcpyRecord(serial)
 	a.Cmd = cmd
-
 }
 
 func (a *App) StopRecord(serial string) {
-	cmd.StopScrcpyRecord(serial)
+	a.Cmd.Kill()
 }
 
 func (a *App) StopProcessing() {
-	// a.Cmd.Cancel()
-	log.Printf("Interrupt")
-	// signal.NotifyContext(a.Cmd.Ctx, os.Kill, syscall.SIGTERM)
-	log.Printf("Kill")
-	log.Printf("pid: %d", a.Cmd.Pid)
-	_ = syscall.Kill(a.Cmd.ExecCmd.Process.Pid, syscall.SIGINT)
-	// cmd.CancelProcess()
+	a.Cmd.Kill()
 }
 
-func StartTransform() {
+func (a *App) StartTransform() {
+	cmd, _ := cmd.StartVideoToImageTransform()
+	a.Cmd = cmd
+}
+
+func (a *App) StartAnalyse() {
+	core.CurseRead()
+}
+
+func (a *App) StopAnalyse() {
+}
+
+func (a *App) StopTransform() {
+	a.Cmd.Kill()
+}
+
+func (a *App) ClearImages() {
 
 }
 
-func StartAnalyse() {
-
-}
-
-func ClearImages() {
-
-}
-
-func ClearVideos() {
+func (a *App) ClearVideos() {
 
 }

@@ -14,17 +14,16 @@
 package adb
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
 
-func TestListDevices(t *testing.T) {
-	devices, _ := Devices()
-	fmt.Printf("list devices: %v", devices)
-	// log.Printf("devices: %v", devices)
+// func TestListDevices(t *testing.T) {
+// 	devices, _ := Devices()
+// 	fmt.Printf("list devices: %v", devices)
+// 	// log.Printf("devices: %v", devices)
 
-}
+// }
 func TestParseDevices(t *testing.T) {
 	for i, c := range []struct {
 		s string
