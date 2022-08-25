@@ -2,16 +2,20 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"op-latency-mobile/src/adb"
 	"op-latency-mobile/src/cmd"
+	"syscall"
 )
 
 // App struct
 type App struct {
 	ctx context.Context
+	Cmd cmd.Cmd
 }
+
+var Canceled = errors.New("context canceled")
 
 // NewApp creates a new App application struct
 func NewApp() *App {
@@ -22,11 +26,6 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-}
-
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
 func (a *App) ListDevices() ([]*adb.Device, error) {
@@ -47,11 +46,27 @@ func SetPointerLocationOff(serial string) {
 }
 
 func (a *App) StartRecord(serial string) {
-	cmd.StartScrcpyRecord(serial, "/Users/jason/Developer/epc/op-latency-mobile/out/video/1.mp4")
+	// timeout := 10
+	// a.Cmd.Ctx, a.Cmd.Cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	// a.Cmd.Ctx, a.Cmd.Cancel = context.WithCancel(context.Background())
+	// defer a.Cmd.Cancel()
+	cmd, _ := cmd.StartScrcpyRecord(serial, "/Users/jason/Developer/epc/op-latency-mobile/out/video/1.mp4")
+	a.Cmd = cmd
+
 }
 
 func (a *App) StopRecord(serial string) {
-	cmd.StartScrcpyRecord(serial, "/Users/jason/Developer/epc/op-latency-mobile/out/video/1.mp4")
+	cmd.StopScrcpyRecord(serial)
+}
+
+func (a *App) StopProcessing() {
+	// a.Cmd.Cancel()
+	log.Printf("Interrupt")
+	// signal.NotifyContext(a.Cmd.Ctx, os.Kill, syscall.SIGTERM)
+	log.Printf("Kill")
+	log.Printf("pid: %d", a.Cmd.Pid)
+	_ = syscall.Kill(a.Cmd.ExecCmd.Process.Pid, syscall.SIGINT)
+	// cmd.CancelProcess()
 }
 
 func StartTransform() {

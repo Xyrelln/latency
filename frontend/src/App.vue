@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-// import HelloWorld from './components/HelloWorld.vue'
 import AsideView from './components/AsideView.vue';
 import MainContent from './components/MainContent.vue';
 </script>
