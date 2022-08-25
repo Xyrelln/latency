@@ -66,7 +66,8 @@ func (a *App) StartTransform() {
 }
 
 func (a *App) StartAnalyse() {
-	core.CurseRead()
+	core.CalcTime()
+	// core.ListImageFile("/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/")
 }
 
 func (a *App) StopAnalyse() {
