@@ -12,6 +12,11 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var (
+	threshold_t = 20
+	threshold_c = 20
+)
+
 type ImageFile struct {
 	Path string
 	Img  image.Image
@@ -83,8 +88,8 @@ func ListImageFile(dirName string) ([]ImageFile, error) {
 
 					width := img.Bounds().Dx() // @todo get x,y by phone
 					height := img.Bounds().Dy()
-					centerRect := image.Rect(width/4, height/4, width/4*3, height/4*3)
-					cropImgC, _ := CropImage(centerRect, touchArea)
+					centerArea := image.Rect(width/4, height/4, width/4*3, height/4*3)
+					cropImgC, _ := CropImage(img, centerArea)
 					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
 					imgs = append(imgs, ImageFile{
 						Path:        path,
@@ -111,7 +116,7 @@ func ListImageFile(dirName string) ([]ImageFile, error) {
 	return imgs, nil
 }
 
-func CalcTime() {
+func CalcTime() ([]int, error) {
 	dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
 	imgs, err := ListImageFile(dir)
 	if err != nil {
@@ -119,28 +124,44 @@ func CalcTime() {
 	}
 
 	var previousImg ImageFile
+	var touched = false
+	var touchedIndex = 0
 	// var touchIndex = 0
+	// 1. 从 touch 展示区域评分判断触控操作
+	/**
+	1. 从 scoreT 评分判断触控操作
+	2. 触控开始后检测中心内容区域评分
+	3. 计算中间时间差
+	**/
+	var responseTime []int
 	for index, imageFile := range imgs {
 		if index > 0 {
+			// start diff in second item
 			scoreT, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
 			scoreC, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
 			log.Printf("scoreT: %d", scoreT)
 			log.Printf("scoreC: %d", scoreC)
+
+			if touched {
+				if scoreC >= threshold_c {
+					costTime := (index - touchedIndex) * (1000 / 60)
+					responseTime = append(responseTime, costTime)
+
+					// reset touched
+					log.Printf("current file: %s", imageFile.Path)
+					touched = false
+				}
+
+			} else {
+				if scoreT >= threshold_t {
+					touched = true
+					touchedIndex = index
+				}
+			}
+
 		}
-		// if scoreT > 20 {
-		// 	// 检测到点击, 开始截取中心位置区域，同时开始统计
-		// 	if startCounter == true {
-		// 		diffIndex := index - touchIndex
-		// 		costTime := diffIndex * (1000 / 60)
-		// 		log.Printf("costTime: %d", costTime)
-		// 		startCounter = false
-		// 	} else {
-		// 		touchIndex = index
-		// 		startCounter = true
-		// 		log.Printf("file: %s", fileName)
-		// 		log.Printf("score: %d", score)
-		// 	}
-		// }
 		previousImg = imageFile
 	}
+	log.Printf("responseTime: %v", responseTime)
+	return responseTime, nil
 }

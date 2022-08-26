@@ -41,3 +41,7 @@ func TestLoadImage(t *testing.T) {
 	ListImageFile("/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/")
 
 }
+
+func TestCalcTime(t *testing.T) {
+	CalcTime()
+}
