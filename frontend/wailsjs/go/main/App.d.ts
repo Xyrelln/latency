@@ -8,7 +8,11 @@ export function ClearVideos():void;
 
 export function ListDevices():Promise<Array<adb.Device>>;
 
-export function StartAnalyse():void;
+export function SetPointerLocationOff(arg1:string):void;
+
+export function SetPointerLocationOn(arg1:string):void;
+
+export function StartAnalyse():Promise<Array<number>>;
 
 export function StartRecord(arg1:string):void;
 

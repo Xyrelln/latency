@@ -1,13 +1,38 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, onMounted, computed} from 'vue'
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { LineChart,
+  LineSeriesOption } from "echarts/charts";
+import { Plus } from '@element-plus/icons-vue'
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  DataZoomComponent
+} from "echarts/components";
+import VChart from "vue-echarts";
 
-const processingStatus = ref(2)
+use([
+  CanvasRenderer,
+  LineChart,
+  TitleComponent,
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  ToolboxComponent,
+  DataZoomComponent
+]);
+
+const processingStatus = ref(3)
 
 const countNumber = ref(3)
 const percentRecord = ref(60)
 const percentDataHandle = ref(60)
 const percentDataAnalyse = ref(20)
-
+const responseTimeChartRef = ref()
 
 const colors = [
   { color: '#f56c6c', percentage: 20 },
@@ -26,6 +51,66 @@ function startCountDown() {
 }
 
 
+const responseTimeData = reactive({
+  title: {
+    text: 'response time',
+    left: "center",
+  },
+  tooltip: {
+    trigger: 'axis',
+  },
+  grid: {
+    left: '50px',
+    right: '7px',
+    bottom: '20px',
+    top: '50px',
+    containLabel: false
+  },
+  xAxis: {
+    data: [1,2,3],
+    nameLocation: 'middle',
+    max: function (value:any) {
+      if (value.max < 10) {
+        return 10
+      }
+      return value.max
+    }
+  },
+  yAxis: {
+    type: 'value',
+    name: 'ms',
+    position: 'left',
+  },
+  series: [
+    {
+      name: 'app',
+      data: [1,2,3],
+      type: 'line',
+      itemStyle: {
+        color: 'rgb(46,211,111)'
+      }
+    }
+  ]
+})
+
+function loadResponseTimeData() {
+  const timeStamp = [1,2,3]
+  const responseData = [1,2,3]
+  responseTimeChartRef.value.setOption({ 
+      txAxis: [
+      {
+        data: timeStamp
+      }
+    ],
+    series: [
+      {
+        data: responseData
+      },
+    ]
+    })
+}
+
+defineExpose({ loadResponseTimeData })
 
 </script>
 
@@ -80,7 +165,12 @@ function startCountDown() {
       <span>
         处理完成
       </span>
+      
     </div>
+    <div style="width:300px;height:200px">
+      <v-chart class="chart" ref="responseTimeChartRef" :option="responseTimeData"  />
+    </div>
+    
 
   </div>
 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, onMounted, computed} from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
-import {ListDevices, StartRecord, StopRecord, StopProcessing, StartTransform, StartAnalyse} from '../../wailsjs/go/main/App'
+import {ListDevices, StartRecord, StopRecord, StopProcessing, StartTransform, StartAnalyse,SetPointerLocationOff, SetPointerLocationOn} from '../../wailsjs/go/main/App'
 import {adb} from '../../wailsjs/go/models'
 
 
@@ -11,7 +12,12 @@ const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
 
+const startButtonText = ref("开始")
+const interval = ref()
 const processStatus = ref(0)
+const developMode = ref(false)
+const countDownSecond = ref(0)
+
 
 const tabName = ref('detail')
 const deviceInfo = reactive({ 
@@ -70,11 +76,24 @@ function getDeviceList () {
 
 
 function handleStartRecord() {
+  // clear first
+  clearCurrentInterval()
+
   StartRecord(deviceSelected.value)
+
+  // add stop count down
+  processStatus.value = 2
+  runUntilCountDown(10, handleStopRecord)
 }
 
 function handleStopRecord() {
+  // clear first
+  clearCurrentInterval()
+
   StopRecord(deviceSelected.value)
+  processStatus.value = 0
+  SetPointerLocationOff(deviceSelected.value)
+  handleToImage()
 }
 
 function handleStopProcessing() {
@@ -86,9 +105,48 @@ function handleToImage() {
 }
 
 function handleImageAnalyse() {
-  StartAnalyse()
+  StartAnalyse().then((res)=>{
+    
+  })
 }
 
+
+function clearCurrentInterval() {
+  if (interval.value != null) {
+    clearInterval(interval.value)
+    interval.value = null
+  }
+}
+
+function runUntilCountDown(second: number, callback: Function){
+  countDownSecond.value = second
+  function countDown() {
+    if (countDownSecond.value  > 1) {
+      countDownSecond.value  --
+    } else {
+      // clearCurrentInterval()
+      callback()
+    }
+  }
+
+  clearCurrentInterval()
+  interval.value = setInterval(countDown, 1000)
+}
+
+function handleStart(){
+  if (deviceSelected.value === "") {
+    ElMessage({
+      type: 'error',
+      message: '请选择设备'
+    })
+    return
+  }
+  processStatus.value = 1
+  runUntilCountDown(3, handleStartRecord)
+
+  SetPointerLocationOn(deviceSelected.value)
+
+}
 
 </script>
 
@@ -114,11 +172,11 @@ function handleImageAnalyse() {
       </el-select>
     </el-row>
     <el-row>
-      <el-button v-if="processStatus===0" type="primary" @click="processStatus=1" style="width: 100%">开始</el-button>
-      <el-button v-if="processStatus===1" type="success" @click="processStatus=2" style="width: 100%">准备: 3</el-button>
-      <el-button v-if="processStatus===2" type="danger"  @click="processStatus=0" style="width: 100%">停止: 10</el-button>
+      <el-button v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStart" style="width: 100%">准备</el-button>
+      <el-button v-if="processStatus===1" type="success" @click="handleStartRecord" style="width: 100%">开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+      <el-button v-if="processStatus===2" type="danger"  @click="handleStopProcessing" style="width: 100%">停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
     </el-row>
-    <el-row>
+    <el-row v-if="developMode">
       <el-button @click="handleStartRecord">rec</el-button>
       <el-button @click="handleStopProcessing">stop</el-button>
       <el-button @click="handleToImage">to_img</el-button>

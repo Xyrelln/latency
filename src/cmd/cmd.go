@@ -68,14 +68,30 @@ func (c *Cmd) Call() (string, error) {
 }
 
 func (c *Cmd) Start() error {
+	clone := *c
+	stdout := &bytes.Buffer{}
+	if clone.Stdout != nil {
+		clone.Stdout = io.MultiWriter(clone.Stdout, stdout)
+	} else {
+		clone.Stdout = stdout
+	}
+	stderr := &bytes.Buffer{}
+	if clone.Stdout != nil {
+		clone.Stderr = io.MultiWriter(clone.Stdout, stderr)
+	} else {
+		clone.Stderr = stderr
+	}
+
 	cmd := exec.Command(scrcpy, c.Args...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 
 	if err := cmd.Start(); err != nil {
-		return err
+		log.Fatal(err)
 	}
 	c.execCmd = cmd
+	log.Println(stderr.String())
+	log.Println(stdout.String())
 	return nil
 }
 
@@ -102,12 +118,12 @@ func (c *Cmd) Kill() error {
 	return nil
 }
 
-func StartScrcpyRecord(serial string) (Cmd, error) {
-	path := "/Users/jason/Developer/epc/op-latency-mobile/out/video/1.mp4"
+func StartScrcpyRecord(serial, recDir string) (Cmd, error) {
+	recFile := path.Join(recDir, "rec.mp4")
 	cmd := Cmd{
 		Args: []string{
 			"-s", serial,
-			"-r", path,
+			"-r", recFile,
 		},
 	}
 
@@ -118,13 +134,12 @@ func StartScrcpyRecord(serial string) (Cmd, error) {
 	return cmd, nil
 }
 
-func StartVideoToImageTransform() (Cmd, error) {
-	log.Println("prepare ffmpge transform")
-	outImgDir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/5"
-	outImgPath := path.Join(outImgDir, "%4d.png")
+func StartVideoToImageTransform(srcVideoPath, desImgPath string) (Cmd, error) {
+	// outImgDir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/5"
+	outImgPath := path.Join(desImgPath, "%4d.png")
 	cmd := Cmd{
 		Args: []string{
-			"-i", videoPath,
+			"-i", srcVideoPath,
 			"-threads", "8",
 			outImgPath,
 		},

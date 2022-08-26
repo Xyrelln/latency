@@ -7,12 +7,16 @@ import (
 	"op-latency-mobile/src/adb"
 	"op-latency-mobile/src/cmd"
 	"op-latency-mobile/src/core"
+	"op-latency-mobile/src/utils"
+	"path"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
-	Cmd cmd.Cmd
+	ctx       context.Context
+	Cmd       cmd.Cmd
+	VideoDir  string
+	ImagesDir string
 }
 
 var Canceled = errors.New("context canceled")
@@ -37,37 +41,47 @@ func (a *App) ListDevices() ([]*adb.Device, error) {
 	return devices, nil
 }
 
-func SetPointerLocationOn(serial string) {
+func (a *App) SetPointerLocationOn(serial string) {
+	log.Printf("set pointer location on")
 	device := adb.GetDevice(serial)
 	device.SetPointerLocationOn()
 }
 
-func SetPointerLocationOff(serial string) {
+func (a *App) SetPointerLocationOff(serial string) {
+	log.Printf("set pointer location off")
 	device := adb.GetDevice(serial)
 	device.SetPointerLocationOn()
 }
 
 func (a *App) StartRecord(serial string) {
-	cmd, _ := cmd.StartScrcpyRecord(serial)
+	log.Printf("start monitor")
+	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
+	log.Printf("workdir: %s", a.VideoDir)
+	cmd, _ := cmd.StartScrcpyRecord(serial, a.VideoDir)
 	a.Cmd = cmd
 }
 
 func (a *App) StopRecord(serial string) {
+	log.Printf("stop monitor")
 	a.Cmd.Kill()
 }
 
 func (a *App) StopProcessing() {
+	log.Printf("stop monitor")
 	a.Cmd.Kill()
 }
 
 func (a *App) StartTransform() {
-	cmd, _ := cmd.StartVideoToImageTransform()
+	log.Printf("prepare data")
+	srcVideoPath := path.Join(a.VideoDir, "rec.mp4")
+	cmd, _ := cmd.StartVideoToImageTransform(srcVideoPath, a.ImagesDir)
 	a.Cmd = cmd
 }
 
-func (a *App) StartAnalyse() {
-	core.CalcTime()
-	// core.ListImageFile("/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/")
+func (a *App) StartAnalyse() []int {
+	log.Printf("analyse data")
+	responseTimes, _ := core.CalcTime()
+	return responseTimes
 }
 
 func (a *App) StopAnalyse() {

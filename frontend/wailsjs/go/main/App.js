@@ -14,6 +14,14 @@ export function ListDevices() {
   return window['go']['main']['App']['ListDevices']();
 }
 
+export function SetPointerLocationOff(arg1) {
+  return window['go']['main']['App']['SetPointerLocationOff'](arg1);
+}
+
+export function SetPointerLocationOn(arg1) {
+  return window['go']['main']['App']['SetPointerLocationOn'](arg1);
+}
+
 export function StartAnalyse() {
   return window['go']['main']['App']['StartAnalyse']();
 }
