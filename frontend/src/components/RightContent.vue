@@ -26,12 +26,16 @@ use([
   DataZoomComponent
 ]);
 
-const processingStatus = ref(3)
+const processingStatus = ref(2)
+const activeStep = ref(0)
 
 const countNumber = ref(3)
-const percentRecord = ref(60)
-const percentDataHandle = ref(60)
-const percentDataAnalyse = ref(20)
+// const totalPercentage = ref(0)
+const recordPercent = ref(0)
+const prepareDataPercent = ref(0)
+const anaysePercent = ref(0)
+const percentDataHandle = ref(0)
+const percentDataAnalyse = ref(0)
 const responseTimeChartRef = ref()
 
 const colors = [
@@ -41,6 +45,11 @@ const colors = [
   { color: '#1989fa', percentage: 80 },
   { color: '#6f7ad3', percentage: 100 },
 ]
+const totalPercentage = computed(() => {
+  return (recordPercent.value + prepareDataPercent.value + anaysePercent.value) / 3
+}) 
+
+const format = (percentage:number) => (percentage === 100 ? 'Done' : `${percentage}%`)
 
 function startCountDown() {
   setInterval(() => {
@@ -67,7 +76,7 @@ const responseTimeData = reactive({
     containLabel: false
   },
   xAxis: {
-    data: [1,2,3],
+    data: [],
     nameLocation: 'middle',
     max: function (value:any) {
       if (value.max < 10) {
@@ -84,7 +93,7 @@ const responseTimeData = reactive({
   series: [
     {
       name: 'app',
-      data: [1,2,3],
+      data: [],
       type: 'line',
       itemStyle: {
         color: 'rgb(46,211,111)'
@@ -93,24 +102,34 @@ const responseTimeData = reactive({
   ]
 })
 
-function loadResponseTimeData() {
-  const timeStamp = [1,2,3]
-  const responseData = [1,2,3]
+function loadResponseTimeData(data: Array<number>) {
   responseTimeChartRef.value.setOption({ 
-      txAxis: [
-      {
-        data: timeStamp
-      }
-    ],
     series: [
       {
-        data: responseData
+        data: data
       },
     ]
     })
 }
 
-defineExpose({ loadResponseTimeData })
+function setRecordPercent(num: number){
+  recordPercent.value = num
+}
+
+function setPrepareDataPercent(num: number){
+  prepareDataPercent.value = num
+}
+
+function setAnaysePercent(num: number){
+  anaysePercent.value = num
+}
+
+defineExpose({ 
+  setRecordPercent,
+  setPrepareDataPercent,
+  setAnaysePercent,
+  loadResponseTimeData 
+})
 
 </script>
 
@@ -133,25 +152,29 @@ defineExpose({ loadResponseTimeData })
       </span>
      </div>
     <div v-else-if="processingStatus===2">
+      <el-row class="progress-bar">
+         <el-progress :percentage="totalPercentage" :format="format" />
+      </el-row>
+
       <el-row>
         <el-col :span="8">
-          <el-progress type="dashboard" :percentage="percentRecord" :color="colors">
+          <el-progress type="dashboard" :percentage="recordPercent" :color="colors">
             <template #default="{ percentage }">
               <span class="percentage-value">{{ percentage }}%</span>
-              <span class="percentage-label">录制</span>
+              <span class="percentage-label">监听</span>
             </template>
           </el-progress>
         </el-col>
         <el-col :span="8">
-          <el-progress type="dashboard" :percentage="percentDataHandle" :color="colors">
+          <el-progress type="dashboard" :percentage="prepareDataPercent" :color="colors">
             <template #default="{ percentage }">
               <span class="percentage-value">{{ percentage }}%</span>
-              <span class="percentage-label">数据处理</span>
+              <span class="percentage-label">预处理</span>
             </template>
           </el-progress>
         </el-col>
         <el-col :span="8">
-          <el-progress type="dashboard" :percentage="percentDataAnalyse" :color="colors">
+          <el-progress type="dashboard" :percentage="anaysePercent" :color="colors">
             <template #default="{ percentage }">
               <span class="percentage-value">{{ percentage }}%</span>
               <span class="percentage-label">分析</span>
@@ -167,9 +190,12 @@ defineExpose({ loadResponseTimeData })
       </span>
       
     </div>
-    <div style="width:300px;height:200px">
+    <!-- <div style="width:500px;height:200px">
       <v-chart class="chart" ref="responseTimeChartRef" :option="responseTimeData"  />
-    </div>
+    </div> -->
+    <el-row style="width:(100vw-220px);height:200px">
+       <v-chart class="chart" ref="responseTimeChartRef" :option="responseTimeData"  />
+    </el-row>
     
 
   </div>
@@ -187,6 +213,11 @@ defineExpose({ loadResponseTimeData })
   display: block;
   margin-top: 10px;
   font-size: 12px;
+}
+
+.progress-bar .el-progress--line {
+  margin-bottom: 15px;
+  width: 100%;
 }
 
 </style>

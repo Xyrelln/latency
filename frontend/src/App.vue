@@ -1,20 +1,11 @@
 <script lang="ts" setup>
-import AsideView from './components/AsideView.vue';
-import MainContent from './components/MainContent.vue';
+import Home from './views/Home.vue';
 </script>
 
 <template>
   <div class="common-layout">
     <el-container>
-      <!-- <el-header>Header</el-header> -->
-      <el-container>
-        <el-aside width="200px">
-          <AsideView/>
-        </el-aside>
-        <el-main>
-          <MainContent></MainContent>
-        </el-main>
-      </el-container>
+      <Home/>
     </el-container>
   </div>
 </template>

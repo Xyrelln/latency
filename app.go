@@ -80,7 +80,7 @@ func (a *App) StartTransform() {
 
 func (a *App) StartAnalyse() []int {
 	log.Printf("analyse data")
-	responseTimes, _ := core.CalcTime()
+	responseTimes, _ := core.CalcTime(a.ImagesDir)
 	return responseTimes
 }
 

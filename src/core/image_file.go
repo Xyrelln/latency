@@ -116,9 +116,9 @@ func ListImageFile(dirName string) ([]ImageFile, error) {
 	return imgs, nil
 }
 
-func CalcTime() ([]int, error) {
-	dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
-	imgs, err := ListImageFile(dir)
+func CalcTime(imgPath string) ([]int, error) {
+	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
+	imgs, err := ListImageFile(imgPath)
 	if err != nil {
 		log.Fatal("Specified directory with images inside does not exists or is corrupted")
 	}
