@@ -12,7 +12,7 @@ export function SetPointerLocationOff(arg1:string):void;
 
 export function SetPointerLocationOn(arg1:string):void;
 
-export function StartAnalyse():Promise<Array<number>>;
+export function StartAnalyse():Promise<Error>;
 
 export function StartRecord(arg1:string):void;
 

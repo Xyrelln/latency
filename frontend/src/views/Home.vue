@@ -3,9 +3,22 @@ import {reactive, ref, inject, Ref, onMounted, computed, watch} from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
-import {ListDevices, StartRecord, StopRecord, StopProcessing, StartTransform, StartAnalyse,SetPointerLocationOff, SetPointerLocationOn} from '../../wailsjs/go/main/App'
+import { 
+  ListDevices,
+  StartRecord,
+  StopRecord,
+  StopProcessing,
+  StartTransform,
+  StartAnalyse,
+  SetPointerLocationOff,
+  SetPointerLocationOn
+} from '../../wailsjs/go/app/Api'
 import {adb} from '../../wailsjs/go/models'
 import RightContent from '../components/RightContent.vue';
+import {
+  EventsOn,
+  EventsOff
+} from '../../wailsjs/runtime/runtime'
 
 const deviceSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
@@ -16,12 +29,12 @@ const rightContentRef = ref()
 const startButtonText = ref("开始")
 const interval = ref()
 const processStatus = ref(0)
-const developMode = ref(false)
+const developMode = ref(true)
 const countDownSecond = ref(0)
 
 
 const tabName = ref('detail')
-const deviceInfo = reactive({ 
+const deviceInfo = reactive({
   android_version: null,
   cpu_arch: '',
   cpu_core_count: null,
@@ -146,7 +159,7 @@ function runUntilCountDown(second: number, callback?: Function){
   interval.value = setInterval(countDown, 1000)
 }
 
-function handleStart(){
+function handlePrepare(){
   if (deviceSelected.value === "") {
     ElMessage({
       type: 'error',
@@ -155,11 +168,29 @@ function handleStart(){
     return
   }
   processStatus.value = 1
+  setPointerLocationOn()
   runUntilCountDown(3, handleStartRecord)
-
-  SetPointerLocationOn(deviceSelected.value)
-
 }
+
+function setPointerLocationOn() {
+  SetPointerLocationOn(deviceSelected.value)
+}
+
+function setPointerLocationOff() {
+  SetPointerLocationOff(deviceSelected.value)
+}
+
+
+function setEventsLister(callback: Function) {
+  EventsOn("latency:done", (data: any) => {
+    console.log("perfdata: " ,data)
+    callback(data)
+  })
+}
+
+
+
+
 
 </script>
 
@@ -187,7 +218,7 @@ function handleStart(){
             </el-select>
           </el-row>
           <el-row>
-            <el-button v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStart" style="width: 100%">准备</el-button>
+            <el-button v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" style="width: 100%">准备</el-button>
             <el-button v-if="processStatus===1" type="success" @click="handleStartRecord" style="width: 100%">开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
             <el-button v-if="processStatus===2" type="danger"  @click="handleStopProcessing" style="width: 100%">停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
           </el-row>
@@ -196,6 +227,8 @@ function handleStart(){
             <el-button @click="handleStopProcessing">stop</el-button>
             <el-button @click="handleToImage">to_img</el-button>
             <el-button @click="handleImageAnalyse">ana</el-button>
+            <el-button @click="setPointerLocationOn">set_pl_on</el-button>
+            <el-button @click="setPointerLocationOff">set_pl_off</el-button>
           </el-row>
 
           <el-tabs 

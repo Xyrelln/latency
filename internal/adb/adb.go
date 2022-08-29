@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -89,6 +90,8 @@ func (c *Cmd) Run() error {
 		args = append(args, "shell", c.Path)
 	}
 	args = append(args, c.Args...)
+	log.Printf("adb: %s", adb)
+	log.Printf("args: %v", args)
 	cmd := exec.Command(adb, args...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
