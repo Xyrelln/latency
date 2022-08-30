@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import {reactive, ref, inject, Ref, onMounted, computed, watch} from 'vue'
+import {reactive, ref, inject, Ref, onMounted, computed, watch, onUnmounted} from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 import { 
   ListDevices,
+  Start,
   StartRecord,
   StopRecord,
   StopProcessing,
@@ -15,6 +17,7 @@ import {
 } from '../../wailsjs/go/app/Api'
 import {adb} from '../../wailsjs/go/models'
 import RightContent from '../components/RightContent.vue';
+import ImagePreview from '../components/ImagePreview.vue';
 import {
   EventsOn,
   EventsOff
@@ -94,11 +97,12 @@ function handleStartRecord() {
   // clear first
   clearCurrentInterval()
 
-  StartRecord(deviceSelected.value)
+  // const err = StartRecord(deviceSelected.value)
+  Start(deviceSelected.value, 10)
 
   // add stop count down
   processStatus.value = 2
-  runUntilCountDown(10, handleStopRecord)
+  runUntilCountDown(10)
 }
 
 function handleStopRecord() {
@@ -159,7 +163,7 @@ function runUntilCountDown(second: number, callback?: Function){
   interval.value = setInterval(countDown, 1000)
 }
 
-function handlePrepare(){
+async function handlePrepare(){
   if (deviceSelected.value === "") {
     ElMessage({
       type: 'error',
@@ -167,30 +171,97 @@ function handlePrepare(){
     })
     return
   }
-  processStatus.value = 1
-  setPointerLocationOn()
-  runUntilCountDown(3, handleStartRecord)
+  NProgress.start()
+  const result = await setPointerLocationOn()
+  if (result){
+    processStatus.value = 1
+    runUntilCountDown(3, handleStartRecord)
+  }
 }
 
-function setPointerLocationOn() {
-  SetPointerLocationOn(deviceSelected.value)
-}
-
-function setPointerLocationOff() {
-  SetPointerLocationOff(deviceSelected.value)
-}
-
-
-function setEventsLister(callback: Function) {
-  EventsOn("latency:done", (data: any) => {
-    console.log("perfdata: " ,data)
-    callback(data)
+async function setPointerLocationOn():Promise<Boolean> {
+  let result = false
+  await SetPointerLocationOn(deviceSelected.value).then(res =>{ 
+    if (res) {
+      ElMessage({
+        type: 'error',
+        message: '开启指针失败'
+      })
+      result = false
+      
+    } else {
+      ElMessage({
+        type: 'success',
+        message: '开启指针成功'
+      })
+     result = true
+    }
   })
+  return result
+}
+
+function setPointerLocationOff():Boolean {
+  SetPointerLocationOff(deviceSelected.value).then(res =>{ 
+    if (res) {
+      ElMessage({
+        type: 'error',
+        message: '关闭指针失败'
+      })
+      return false
+      
+    } else {
+      ElMessage({
+        type: 'success',
+        message: '关闭指针成功'
+      })
+      return true
+    }
+  })
+  return false
 }
 
 
+// function setEventsLister(callback: Function) {
+//   EventsOn("latency:done", (data: any) => {
+//     console.log("perfdata: " ,data)
+//     callback(data)
+//   })
+// }
 
 
+onMounted(()=> {
+  EventsOn("latency:record_start", ()=>{
+    console.log("record_start")
+  })
+  EventsOn("latency:record_filish", ()=>{
+    setPointerLocationOff()
+  })
+  EventsOn("latency:transform_start", ()=>{
+    rightContentRef.value.setPrepareDataPercent(5)
+  })
+  EventsOn("latency:transform_filish", ()=>{
+    rightContentRef.value.setPrepareDataPercent(100)
+  })
+  EventsOn("latency:analyse_start", ()=>{
+    rightContentRef.value.setAnaysePercent(5)
+  })
+  EventsOn("latency:analyse_filish", (res)=>{
+    rightContentRef.value.setAnaysePercent(100)
+    processStatus.value = 0
+    rightContentRef.value.loadResponseTimeData(res)
+    NProgress.done()
+  })
+  
+})
+
+onUnmounted(()=>{
+  EventsOff("latency:record_start")
+  EventsOff("latency:record_filish")
+  EventsOff("latency:transform_start")
+  EventsOff("latency:transform_filish")
+  EventsOff("latency:analyse_start")
+  EventsOff("latency:analyse_filish")
+})
 
 </script>
 
@@ -318,6 +389,7 @@ function setEventsLister(callback: Function) {
       </el-aside>
       <el-main>
         <RightContent ref="rightContentRef"/>
+        <ImagePreview ref="ImagePreviewRef"/>
       </el-main>
     </el-container>
   

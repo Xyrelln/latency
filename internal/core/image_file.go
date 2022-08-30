@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"image"
 	"log"
 	"os"
@@ -67,6 +68,25 @@ func LoadImage(path string, info os.FileInfo, e error) (image.Image, error) {
 		}
 	}
 	return nil, nil
+}
+
+func GetCropRect(sx, sy, sw, sh, pw, ph, dx, dy int) (image.Rectangle, error) {
+	// 0 0 200 200 600 338
+	// 111 111 200 200 600 338
+	proportion := dx / pw
+	yProportion := dy / ph
+
+	if (proportion - yProportion) > 0 {
+		return image.Rect(0, 0, 0, 0), errors.New("image with wrong scaling")
+	}
+
+	cropRect := image.Rect(
+		sx*proportion,
+		sy*proportion,
+		sw*proportion,
+		sh*proportion,
+	)
+	return cropRect, nil
 }
 
 func ListImageFile(dirName string) ([]ImageFile, error) {

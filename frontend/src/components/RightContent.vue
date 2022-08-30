@@ -14,6 +14,7 @@ import {
   DataZoomComponent
 } from "echarts/components";
 import VChart from "vue-echarts";
+import { randomInt } from 'crypto';
 
 use([
   CanvasRenderer,
@@ -103,7 +104,13 @@ const responseTimeData = reactive({
 })
 
 function loadResponseTimeData(data: Array<number>) {
+  const xData = Array.from(new Array(data.length +1).keys()).slice(1)
   responseTimeChartRef.value.setOption({ 
+    xAxis: [
+      {
+        data: xData
+      }
+    ],
     series: [
       {
         data: data
@@ -123,6 +130,19 @@ function setPrepareDataPercent(num: number){
 function setAnaysePercent(num: number){
   anaysePercent.value = num
 }
+
+const tableData = [
+  {
+    time: 112,
+  },
+  {
+     time: 240,
+  }
+]
+
+const data = [112,240, 256, 240, 224 ,240]
+const url =
+  'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
 
 defineExpose({ 
   setRecordPercent,
@@ -151,7 +171,7 @@ defineExpose({
         倒计时：{{ countNumber }}
       </span>
      </div>
-    <div v-else-if="processingStatus===2">
+    <!-- <div v-else-if="processingStatus===2">
       <el-row class="progress-bar">
          <el-progress :percentage="totalPercentage" :format="format" />
       </el-row>
@@ -183,7 +203,7 @@ defineExpose({
         </el-col>
       </el-row>
      
-    </div>
+    </div> -->
     <div v-else-if="processingStatus===3">
       <span>
         处理完成
@@ -196,7 +216,17 @@ defineExpose({
     <el-row style="width:(100vw-220px);height:200px">
        <v-chart class="chart" ref="responseTimeChartRef" :option="responseTimeData"  />
     </el-row>
-    
+
+    <el-table :data="tableData" stripe style="width: 100%">
+    <el-table-column label="序号" type="index" align="center" width="55" />
+      <!-- <el-table-column prop="name" label="序号"/> -->
+    <el-table-column prop="time" align="center" label="响应时间"/>
+    </el-table>
+
+    <!-- <div class="out-img-bobx">
+      <img class="preview-img" src="../assets/images/0001.png"/>
+    </div> -->
+      
 
   </div>
 
@@ -218,6 +248,19 @@ defineExpose({
 .progress-bar .el-progress--line {
   margin-bottom: 15px;
   width: 100%;
+}
+
+.out-img-bobx {
+  width: 600px;
+  height: 400px;
+  line-height: 400px;
+  text-align: center;
+}
+
+.preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  vertical-align: middle;
 }
 
 </style>

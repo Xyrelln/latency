@@ -8,20 +8,22 @@ export function ClearVideos():void;
 
 export function ListDevices():Promise<Array<adb.Device>>;
 
-export function SetPointerLocationOff(arg1:string):void;
+export function SetPointerLocationOff(arg1:string):Promise<Error>;
 
-export function SetPointerLocationOn(arg1:string):void;
+export function SetPointerLocationOn(arg1:string):Promise<Error>;
+
+export function Start(arg1:string,arg2:number):Promise<Error>;
 
 export function StartAnalyse():Promise<Error>;
 
-export function StartRecord(arg1:string):void;
+export function StartRecord(arg1:string):Promise<Error>;
 
-export function StartTransform():void;
+export function StartTransform():Promise<Error>;
 
 export function StopAnalyse():void;
 
-export function StopProcessing():void;
+export function StopProcessing():Promise<Error>;
 
-export function StopRecord(arg1:string):void;
+export function StopRecord(arg1:string):Promise<Error>;
 
 export function StopTransform():void;

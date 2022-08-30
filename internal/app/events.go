@@ -4,7 +4,7 @@ const (
 	eventInit                  = "latency:init"
 	eventRecordStart           = "latency:record_start"
 	eventRecordFilish          = "latency:record_filish"
-	eventtTransformStart       = "latency:transform_start"
+	eventTransformStart        = "latency:transform_start"
 	eventTransformFilish       = "latency:transform_filish"
 	eventAnalyseStart          = "latency:analyse_start"
 	eventAnalyseFilish         = "latency:analyse_filish"

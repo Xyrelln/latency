@@ -22,6 +22,10 @@ export function SetPointerLocationOn(arg1) {
   return window['go']['app']['Api']['SetPointerLocationOn'](arg1);
 }
 
+export function Start(arg1, arg2) {
+  return window['go']['app']['Api']['Start'](arg1, arg2);
+}
+
 export function StartAnalyse() {
   return window['go']['app']['Api']['StartAnalyse']();
 }
