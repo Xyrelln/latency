@@ -26,6 +26,17 @@ type ImageFile struct {
 	ExtImgHashC *goimagehash.ExtImageHash // center area
 }
 
+type ImageRectInfo struct {
+	X             int `json:"x"`
+	Y             int `json:"y"`
+	W             int `json:"w"`
+	H             int `json:"h"`
+	PreviewWidth  int `json:"preview_width"`
+	PreviewHeight int `json:"preview_height"`
+	SourceWidth   int `json:"source_width"`
+	SourceHeight  int `json:"source_height"`
+}
+
 // func GetFileNamesByPath(dirPath, extension string) ([]string, error) {
 // 	var files []string
 // 	fs, err := ioutil.ReadDir(dirPath)
@@ -70,21 +81,21 @@ func LoadImage(path string, info os.FileInfo, e error) (image.Image, error) {
 	return nil, nil
 }
 
-func GetCropRect(sx, sy, sw, sh, pw, ph, dx, dy int) (image.Rectangle, error) {
+func GetCropRect(imageRect ImageRectInfo) (image.Rectangle, error) {
 	// 0 0 200 200 600 338
 	// 111 111 200 200 600 338
-	proportion := dx / pw
-	yProportion := dy / ph
+	proportion := imageRect.SourceWidth / imageRect.W
+	yProportion := imageRect.SourceHeight / imageRect.H
 
 	if (proportion - yProportion) > 0 {
 		return image.Rect(0, 0, 0, 0), errors.New("image with wrong scaling")
 	}
 
 	cropRect := image.Rect(
-		sx*proportion,
-		sy*proportion,
-		sw*proportion,
-		sh*proportion,
+		imageRect.X*proportion,
+		imageRect.Y*proportion,
+		imageRect.W*proportion,
+		imageRect.H*proportion,
 	)
 	return cropRect, nil
 }
@@ -136,9 +147,72 @@ func ListImageFile(dirName string) ([]ImageFile, error) {
 	return imgs, nil
 }
 
-func CalcTime(imgPath string) ([]int, error) {
+func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, error) {
+	// var images []image.Image
+	var imgs []ImageFile
+	var eg errgroup.Group
+	touchArea := image.Rect(0, 0, 100, 35)
+
+	_ = filepath.Walk(
+		dirName,
+		func(path string, info os.FileInfo, e error) error {
+			eg.Go(func() error {
+				img, err := LoadImage(path, info, e)
+				if img != nil {
+					// log.Println(path)
+					// images = append(images, img)
+					cropImgT, _ := CropImage(img, touchArea)
+					extImgHashT, _ := goimagehash.ExtDifferenceHash(cropImgT, 16, 16)
+
+					// width := img.Bounds().Dx() // @todo get x,y by phone
+					// height := img.Bounds().Dy()
+					// centerArea := image.Rect(width/4, height/4, width/4*3, height/4*3)
+					cropImgC, _ := CropImage(img, rect)
+					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
+					imgs = append(imgs, ImageFile{
+						Path:        path,
+						Img:         img,
+						ExtImgHashC: extImgHashC,
+						ExtImgHashT: extImgHashT,
+					})
+				}
+				return err
+			})
+			return nil
+		},
+	)
+	err := eg.Wait()
+	if err != nil {
+		log.Fatal("Specified directory with images inside does not exists or is corrupted")
+	}
+	// sorted
+	sort.Slice(imgs, func(i, j int) bool {
+		return imgs[i].Path < imgs[j].Path // filename as 0001   0002
+	})
+
+	log.Printf("image count: %d", len(imgs))
+	return imgs, nil
+}
+
+func GetImageInfo(imagePath string) (ImageInfo, error) {
+	var imgInfo ImageInfo
+	fimg, _ := os.Open(imagePath)
+	defer fimg.Close()
+	img, _, err := image.Decode(fimg)
+	if err != nil {
+		return imgInfo, err
+	}
+	imgInfo.Path = imagePath
+	imgInfo.Width = img.Bounds().Dx()
+	imgInfo.Height = img.Bounds().Dy()
+	return imgInfo, nil
+
+}
+
+func CalcTime(imgPath string, imageRect ImageRectInfo) ([]int, error) {
 	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
-	imgs, err := ListImageFile(imgPath)
+	rect, _ := GetCropRect(imageRect)
+	imgs, err := ListImageFileWithCrop(imgPath, rect)
 	if err != nil {
 		log.Fatal("Specified directory with images inside does not exists or is corrupted")
 	}

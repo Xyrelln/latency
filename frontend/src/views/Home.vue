@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import {reactive, ref, inject, Ref, onMounted, computed, watch, onUnmounted} from 'vue'
+import {reactive, ref, h, inject, Ref, onMounted, computed, watch, onUnmounted} from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { 
@@ -13,9 +14,10 @@ import {
   StartTransform,
   StartAnalyse,
   SetPointerLocationOff,
-  SetPointerLocationOn
+  SetPointerLocationOn,
+  GetFirstImageInfo
 } from '../../wailsjs/go/app/Api'
-import {adb} from '../../wailsjs/go/models'
+import {adb, core} from '../../wailsjs/go/models'
 import RightContent from '../components/RightContent.vue';
 import ImagePreview from '../components/ImagePreview.vue';
 import {
@@ -34,7 +36,7 @@ const interval = ref()
 const processStatus = ref(0)
 const developMode = ref(true)
 const countDownSecond = ref(0)
-
+const imageSrc = ref()
 
 const tabName = ref('detail')
 const deviceInfo = reactive({
@@ -47,39 +49,47 @@ const deviceInfo = reactive({
   product_model: ''
 })
 
+const imageInfo = reactive({
+  path: '',
+  width: 0,
+  height: 0,
+  size: 0
+})
+
 const settingForm = reactive({
-  captureInterval: 1,
-  jankThreshold: 83.3333
+  diffScore: 20,
+  timeout: 10,
+  develop: false,
 })
 
 const rules =  {
-  jankThreshold: [
+  diffScore: [
     {
       required: true,
-      message: '帧间隔必填',
+      message: '图片比对阈值',
       trigger: 'blur',
     },
     {
-      validator: checkJankThreshold,
+      validator: checkGreaterThanZero,
       trigger: 'blur',
     }
   ],
-  captureInterval: [
+  timeout: [
     {
       required: true,
-      message: '采集间隔必填',
+      message: '录制时长',
       trigger: 'blur',
     },
     {
-      validator: checkJankThreshold,
+      validator: checkGreaterThanZero,
       trigger: 'blur',
     }
   ]
 }
 
-function checkJankThreshold (rule: any, value: any, callback: any)  {
+function checkGreaterThanZero (rule: any, value: any, callback: any)  {
   if (value <= 0) {
-    callback(new Error('帧间隔必须大于0'))
+    callback(new Error('数值必须大于0'))
   } else {
     callback()
   }
@@ -98,11 +108,11 @@ function handleStartRecord() {
   clearCurrentInterval()
 
   // const err = StartRecord(deviceSelected.value)
-  Start(deviceSelected.value, 10)
+  Start(deviceSelected.value, settingForm.timeout)
 
   // add stop count down
   processStatus.value = 2
-  runUntilCountDown(10)
+  runUntilCountDown(settingForm.timeout)
 }
 
 function handleStopRecord() {
@@ -112,7 +122,7 @@ function handleStopRecord() {
   StopRecord(deviceSelected.value)
   processStatus.value = 0
   SetPointerLocationOff(deviceSelected.value)
-  handleToImage()
+  // handleToImage()
 }
 
 function handleStopProcessing() {
@@ -120,25 +130,28 @@ function handleStopProcessing() {
 }
 
 function handleToImage() {
-  rightContentRef.value.setPrepareDataPercent(5)
+  // rightContentRef.value.setPrepareDataPercent(5)
   StartTransform()
   rightContentRef.value.setPrepareDataPercent(100)
-  rightContentRef.value.setAnaysePercent(5)
-  handleImageAnalyse()
-  rightContentRef.value.setAnaysePercent(100)
+  // rightContentRef.value.setAnaysePercent(5)
+  // handleImageAnalyse()
+  // rightContentRef.value.setAnaysePercent(100)
 }
 
 function handleImageAnalyse() {
-  StartAnalyse().then((res)=>{
-    rightContentRef.value.loadResponseTimeData(res)
+  const rectinfo = core.ImageRectInfo.createFrom({
+    
+  })
+  StartAnalyse(rectinfo).then((res)=>{
+    // rightContentRef.value.loadResponseTimeData(res)
   })
 }
 
-watch(countDownSecond, (value)=> {
-  if (processStatus.value === 2) {
-    rightContentRef.value.setRecordPercent(100 - value*10)
-  }
-})
+// watch(countDownSecond, (value)=> {
+//   if (processStatus.value === 2) {
+//     rightContentRef.value.setRecordPercent(100 - value*10)
+//   }
+// })
 
 
 function clearCurrentInterval() {
@@ -221,35 +234,65 @@ function setPointerLocationOff():Boolean {
 }
 
 
-// function setEventsLister(callback: Function) {
-//   EventsOn("latency:done", (data: any) => {
-//     console.log("perfdata: " ,data)
-//     callback(data)
-//   })
-// }
+function getFirstImage(){
+  GetFirstImageInfo().then((res: core.ImageInfo) => {
+    imageInfo.path = res.path
+    imageInfo.width = res.width
+    imageInfo.height = res.height
+  })
+}
 
 
 onMounted(()=> {
   EventsOn("latency:record_start", ()=>{
     console.log("record_start")
+    ElNotification({
+      title: '进度提示',
+      type: 'info',
+      message: "开始录制",
+    })
   })
   EventsOn("latency:record_filish", ()=>{
     setPointerLocationOff()
+    ElNotification({
+      title: '进度提示',
+      type: 'success',
+      message: "录制成功",
+    })
   })
   EventsOn("latency:transform_start", ()=>{
-    rightContentRef.value.setPrepareDataPercent(5)
+    ElNotification({
+      title: '进度提示',
+      type: 'info',
+      message: "开始数据预处理",
+    })
+    // rightContentRef.value.setPrepareDataPercent(5)
   })
   EventsOn("latency:transform_filish", ()=>{
-    rightContentRef.value.setPrepareDataPercent(100)
+    // rightContentRef.value.setPrepareDataPercent(100)
+    ElNotification({
+      title: '进度提示',
+      type: 'success',
+      message: "数据预处理完成，加载首帧画面",
+    })
+    getFirstImage()
+    // imageInfo.path = res.Path
+    // imageInfo.width = res.Width
+    // imageInfo.height = res.Height
   })
   EventsOn("latency:analyse_start", ()=>{
-    rightContentRef.value.setAnaysePercent(5)
+    // rightContentRef.value.setAnaysePercent(5)
   })
   EventsOn("latency:analyse_filish", (res)=>{
-    rightContentRef.value.setAnaysePercent(100)
+    // rightContentRef.value.setAnaysePercent(100)
     processStatus.value = 0
     rightContentRef.value.loadResponseTimeData(res)
     NProgress.done()
+    ElNotification({
+      title: '进度提示',
+      type: 'success',
+      message: "数据处理完成",
+    })
   })
   
 })
@@ -293,7 +336,7 @@ onUnmounted(()=>{
             <el-button v-if="processStatus===1" type="success" @click="handleStartRecord" style="width: 100%">开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
             <el-button v-if="processStatus===2" type="danger"  @click="handleStopProcessing" style="width: 100%">停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
           </el-row>
-          <el-row v-if="developMode">
+          <el-row v-if="settingForm.develop">
             <el-button @click="handleStartRecord">rec</el-button>
             <el-button @click="handleStopProcessing">stop</el-button>
             <el-button @click="handleToImage">to_img</el-button>
@@ -315,57 +358,16 @@ onUnmounted(()=>{
                       <el-col :span="12" class="info-line">
                         <span class="info-value">数值</span>
                       </el-col>
-                    </el-row>
-                    <!-- <el-row class="info-list">
+                      <el-row class="info-list">
                       <el-col :span="12" class="info-line">
-                        <span class="info-key">OS Version</span>
+                        <span class="info-key">Version</span>
                       </el-col >
                       <el-col :span="12" class="info-line">
                         <span class="info-value">{{ deviceInfo.android_version }}</span>
                       </el-col>
                     </el-row>
-                    <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">CPU Arch</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">{{ deviceInfo.cpu_arch }}</span>
-                      </el-col>
                     </el-row>
-                    <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">CPU Core</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">{{ deviceInfo.cpu_core_count }}</span>
-                      </el-col>
-                    </el-row>
-                    <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">MEM(G)</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">{{ Math.floor(deviceInfo.mem_total/1000) }}</span>
-                      </el-col>
-                    </el-row>
-                    <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">Model Name</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">{{ deviceInfo.product_model }}</span>
-                      </el-col>
-                    </el-row>
-                    <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">Hardware</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">{{ deviceInfo.hardware }}</span>
-                      </el-col>
-                    </el-row> -->
                   </div>
-                
                 </el-scrollbar>
               </el-tab-pane>
 
@@ -373,11 +375,17 @@ onUnmounted(()=>{
                 <el-scrollbar style="height:60vh">
                   <el-row>
                     <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
-                      <el-form-item label="采集间隔(s)" prop="captureInterval">
-                        <el-input v-model.number="settingForm.captureInterval"/>
+                      <el-form-item label="图片比对阈值" prop="diffScore">
+                        <el-input v-model.number="settingForm.diffScore"/>
                       </el-form-item>
-                      <el-form-item label="帧间隔(ms)" prop="jankThreshold">
-                        <el-input v-model.number="settingForm.jankThreshold"/>
+                      <el-form-item label="录制时长(秒)" prop="timeout">
+                        <el-input v-model.number="settingForm.timeout"/>
+                      </el-form-item>
+                      <el-form-item label="调试开关">
+                        <el-switch v-model="settingForm.develop" />
+                      </el-form-item>
+                      <el-form-item label="数据清理">
+                        <el-button>清理缓存数据</el-button>
                       </el-form-item>
                     </el-form>
                   </el-row>
@@ -388,8 +396,12 @@ onUnmounted(()=>{
         </div>
       </el-aside>
       <el-main>
-        <RightContent ref="rightContentRef"/>
-        <ImagePreview ref="ImagePreviewRef"/>
+        <!-- <RightContent ref="rightContentRef"/> -->
+        <ImagePreview 
+          ref="ImagePreviewRef"
+          :data="imageInfo"
+          :src="imageInfo.path"
+          />
       </el-main>
     </el-container>
   

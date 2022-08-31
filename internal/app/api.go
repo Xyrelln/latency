@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"log"
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
@@ -14,6 +13,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+const (
+	recordFile     = "rec.mp4"
+	firstImageFile = "0001.png"
+)
+
 // Api struct
 type Api struct {
 	ctx       context.Context
@@ -21,8 +25,6 @@ type Api struct {
 	VideoDir  string
 	ImagesDir string
 }
-
-var Canceled = errors.New("context canceled")
 
 // NewApp creates a new Api application struct
 func NewApp() *Api {
@@ -71,8 +73,6 @@ func (a *Api) StartRecord(serial string) error {
 
 func (a *Api) Start(serial string, recordSecond int64) error {
 	// timeout := time.After(time.Duration(recordSecond) * time.Second)
-	// // err := a.StartRecord(serial)
-
 	// ch := make(chan string, 1)
 	// go func() {
 	// 	err := a.StartRecord(serial)
@@ -119,7 +119,7 @@ func (a *Api) StopProcessing() error {
 
 func (a *Api) StartTransform() error {
 	log.Printf("prepare data")
-	srcVideoPath := path.Join(a.VideoDir, "rec.mp4")
+	srcVideoPath := path.Join(a.VideoDir, recordFile)
 	a.emitInfo(eventTransformStart)
 	cmd, err := cmd.StartVideoToImageTransform(srcVideoPath, a.ImagesDir)
 	if err != nil {
@@ -127,16 +127,26 @@ func (a *Api) StartTransform() error {
 		log.Print(err)
 		return err
 	}
+
 	a.emitInfo(eventTransformFilish)
 	a.Cmd = cmd
 	return nil
 }
 
-func (a *Api) StartAnalyse() error {
+func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
+	firstImage := path.Join(a.ImagesDir, firstImageFile)
+	mInfo, err := core.GetImageInfo(firstImage)
+	if err != nil {
+		return mInfo, err
+	}
+	return mInfo, nil
+}
+
+func (a *Api) StartAnalyse(imageRect core.ImageRectInfo) error {
 	log.Printf("analyse data")
 	log.Printf("workdir: %s", a.ImagesDir)
 	a.emitInfo(eventAnalyseStart)
-	responseTimes, _ := core.CalcTime(a.ImagesDir)
+	responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect)
 	a.emitData(eventAnalyseFilish, responseTimes)
 	return nil
 }

@@ -10,6 +10,10 @@ export function ClearVideos() {
   return window['go']['app']['Api']['ClearVideos']();
 }
 
+export function GetFirstImageInfo() {
+  return window['go']['app']['Api']['GetFirstImageInfo']();
+}
+
 export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
 }
@@ -26,8 +30,8 @@ export function Start(arg1, arg2) {
   return window['go']['app']['Api']['Start'](arg1, arg2);
 }
 
-export function StartAnalyse() {
-  return window['go']['app']['Api']['StartAnalyse']();
+export function StartAnalyse(arg1) {
+  return window['go']['app']['Api']['StartAnalyse'](arg1);
 }
 
 export function StartRecord(arg1) {

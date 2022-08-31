@@ -123,7 +123,7 @@ func StartScrcpyRecord(serial, recDir string) (Cmd, error) {
 	cmd := Cmd{
 		Args: []string{
 			"-s", serial,
-			"-r", recFile,
+			"-Nr", recFile,
 		},
 	}
 

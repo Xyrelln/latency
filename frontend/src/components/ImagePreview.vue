@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, onMounted, computed} from 'vue'
+import {adb, core} from '../../wailsjs/go/models'
+interface Props {
+  src: string
+  data: core.ImageInfo
+}
 
+const props = defineProps<Props>()
 const selectBoxRef = ref()
 const previewImgRef = ref()
 const canvasRef = ref()
 const data = [112,240, 256, 240, 224 ,240]
-const url =
-    'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+// const url =
+//     'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
 
+// const imageSrc = ref()
 
 const selectArea = reactive({
     ax: 0,
@@ -135,16 +142,24 @@ function getImage() {
 //     imgFile = blob;
 //   }, 'image/jpeg');
 // });
+
+
 </script>
 
 <template>
     <div>
     <!-- <el-empty description="description" /> -->
-    <el-button @click="getImage">getImageXY</el-button>
+    <el-button @click="getImage">计算响应时间</el-button>
     
     <div class="out-img-bobx">
         <!-- <span class="demonstration">111</span> -->
-        <img ref="previewImgRef" class="preview-img" draggable="false" src="../assets/images/0001.png" alt=""/>
+        <!-- <img ref="previewImgRef" class="preview-img" draggable="false" src="../assets/images/0001.png" alt=""/> -->
+        <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.data.path" alt=""/>
+        <el-image :src="props.src">
+          <template #placeholder>
+            <div class="image-slot">Loading<span class="dot">...</span></div>
+          </template>
+        </el-image>
         <div ref="selectBoxRef" id="select-box">
       </div>
         <!-- <canvas ref="canvasRef" id="myCanvas" width="1000" height="800" style="border:1px solid #d3d3d3;">
