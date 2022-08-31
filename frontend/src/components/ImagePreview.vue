@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, onMounted, computed} from 'vue'
 import {adb, core} from '../../wailsjs/go/models'
+import { 
+  StartAnalyse,
+} from '../../wailsjs/go/app/Api'
 interface Props {
   src: string
   data: core.ImageInfo
@@ -10,11 +13,17 @@ const props = defineProps<Props>()
 const selectBoxRef = ref()
 const previewImgRef = ref()
 const canvasRef = ref()
-const data = [112,240, 256, 240, 224 ,240]
-// const url =
-//     'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
-
-// const imageSrc = ref()
+const resizeRef = ref()
+const resizeTopRef = ref()
+const resizeRightRef = ref()
+const resizeBottomRef = ref()
+const resizeLeftRef = ref()
+const location = reactive({
+  x: 0,
+  y: 0,
+  w: 0,
+  h: 0,
+})
 
 const selectArea = reactive({
     ax: 0,
@@ -29,105 +38,115 @@ const selectArea = reactive({
 })
 
 
-function move(e:any) {
-  // document.getElementById("local").innerHTML = e.pageY + '，' + e.pageX
-  selectArea.mx = e.pageX;
-  selectArea.my = e.pageY;
-  paintReact()
+// function move(e:any) {
+//   // document.getElementById("local").innerHTML = e.pageY + '，' + e.pageX
+//   selectArea.mx = e.pageX;
+//   selectArea.my = e.pageY;
+//   paintReact()
+// }
+
+// function down(e:any) {
+//   // document.getElementById("down").innerHTML = e.pageY + '，' + e.pageX
+//   selectArea.ax = e.pageX;
+//   selectArea.ay = e.pageY;
+//   selectArea.paint = true
+// }
+
+// function up(e:any) {
+//   // document.getElementById("up").innerHTML = e.pageY + '，' + e.pageX
+//   selectArea.bx = e.pageX;
+//   selectArea.by = e.pageY;
+//   selectArea.paint = false
+// }
+
+// function paintReact() {
+//   const ctx = canvasRef.value.getContext("2d")
+//   ctx.clearRect(0, 0, 1000, 800)
+//   selectArea.width = selectArea.mx - selectArea.ax
+//   selectArea.height = selectArea.my - selectArea.ay
+//   console.log(selectArea.width, selectArea.height);
+//   if (selectArea.paint) {
+//       ctx.strokeRect(selectArea.ax, selectArea.ay, selectArea.width, selectArea.height)
+//   }
+// }
+
+function handleImageAnalyse() {
+  const rectinfo = core.ImageRectInfo.createFrom({
+
+  })
+  StartAnalyse(rectinfo).then((res)=>{
+  })
 }
 
-function down(e:any) {
-  // document.getElementById("down").innerHTML = e.pageY + '，' + e.pageX
-  selectArea.ax = e.pageX;
-  selectArea.ay = e.pageY;
-  selectArea.paint = true
-}
-
-function up(e:any) {
-  // document.getElementById("up").innerHTML = e.pageY + '，' + e.pageX
-  selectArea.bx = e.pageX;
-  selectArea.by = e.pageY;
-  selectArea.paint = false
-}
-
-function paintReact() {
-  const ctx = canvasRef.value.getContext("2d")
-  ctx.clearRect(0, 0, 1000, 800)
-  selectArea.width = selectArea.mx - selectArea.ax
-  selectArea.height = selectArea.my - selectArea.ay
-  console.log(selectArea.width, selectArea.height);
-  if (selectArea.paint) {
-      ctx.strokeRect(selectArea.ax, selectArea.ay, selectArea.width, selectArea.height)
-  }
-}
-
-onMounted(()=>{
+function selectBoxInit() {
   previewImgRef.value.addEventListener('load', ()=>{
-    selectBoxRef.value.style.display = 'block'
     selectBoxRef.value.style.top = previewImgRef.value.offsetTop + 'px'
     selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + 'px'
-
-    console.log(selectBoxRef.value.offsetHeight)
-    console.log(selectBoxRef.value.style.top)
   })
 
   selectBoxRef.value.addEventListener('mousedown', (ev:any) => {
-    console.log(ev)
     const X = ev.clientX - ev.target.offsetLeft;
     const Y = ev.clientY - ev.target.offsetTop;
 
+    const px = previewImgRef.value.offsetLeft
+    const py = previewImgRef.value.offsetTop
+    const pw = previewImgRef.value.offsetWidth
+    const ph = previewImgRef.value.offsetHeight
+
     // 鼠标移动
     document.onmousemove = (ev:any) => {
-      selectBoxRef.value.style.left = ev.clientX - X + 'px';
-      selectBoxRef.value.style.top = ev.clientY - Y + 'px';
+      const tx = ev.clientX - X
+      const ty = ev.clientY - Y
+      
+      if (tx <= px) {
+        selectBoxRef.value.style.left = px + 'px'
+       
+      } else if (tx >= px + pw - 200) {
+        selectBoxRef.value.style.left = px + pw - 200  + 'px'
+      } else {
+        selectBoxRef.value.style.left = tx + 'px'
+      }
 
-      // 限制选择框的拖动范围，禁止拖出图片区域
-      // if (selectBoxRef.value.offsetLeft <= previewImgRef.value.offsetLeft) {
-      //   selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + 'px';
-      // }
-      // if (selectBoxRef.value.offsetLeft >= previewImgRef.value.offsetWidth - selectBoxRef.value.offsetWidth) {
-      //   selectBoxRef.value.style.left = previewImgRef.value.offsetWidth - selectBoxRef.value.offsetWidth + 'px';
-      // }
-      // if (selectBoxRef.value.offsetTop <= previewImgRef.value.offsetTop) {
-      //   selectBoxRef.value.style.top = previewImgRef.value.offsetTop + 'px';
-      // }
-      // if (selectBoxRef.value.offsetTop >= previewImgRef.value.offsetHeight - selectBoxRef.value.offsetHeight) {
-      //   selectBoxRef.value.style.top = previewImgRef.value.offsetHeight - selectBoxRef.value.offsetHeight + 'px';
-      // }
+      if (ty <= py) {
+        selectBoxRef.value.style.top = py + 'px'
+      } else if (ty >= py + ph - 200){
+        selectBoxRef.value.style.top = py + ph - 200 + 'px'
+      } else {
+        selectBoxRef.value.style.top = ty + 'px'
+      }
     }
 
     document.onmouseup = (ev:any) => {
-      console.log(ev)
-      console.log(selectBoxRef.value.offsetHeight)
-      console.log(selectBoxRef.value.style.top)
       document.onmousemove = null;
     }
     return false;
   })
 
-  // canvasRef.value.addEventListener('mousemove', move, false)
-  // canvasRef.value.addEventListener('mousedown', down, false)
-  // canvasRef.value.addEventListener('mouseup', up, false)
+}
+
+onMounted(()=>{
+  selectBoxInit()
+
+  resizeTopRef.value.addEventListener('mousedown', mouseDownHandler);
+  resizeRightRef.value.addEventListener('mousedown', mouseDownHandler);
+  resizeBottomRef.value.addEventListener('mousedown', mouseDownHandler);
+  resizeLeftRef.value.addEventListener('mousedown', mouseDownHandler);
 })
 
 
 function getImage() {
-  const sX = selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft;  // 区域选择框左侧位置
-  const sY = selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop;  // 区域选择框上方位置
-  const sW = selectBoxRef.value.offsetWidth;  // 区域选择框宽度
-  const sH = selectBoxRef.value.offsetHeight;  // 区域选择框高度
-  const pW = previewImgRef.value.offsetWidth;  // 区域选择框宽度
-  const pH = previewImgRef.value.offsetHeight;  // 区域选择框高度
-  console.log(sX, sY, sW, sH, pW, pH)
+  const rectinfo = core.ImageRectInfo.createFrom({
+    x: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft,
+    y: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop,
+    w: selectBoxRef.value.offsetWidth,
+    h: selectBoxRef.value.offsetHeight,
+    preview_width: previewImgRef.value.offsetWidth,
+    preview_height: previewImgRef.value.offsetHeight,
+    source_width: props.data.width,
+    source_height: props.data.height,
+  })
 
-  // const destArea = 0
-  // 把图片截取到 canvas
-  // canvasEl.getContext('2d').drawImage(previewImgRef.value, sX, sY, sW, sH , 0, 0, canvasEl.width, canvasEl.height);
-  // // 把裁剪后的 canvas 图像转为 Blob
-  // canvasEl.toBlob(blob => {
-  //   if (blob === null) return false;
-  //   imgFile = blob;
-  // }, 'image/jpeg');
+  StartAnalyse(rectinfo)
 }
 // cropBtn.addEventListener('click', () => {
 //   const sX = previewImgRef.value.offsetLeft - previewImgRef.value.offsetLeft;  // 区域选择框左侧位置
@@ -143,6 +162,45 @@ function getImage() {
 //   }, 'image/jpeg');
 // });
 
+function handleImageLoadSuccess() {
+  console.log("handleImageLoadSuccess")
+}
+
+
+const mouseDownHandler = function (e:any) {
+    e.stopPropagation()
+    // Get the current mouse position
+    console.log("mouseDownHandler")
+    location.x = e.clientX;
+    location.y = e.clientY;
+
+    // Calculate the dimension of element
+    const styles = window.getComputedStyle(selectBoxRef.value);
+    location.w = parseInt(styles.width, 10);
+    location.h = parseInt(styles.height, 10);
+
+    // Attach the listeners to `document`
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+};
+
+const mouseMoveHandler = function (e: any) {
+  console.log("mouseMoveHandler")
+    // How far the mouse has been moved
+    const dx = e.clientX - location.x;
+    const dy = e.clientY - location.y;
+    console.log(dx, dy)
+    // Adjust the dimension of element
+    selectBoxRef.value.style.width = `${location.w + dx}px`;
+    selectBoxRef.value.style.height = `${location.h + dy}px`;
+};
+
+const mouseUpHandler = function () {
+    // Remove the handlers of `mousemove` and `mouseup`
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+};
+
 
 </script>
 
@@ -155,38 +213,36 @@ function getImage() {
         <!-- <span class="demonstration">111</span> -->
         <!-- <img ref="previewImgRef" class="preview-img" draggable="false" src="../assets/images/0001.png" alt=""/> -->
         <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.data.path" alt=""/>
-        <el-image :src="props.src">
+        <!-- <el-image :src="props.data.path" @load="handleImageLoadSuccess">
           <template #placeholder>
             <div class="image-slot">Loading<span class="dot">...</span></div>
           </template>
-        </el-image>
-        <div ref="selectBoxRef" id="select-box">
-      </div>
-        <!-- <canvas ref="canvasRef" id="myCanvas" width="1000" height="800" style="border:1px solid #d3d3d3;">
-			Your browser does not support the HTML5 canvas tag.
-		</canvas> -->
-		<!-- <span>local</span>
-		<p id="local"></p>
-		<span>down</span>
-		<p id="down"></p>
-		<span>up</span>
-		<p id="up"></p> -->
-
+        </el-image> -->
+          <div ref="selectBoxRef" class="s-move-content-header" id="select-box">
+            <div ref="resizeTopRef" class="resizer resizer-t"></div>
+            <div ref="resizeRightRef" class="resizer resizer-r"></div>
+            <div ref="resizeBottomRef" class="resizer resizer-b"></div>
+            <div ref="resizeLeftRef" class="resizer resizer-l"></div>
+          </div>
+    </div>
+<!-- 
+    <div ref="resizeRef" id="resizeMe" class="resizable">
+        Resize me
+        <div ref="resizeTopRef" class="resizer resizer-t"></div>
+        <div ref="resizeRightRef" class="resizer resizer-r"></div>
+        <div ref="resizeBottomRef" class="resizer resizer-b"></div>
+        <div ref="resizeLeftRef" class="resizer resizer-l"></div>
+    </div> -->
 
     </div>
-        
-
-    </div>
-
-    
 </template>
 
-<style scoped>
+<style>
 
 .out-img-bobx {
-    width: 600px;
-    height: 400px;
-    line-height: 400px;
+    width: 700px;
+    height: 600px;
+    line-height: 600px;
     text-align: center;
 }
 
@@ -204,6 +260,69 @@ function getImage() {
   position: absolute;
   display: none;
   cursor: move;
+  display: block;
 }
+
+img {
+  -webkit-user-drag: none;
+}
+
+/* body {
+  -webkit-user-select: none
+} */
+
+.resizable {
+  position: relative;
+
+  /* Center the content */
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  /* Misc */
+  border: 1px solid #cbd5e0;
+  height: 8rem;
+  width: 8rem;
+}
+.resizer {
+    /* All resizers are positioned absolutely inside the element */
+    position: absolute;
+}
+
+/* Placed at the right side */
+.resizer-r {
+    cursor: col-resize;
+    height: 100%;
+    right: 0;
+    top: 0;
+    width: 5px;
+}
+
+.resizer-l {
+    cursor: col-resize;
+    height: 100%;
+    left: 0;
+    top: 0;
+    width: 5px;
+}
+
+
+/* Placed at the bottom side */
+.resizer-b {
+    bottom: 0;
+    cursor: row-resize;
+    height: 5px;
+    left: 0;
+    width: 100%;
+}
+
+.resizer-t {
+    top: 0;
+    cursor: row-resize;
+    height: 5px;
+    left: 0;
+    width: 100%;
+}
+
 
 </style>

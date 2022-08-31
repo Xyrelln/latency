@@ -22,7 +22,8 @@ import RightContent from '../components/RightContent.vue';
 import ImagePreview from '../components/ImagePreview.vue';
 import {
   EventsOn,
-  EventsOff
+  EventsOff,
+  WindowReload,
 } from '../../wailsjs/runtime/runtime'
 
 const deviceSelected = ref("")
@@ -50,7 +51,9 @@ const deviceInfo = reactive({
 })
 
 const imageInfo = reactive({
-  path: '',
+  path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-08-31T14:29:46+08:00/images/0001.png',
+  // path: '/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/0001.png',
+  // path: '',
   width: 0,
   height: 0,
   size: 0
@@ -107,7 +110,6 @@ function handleStartRecord() {
   // clear first
   clearCurrentInterval()
 
-  // const err = StartRecord(deviceSelected.value)
   Start(deviceSelected.value, settingForm.timeout)
 
   // add stop count down
@@ -122,7 +124,6 @@ function handleStopRecord() {
   StopRecord(deviceSelected.value)
   processStatus.value = 0
   SetPointerLocationOff(deviceSelected.value)
-  // handleToImage()
 }
 
 function handleStopProcessing() {
@@ -130,29 +131,17 @@ function handleStopProcessing() {
 }
 
 function handleToImage() {
-  // rightContentRef.value.setPrepareDataPercent(5)
   StartTransform()
   rightContentRef.value.setPrepareDataPercent(100)
-  // rightContentRef.value.setAnaysePercent(5)
-  // handleImageAnalyse()
-  // rightContentRef.value.setAnaysePercent(100)
 }
 
 function handleImageAnalyse() {
   const rectinfo = core.ImageRectInfo.createFrom({
-    
+
   })
   StartAnalyse(rectinfo).then((res)=>{
-    // rightContentRef.value.loadResponseTimeData(res)
   })
 }
-
-// watch(countDownSecond, (value)=> {
-//   if (processStatus.value === 2) {
-//     rightContentRef.value.setRecordPercent(100 - value*10)
-//   }
-// })
-
 
 function clearCurrentInterval() {
   if (interval.value != null) {
@@ -255,47 +244,44 @@ onMounted(()=> {
   EventsOn("latency:record_filish", ()=>{
     setPointerLocationOff()
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 1/3',
       type: 'success',
       message: "录制成功",
     })
   })
   EventsOn("latency:transform_start", ()=>{
-    ElNotification({
-      title: '进度提示',
-      type: 'info',
-      message: "开始数据预处理",
-    })
-    // rightContentRef.value.setPrepareDataPercent(5)
+    // ElNotification({
+    //   title: '进度提示',
+    //   type: 'info',
+    //   message: "开始数据预处理",
+    // })
   })
   EventsOn("latency:transform_filish", ()=>{
-    // rightContentRef.value.setPrepareDataPercent(100)
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 2/3',
       type: 'success',
       message: "数据预处理完成，加载首帧画面",
     })
     getFirstImage()
-    // imageInfo.path = res.Path
-    // imageInfo.width = res.Width
-    // imageInfo.height = res.Height
   })
   EventsOn("latency:analyse_start", ()=>{
-    // rightContentRef.value.setAnaysePercent(5)
   })
   EventsOn("latency:analyse_filish", (res)=>{
-    // rightContentRef.value.setAnaysePercent(100)
     processStatus.value = 0
     rightContentRef.value.loadResponseTimeData(res)
     NProgress.done()
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 3/3',
       type: 'success',
       message: "数据处理完成",
     })
   })
   
 })
+
+function handleReload() {
+  WindowReload();
+}
 
 onUnmounted(()=>{
   EventsOff("latency:record_start")
@@ -387,6 +373,9 @@ onUnmounted(()=>{
                       <el-form-item label="数据清理">
                         <el-button>清理缓存数据</el-button>
                       </el-form-item>
+                      <el-form-item label="其他">
+                        <el-button @click="handleReload">reload</el-button>
+                      </el-form-item>
                     </el-form>
                   </el-row>
                 </el-scrollbar>
@@ -396,12 +385,12 @@ onUnmounted(()=>{
         </div>
       </el-aside>
       <el-main>
-        <!-- <RightContent ref="rightContentRef"/> -->
         <ImagePreview 
           ref="ImagePreviewRef"
           :data="imageInfo"
           :src="imageInfo.path"
           />
+        <!-- <RightContent ref="rightContentRef"/> -->
       </el-main>
     </el-container>
   

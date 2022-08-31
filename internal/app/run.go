@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -23,7 +22,8 @@ func NewFileLoader() *FileLoader {
 
 func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var err error
-	requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
+	requestedFilename := req.URL.Path
+	// requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
 	println("Requesting file:", requestedFilename)
 	fileData, err := os.ReadFile(requestedFilename)
 	if err != nil {
