@@ -31,6 +31,9 @@ const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
 
+const isAuth = ref(false)
+const prepareTimeout = ref(3)
+
 const rightContentRef = ref()
 const startButtonText = ref("开始")
 const interval = ref()
@@ -62,6 +65,7 @@ const imageInfo = reactive({
 const settingForm = reactive({
   diffScore: 20,
   timeout: 10,
+  prepareTimeout: 3,
   develop: false,
 })
 
@@ -81,6 +85,17 @@ const rules =  {
     {
       required: true,
       message: '录制时长',
+      trigger: 'blur',
+    },
+    {
+      validator: checkGreaterThanZero,
+      trigger: 'blur',
+    }
+  ],
+  prepareTimeout: [
+    {
+      required: true,
+      message: '准备时长',
       trigger: 'blur',
     },
     {
@@ -175,9 +190,14 @@ async function handlePrepare(){
   }
   NProgress.start()
   const result = await setPointerLocationOn()
-  if (result){
-    processStatus.value = 1
-    runUntilCountDown(3, handleStartRecord)
+  if (result) {
+    if (prepareTimeout.value === 0) {
+      processStatus.value = 2
+      handleStartRecord()
+    } else {
+      processStatus.value = 1
+      runUntilCountDown(prepareTimeout.value, handleStartRecord)
+    }
   }
 }
 
@@ -295,106 +315,109 @@ onUnmounted(()=>{
 </script>
 
 <template>
-    <el-container>
-      <el-aside width="200px">
-        <div>
-          <el-row>
-            <el-avatar :icon="UserFilled" />
-          </el-row>
-          <el-row>
-            <el-select
-                v-model="deviceSelected"
-                @focus="getDeviceList"
-                filterable
-                placeholder="请选择设备"
-                style="width:100%">
-              <el-option
-                v-for="item in data.devices"
-                :key="item.Serial"
-                :label="item.Serial"
-                :value="item.Serial"
-              >
-              </el-option>
-            </el-select>
-          </el-row>
-          <el-row>
-            <el-button v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" style="width: 100%">准备</el-button>
-            <el-button v-if="processStatus===1" type="success" @click="handleStartRecord" style="width: 100%">开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
-            <el-button v-if="processStatus===2" type="danger"  @click="handleStopProcessing" style="width: 100%">停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
-          </el-row>
-          <el-row v-if="settingForm.develop">
-            <el-button @click="handleStartRecord">rec</el-button>
-            <el-button @click="handleStopProcessing">stop</el-button>
-            <el-button @click="handleToImage">to_img</el-button>
-            <el-button @click="handleImageAnalyse">ana</el-button>
-            <el-button @click="setPointerLocationOn">set_pl_on</el-button>
-            <el-button @click="setPointerLocationOff">set_pl_off</el-button>
-          </el-row>
+  <el-container>
+    <el-aside class="aside-content" width="220px">
+      <el-row class="row-item" v-if="isAuth">
+        <el-avatar :icon="UserFilled" />
+      </el-row>
+      <el-row class="row-item">
+        <el-select
+            v-model="deviceSelected"
+            @focus="getDeviceList"
+            filterable
+            placeholder="请选择设备"
+            style="width:100%">
+          <el-option
+            v-for="item in data.devices"
+            :key="item.Serial"
+            :label="item.Serial"
+            :value="item.Serial"
+          >
+          </el-option>
+        </el-select>
+      </el-row>
+      <el-row class="row-item">
+        <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" >准备</el-button>
+        <el-button class="operation-button" v-if="processStatus===1" type="success" @click="handleStartRecord" >开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+        <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+      </el-row>
+      <el-row class="row-item" v-if="settingForm.develop">
+        <el-button @click="handleStartRecord">rec</el-button>
+        <el-button @click="handleStopProcessing">stop</el-button>
+        <el-button @click="handleToImage">to_img</el-button>
+        <el-button @click="handleImageAnalyse">ana</el-button>
+        <el-button @click="setPointerLocationOn">set_pl_on</el-button>
+        <el-button @click="setPointerLocationOff">set_pl_off</el-button>
+      </el-row>
 
-          <el-tabs 
-              v-model="tabName" 
-              class="platform-tabs">
-              <el-tab-pane label="详情" name="detail">
-                <el-scrollbar style="height:60vh">
-                  <div>
-                    <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">名称</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">数值</span>
-                      </el-col>
-                      <el-row class="info-list">
-                      <el-col :span="12" class="info-line">
-                        <span class="info-key">Version</span>
-                      </el-col >
-                      <el-col :span="12" class="info-line">
-                        <span class="info-value">{{ deviceInfo.android_version }}</span>
-                      </el-col>
-                    </el-row>
-                    </el-row>
-                  </div>
-                </el-scrollbar>
-              </el-tab-pane>
+      <el-tabs 
+          v-model="tabName" 
+          class="platform-tabs">
+          <el-tab-pane label="帮助" name="detail">
+            <el-scrollbar style="height:60vh">
+              <div>
+                <!-- <el-row class="info-list">
+                  <el-col :span="12" class="info-line">
+                    <span class="info-key">名称</span>
+                  </el-col >
+                  <el-col :span="12" class="info-line">
+                    <span class="info-value">数值</span>
+                  </el-col>
+                  <el-row class="info-list">
+                  <el-col :span="12" class="info-line">
+                    <span class="info-key">Version</span>
+                  </el-col >
+                  <el-col :span="12" class="info-line">
+                    <span class="info-value">{{ deviceInfo.android_version }}</span>
+                  </el-col>
+                </el-row>
+                </el-row> -->
+                
+              </div>
+            </el-scrollbar>
+          </el-tab-pane>
 
-              <el-tab-pane label="设置" name="setting">
-                <el-scrollbar style="height:60vh">
-                  <el-row>
-                    <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
-                      <el-form-item label="图片比对阈值" prop="diffScore">
-                        <el-input v-model.number="settingForm.diffScore"/>
-                      </el-form-item>
-                      <el-form-item label="录制时长(秒)" prop="timeout">
-                        <el-input v-model.number="settingForm.timeout"/>
-                      </el-form-item>
-                      <el-form-item label="调试开关">
-                        <el-switch v-model="settingForm.develop" />
-                      </el-form-item>
-                      <el-form-item label="数据清理">
-                        <el-button>清理缓存数据</el-button>
-                      </el-form-item>
-                      <el-form-item label="其他">
-                        <el-button @click="handleReload">reload</el-button>
-                      </el-form-item>
-                    </el-form>
-                  </el-row>
-                </el-scrollbar>
-              </el-tab-pane>
-            </el-tabs>
+          <el-tab-pane label="设置" name="setting">
+            <el-scrollbar style="height:60vh">
+              <el-row>
+                <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
+                  <el-form-item label="图片比对阈值" prop="diffScore">
+                    <el-input v-model.number="settingForm.diffScore"/>
+                  </el-form-item>
+                  <el-form-item label="录制时长(秒)" prop="timeout">
+                    <el-input v-model.number="settingForm.timeout"/>
+                  </el-form-item>
+                  <el-form-item label="准备时长(秒)" prop="prepareTimeout">
+                    <el-input v-model.number="settingForm.prepareTimeout"/>
+                  </el-form-item>
+                  <el-form-item label="调试开关">
+                    <el-switch v-model="settingForm.develop" />
+                  </el-form-item>
+                  <el-form-item label="数据清理">
+                    <el-button>清理缓存数据</el-button>
+                  </el-form-item>
+                  <el-form-item label="其他">
+                    <el-button @click="handleReload">reload</el-button>
+                  </el-form-item>
+                </el-form>
+              </el-row>
+            </el-scrollbar>
+          </el-tab-pane>
+        </el-tabs>
 
-        </div>
-      </el-aside>
-      <el-main>
-        <ImagePreview 
-          ref="ImagePreviewRef"
-          :data="imageInfo"
-          :src="imageInfo.path"
-          />
-        <!-- <RightContent ref="rightContentRef"/> -->
-      </el-main>
-    </el-container>
-  
+    </el-aside>
+    <el-main>
+      <el-scrollbar height="calc(100vh - 60px)">
 
+      <ImagePreview 
+        ref="ImagePreviewRef"
+        :data="imageInfo"
+        :src="imageInfo.path"
+        />
+      <RightContent ref="rightContentRef"/>
+    </el-scrollbar>
+    </el-main>
+  </el-container>
     
 </template>
 
@@ -404,9 +427,24 @@ onUnmounted(()=>{
   transition: opacity 0.5s ease;
 }
 
+
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
 } */
 
+.operation-button {
+  width: 100%;
+}
+
+.row-item {
+  margin-bottom: 1rem;
+}
+
+.aside-content {
+  border: solid 1px #e6e6e6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2);
+}
 </style>

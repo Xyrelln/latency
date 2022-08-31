@@ -38,38 +38,6 @@ const selectArea = reactive({
 })
 
 
-// function move(e:any) {
-//   // document.getElementById("local").innerHTML = e.pageY + '，' + e.pageX
-//   selectArea.mx = e.pageX;
-//   selectArea.my = e.pageY;
-//   paintReact()
-// }
-
-// function down(e:any) {
-//   // document.getElementById("down").innerHTML = e.pageY + '，' + e.pageX
-//   selectArea.ax = e.pageX;
-//   selectArea.ay = e.pageY;
-//   selectArea.paint = true
-// }
-
-// function up(e:any) {
-//   // document.getElementById("up").innerHTML = e.pageY + '，' + e.pageX
-//   selectArea.bx = e.pageX;
-//   selectArea.by = e.pageY;
-//   selectArea.paint = false
-// }
-
-// function paintReact() {
-//   const ctx = canvasRef.value.getContext("2d")
-//   ctx.clearRect(0, 0, 1000, 800)
-//   selectArea.width = selectArea.mx - selectArea.ax
-//   selectArea.height = selectArea.my - selectArea.ay
-//   console.log(selectArea.width, selectArea.height);
-//   if (selectArea.paint) {
-//       ctx.strokeRect(selectArea.ax, selectArea.ay, selectArea.width, selectArea.height)
-//   }
-// }
-
 function handleImageAnalyse() {
   const rectinfo = core.ImageRectInfo.createFrom({
 
