@@ -32,7 +32,7 @@ const data: {devices: Array<adb.Device>} = reactive({
 })
 
 const isAuth = ref(false)
-const prepareTimeout = ref(3)
+const placeholder = "./assets/images/placeholder.png"
 
 const rightContentRef = ref()
 const startButtonText = ref("开始")
@@ -54,9 +54,9 @@ const deviceInfo = reactive({
 })
 
 const imageInfo = reactive({
-  path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-08-31T14:29:46+08:00/images/0001.png',
+  // path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-08-31T14:29:46+08:00/images/0001.png',
   // path: '/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/0001.png',
-  // path: '',
+  path: '/Users/jason/Developer/epc/op-latency-mobile/frontend/src/assets/images/placeholder.png',
   width: 0,
   height: 0,
   size: 0
@@ -99,7 +99,7 @@ const rules =  {
       trigger: 'blur',
     },
     {
-      validator: checkGreaterThanZero,
+      validator: checkGreaterEqualZero,
       trigger: 'blur',
     }
   ]
@@ -112,6 +112,15 @@ function checkGreaterThanZero (rule: any, value: any, callback: any)  {
     callback()
   }
 }
+
+function checkGreaterEqualZero (rule: any, value: any, callback: any)  {
+  if (value < 0) {
+    callback(new Error('数值必须大于等于0'))
+  } else {
+    callback()
+  }
+}
+
 
 
 function getDeviceList () {
@@ -191,12 +200,12 @@ async function handlePrepare(){
   NProgress.start()
   const result = await setPointerLocationOn()
   if (result) {
-    if (prepareTimeout.value === 0) {
+    if (settingForm.prepareTimeout === 0) {
       processStatus.value = 2
       handleStartRecord()
     } else {
       processStatus.value = 1
-      runUntilCountDown(prepareTimeout.value, handleStartRecord)
+      runUntilCountDown(settingForm.prepareTimeout, handleStartRecord)
     }
   }
 }
@@ -263,6 +272,7 @@ onMounted(()=> {
   })
   EventsOn("latency:record_filish", ()=>{
     setPointerLocationOff()
+    processStatus.value = 0
     ElNotification({
       title: '进度提示: 1/3',
       type: 'success',
@@ -284,18 +294,23 @@ onMounted(()=> {
     })
     getFirstImage()
   })
-  EventsOn("latency:analyse_start", ()=>{
-  })
-  EventsOn("latency:analyse_filish", (res)=>{
-    processStatus.value = 0
-    rightContentRef.value.loadResponseTimeData(res)
-    NProgress.done()
-    ElNotification({
-      title: '进度提示: 3/3',
-      type: 'success',
-      message: "数据处理完成",
-    })
-  })
+  // EventsOn("latency:analyse_start", ()=>{
+  //   ElNotification({
+  //     title: '进度提示',
+  //     type: 'info',
+  //     message: "开始数据分析",
+  //   })
+  // })
+  // EventsOn("latency:analyse_filish", (res)=>{
+  //   // processStatus.value = 0
+  //   rightContentRef.value.loadResponseTimeData(res)
+  //   NProgress.done()
+  //   ElNotification({
+  //     title: '进度提示: 3/3',
+  //     type: 'success',
+  //     message: "数据处理完成",
+  //   })
+  // })
   
 })
 
@@ -308,8 +323,8 @@ onUnmounted(()=>{
   EventsOff("latency:record_filish")
   EventsOff("latency:transform_start")
   EventsOff("latency:transform_filish")
-  EventsOff("latency:analyse_start")
-  EventsOff("latency:analyse_filish")
+  // EventsOff("latency:analyse_start")
+  // EventsOff("latency:analyse_filish")
 })
 
 </script>
@@ -406,17 +421,17 @@ onUnmounted(()=>{
         </el-tabs>
 
     </el-aside>
-    <el-main>
-      <el-scrollbar height="calc(100vh - 60px)">
+    <el-main class="main-content">
+      <!-- <el-scrollbar height="calc(100vh - 60px)"> -->
 
       <ImagePreview 
         ref="ImagePreviewRef"
         :data="imageInfo"
-        :src="imageInfo.path"
         />
-      <RightContent ref="rightContentRef"/>
-    </el-scrollbar>
+      <!-- <RightContent ref="rightContentRef"/> -->
+    <!-- </el-scrollbar> -->
     </el-main>
+   
   </el-container>
     
 </template>
@@ -445,6 +460,14 @@ onUnmounted(()=>{
   border: solid 1px #e6e6e6;
   padding: 0.5rem;
   border-radius: 4px;
-  box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2);
+  /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
+}
+
+.main-content {
+  border: solid 1px #e6e6e6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-left: 1rem;
+  /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 </style>

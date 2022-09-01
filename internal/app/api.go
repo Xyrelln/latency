@@ -144,6 +144,7 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 
 func (a *Api) StartAnalyse(imageRect core.ImageRectInfo) error {
 	log.Printf("analyse data")
+	log.Printf("current rect: %v", imageRect)
 	log.Printf("workdir: %s", a.ImagesDir)
 	a.emitInfo(eventAnalyseStart)
 	responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect)

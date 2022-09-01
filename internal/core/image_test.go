@@ -2,36 +2,47 @@ package core
 
 import (
 	"image"
-	"image/png"
 	"log"
 	"os"
 	"testing"
 )
 
 func TestCropCurserArea(t *testing.T) {
-	fd, err := os.Open("/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/0001.png")
+	var imageRect ImageRectInfo
+	fd, err := os.Open("/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-09-01T15:33:13+08:00/images/0002.png")
+	defer fd.Close()
 	if err != nil {
 		log.Fatal(err)
 		// return nil, err
 	}
-	img, _ := png.Decode(fd)
-	width := img.Bounds().Dx()
-	height := img.Bounds().Dy()
-	centerRect := image.Rect(width/4, height/4, width/4*3, height/4*3)
+	img, _, _ := image.Decode(fd)
+	// width := img.Bounds().Dx()
+	// height := img.Bounds().Dy()
+	// centerRect := image.Rect(117, 500, 535, 535)
+	imageRect.X = 44
+	imageRect.Y = 187
+	imageRect.W = 200
+	imageRect.PreviewWidth = 717
+	imageRect.PreviewHeight = 403
+	imageRect.SourceHeight = 1920
+	imageRect.SourceWidth = 1080
 
-	cropImg, _ := CropImage(img, centerRect)
+	rect, _ := GetCropRect(imageRect)
+	log.Print(rect)
+	cropImg, _ := CropImage(img, rect)
+
 	// cropImage, err := CropCurserArea("/Users/jason/Developer/epc/op-latency-mobile/out/image/4/0001.png")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-	grayImg := image.NewGray(cropImg.Bounds())
-	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
-		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
-			grayImg.Set(x, y, img.At(x, y))
-		}
-	}
+	// grayImg := image.NewGray(cropImg.Bounds())
+	// for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+	// 	for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+	// 		grayImg.Set(x, y, img.At(x, y))
+	// 	}
+	// }
 
-	err = SaveImage("/Users/jason/Developer/epc/op-latency-mobile/out/image/crop/167-center-0001.png", grayImg)
+	err = SaveImage("/Users/jason/Developer/epc/op-latency-mobile/out/image/crop/1537-0001.png", cropImg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,6 +53,6 @@ func TestLoadImage(t *testing.T) {
 
 }
 
-func TestCalcTime(t *testing.T) {
-	CalcTime()
-}
+// func TestCropImage(t *testing.T) {
+// 	CalcTime()
+// }

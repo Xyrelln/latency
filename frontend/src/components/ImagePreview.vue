@@ -1,23 +1,34 @@
 <script setup lang="ts">
-import {reactive, ref, inject, Ref, onMounted, computed} from 'vue'
+import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} from 'vue'
+import { ElMessage } from 'element-plus'
+import { ElNotification } from 'element-plus'
+import NProgress from 'nprogress'
 import {adb, core} from '../../wailsjs/go/models'
 import { 
   StartAnalyse,
 } from '../../wailsjs/go/app/Api'
+import {
+  EventsOn,
+  EventsOff,
+} from '../../wailsjs/runtime/runtime'
+
 interface Props {
-  src: string
   data: core.ImageInfo
 }
 
 const props = defineProps<Props>()
 const selectBoxRef = ref()
 const previewImgRef = ref()
-const canvasRef = ref()
-const resizeRef = ref()
+// const canvasRef = ref()
+// const resizeRef = ref()
 const resizeTopRef = ref()
 const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
+
+const calcButtonDisable = ref(true)
+
+const delayTimes = ref<Array<number>>([])
 const location = reactive({
   x: 0,
   y: 0,
@@ -170,47 +181,92 @@ const mouseUpHandler = function () {
 };
 
 
+onMounted(()=>{
+  EventsOn("latency:analyse_start", ()=>{
+    ElNotification({
+      title: '进度提示',
+      type: 'info',
+      message: "开始数据分析",
+    })
+  })
+  EventsOn("latency:analyse_filish", (res: Array<number>)=>{
+    // processStatus.value = 0
+    // rightContentRef.value.loadResponseTimeData(res)
+    delayTimes.value = res
+    NProgress.done()
+    ElNotification({
+      title: '进度提示: 3/3',
+      type: 'success',
+      message: "数据处理完成",
+    })
+  })
+
+})
+
+onUnmounted(()=>{
+  EventsOff("latency:analyse_start")
+  EventsOff("latency:analyse_filish")
+})
+
+/**
+ * 判断是否竖屏
+//  */
+// function isVerticalScreen() {
+//   return props.data.width < props.data.height
+// }
+watch(props.data, value => {
+
+})
+
+/**
+ * 判断是否竖屏
+ */
+const isVerticalScreen = computed(()=>{
+  return props.data.width < props.data.height
+})
+
+
 </script>
 
 <template>
-    <div>
-    <!-- <el-empty description="description" /> -->
-    <el-button @click="getImage">计算响应时间</el-button>
-    
-    <div class="out-img-bobx">
-        <!-- <span class="demonstration">111</span> -->
-        <!-- <img ref="previewImgRef" class="preview-img" draggable="false" src="../assets/images/0001.png" alt=""/> -->
-        <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.data.path" alt=""/>
-        <!-- <el-image :src="props.data.path" @load="handleImageLoadSuccess">
-          <template #placeholder>
-            <div class="image-slot">Loading<span class="dot">...</span></div>
-          </template>
-        </el-image> -->
+  <div>
+    <el-scrollbar height="calc(95vh)">
+    <el-row justify="center" class="preview-content">
+      <el-col :span="22">
+        <span>标识检测区域</span>
+        <div class="out-img-box">
+          <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.data.path" alt=""/>
           <div ref="selectBoxRef" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
             <div ref="resizeBottomRef" class="resizer resizer-b"></div>
             <div ref="resizeLeftRef" class="resizer resizer-l"></div>
           </div>
-    </div>
-<!-- 
-    <div ref="resizeRef" id="resizeMe" class="resizable">
-        Resize me
-        <div ref="resizeTopRef" class="resizer resizer-t"></div>
-        <div ref="resizeRightRef" class="resizer resizer-r"></div>
-        <div ref="resizeBottomRef" class="resizer resizer-b"></div>
-        <div ref="resizeLeftRef" class="resizer resizer-l"></div>
-    </div> -->
-
-    </div>
+        </div>
+      </el-col>
+    </el-row>
+    <el-row justify="end">
+      <el-col :span="4">
+        <el-button type="primary" @click="getImage" :disabled="calcButtonDisable" style="float:right">计算延迟</el-button>
+      </el-col>
+    </el-row>
+    <el-row>
+      <span class="data-item">检测到操作总数: {{ delayTimes.length }}</span>
+      <!-- <span class="data-item">延迟: {{ delayTimes.join(", ") }}</span> -->
+    </el-row>
+    <el-row>
+      <span class="data-item">计算延迟数据为: {{ delayTimes.join(", ") }}</span>
+    </el-row>
+  </el-scrollbar>
+  </div>
 </template>
 
 <style>
 
-.out-img-bobx {
-    width: 700px;
-    height: 600px;
-    line-height: 600px;
+.out-img-box {
+    width: calc(70vw);
+    height: calc(70vh);
+    /* line-height: 600px; */
     text-align: center;
 }
 
@@ -292,5 +348,13 @@ img {
     width: 100%;
 }
 
+
+.data-item {
+  display: block;
+}
+
+.preview-content {
+
+}
 
 </style>

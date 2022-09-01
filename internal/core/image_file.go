@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"image"
 	"log"
 	"os"
@@ -84,19 +83,19 @@ func LoadImage(path string, info os.FileInfo, e error) (image.Image, error) {
 func GetCropRect(imageRect ImageRectInfo) (image.Rectangle, error) {
 	// 0 0 200 200 600 338
 	// 111 111 200 200 600 338
-	proportion := imageRect.SourceWidth / imageRect.W
-	yProportion := imageRect.SourceHeight / imageRect.H
+	// proportion := imageRect.SourceWidth / imageRect.PreviewWidth
+	// yProportion := imageRect.SourceHeight / imageRect.PreviewHeight
 
-	if (proportion - yProportion) > 0 {
-		return image.Rect(0, 0, 0, 0), errors.New("image with wrong scaling")
-	}
+	// if (proportion - yProportion) > 0 {
+	// 	return image.Rect(0, 0, 0, 0), errors.New("image with wrong scaling")
+	// }
 
-	cropRect := image.Rect(
-		imageRect.X*proportion,
-		imageRect.Y*proportion,
-		imageRect.W*proportion,
-		imageRect.H*proportion,
-	)
+	x0 := imageRect.X * imageRect.SourceWidth / imageRect.PreviewWidth
+	y0 := imageRect.Y * imageRect.SourceHeight / imageRect.PreviewHeight
+	x1 := imageRect.W*imageRect.SourceWidth/imageRect.PreviewWidth + x0
+	y1 := imageRect.H*imageRect.SourceHeight/imageRect.PreviewHeight + y0
+	cropRect := image.Rect(x0, y0, x1, y1)
+
 	return cropRect, nil
 }
 
@@ -211,7 +210,12 @@ func GetImageInfo(imagePath string) (ImageInfo, error) {
 
 func CalcTime(imgPath string, imageRect ImageRectInfo) ([]int, error) {
 	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
-	rect, _ := GetCropRect(imageRect)
+
+	rect, err := GetCropRect(imageRect)
+	if err != nil {
+		log.Fatal("image with wrong scaling")
+	}
+	log.Printf("rect: %v", rect)
 	imgs, err := ListImageFileWithCrop(imgPath, rect)
 	if err != nil {
 		log.Fatal("Specified directory with images inside does not exists or is corrupted")
