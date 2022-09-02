@@ -418,6 +418,9 @@ onUnmounted(()=>{
               </el-row>
             </el-scrollbar>
           </el-tab-pane>
+          <el-tab-pane label="关于" name="about">
+            <span>www.vrviu.com</span>
+          </el-tab-pane>
         </el-tabs>
 
     </el-aside>

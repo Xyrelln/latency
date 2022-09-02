@@ -4,13 +4,12 @@ import (
 	"errors"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"time"
 )
 
 func GetTimeStamp() string {
-	return time.Now().Format(time.RFC3339)
+	return time.Now().Format("20060102150405.000")
 }
 
 func GetExecuteRoot() string {
@@ -24,9 +23,9 @@ func GetExecuteRoot() string {
 func CreateWorkDir() (string, string) {
 	root := GetExecuteRoot()
 	timestamp := GetTimeStamp()
-	workDir := path.Join(root, timestamp)
-	videoDir := path.Join(workDir, "video")
-	imagesDir := path.Join(workDir, "images")
+	workDir := filepath.Join(root, timestamp)
+	videoDir := filepath.Join(workDir, "video")
+	imagesDir := filepath.Join(workDir, "images")
 
 	if _, err := os.Stat(videoDir); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(videoDir, os.ModePerm)

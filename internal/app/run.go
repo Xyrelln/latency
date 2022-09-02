@@ -1,13 +1,22 @@
 package app
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
+)
+
+var (
+	appname = "latency-vrviu"
+	verion  = "0.0.1"
 )
 
 //var assets embed.FS
@@ -36,25 +45,52 @@ func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 func Run(assets embed.FS) int {
 	// Create an instance of the app structure
-	app := NewApp()
+	appData, err := appDataLocation(appname)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open add data directory: %v\n", err)
+		return 1
+	}
+	defer crashlog(appData)
 
-	// Create application with options
-	err := wails.Run(&options.App{
-		Title:            "op-latency-mobile",
-		Width:            1024,
-		Height:           768,
-		Assets:           assets,
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
-		AssetsHandler:    NewFileLoader(),
+	app := NewApp()
+	app.AppData = appData
+
+	ops := &options.App{
+		Title:  "op-latency-mobile",
+		Width:  1024,
+		Height: 768,
+		Assets: assets,
+		// BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		OnStartup:     app.startup,
+		AssetsHandler: NewFileLoader(),
 		Bind: []interface{}{
 			app,
 		},
-	})
+	}
+
+	// Create application with options
+	err = wails.Run(ops)
 
 	if err != nil {
 		println("Error:", err.Error())
 	}
 
 	return 0
+}
+
+func crashlog(appData string) {
+	// if wails.BuildMode != cmd.BuildModeProd {
+	// 	return
+	// }
+	if r := recover(); r != nil {
+		if _, err := os.Stat(appData); os.IsNotExist(err) {
+			os.MkdirAll(appData, 0700)
+		}
+		var b bytes.Buffer
+		b.WriteString(fmt.Sprintf("%+v\n\n", r))
+		buf := make([]byte, 1<<20)
+		s := runtime.Stack(buf, true)
+		b.Write(buf[0:s])
+		ioutil.WriteFile(filepath.Join(appData, "crash.log"), b.Bytes(), 0644)
+	}
 }

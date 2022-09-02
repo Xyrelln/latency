@@ -1,3 +1,5 @@
+//go:build windows
+
 // Copyright (C) 2015 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +25,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	// "android.googlesource.com/platform/tools/gpu/maker"
 )
 
@@ -93,6 +96,7 @@ func (c *Cmd) Run() error {
 	log.Printf("adb: %s", adb)
 	log.Printf("args: %v", args)
 	cmd := exec.Command(adb, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	return cmd.Run()

@@ -4,31 +4,35 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"log"
 	"os/exec"
-	"path"
 	"path/filepath"
-	"syscall"
+	// "op-latency-mobile/third"
 )
 
 var ErrScrcpyNotFound = errors.New("scrcpy command not found on PATH")
-var ErrFfmpegNotFound = errors.New("ffmpeg command not found on PATH")
+var ErrFFmpegNotFound = errors.New("ffmpeg command not found on PATH")
+var ErrTaskKillNotFound = errors.New("taskkill command not found on PATH")
 
 var scrcpy string
 var ffmpeg string
-
-var videoPath = "/Users/jason/Developer/epc/op-latency-mobile/out/video/1.mp4"
+var taskkill string
 
 func init() {
-	if p, err := exec.LookPath("scrcpy"); err == nil {
+	if p, err := exec.LookPath("scrcpy.exe"); err == nil {
 		if p, err = filepath.Abs(p); err == nil {
 			scrcpy = p
 		}
 	}
 
-	if p, err := exec.LookPath("ffmpeg"); err == nil {
+	if p, err := exec.LookPath("ffmpeg.exe"); err == nil {
 		if p, err = filepath.Abs(p); err == nil {
 			ffmpeg = p
+		}
+	}
+
+	if p, err := exec.LookPath("taskkill.exe"); err == nil {
+		if p, err = filepath.Abs(p); err == nil {
+			taskkill = p
 		}
 	}
 }
@@ -41,15 +45,31 @@ type Cmd struct {
 	Stderr  io.Writer
 }
 
-func (c *Cmd) Run() error {
-	cmd := exec.Command(ffmpeg, c.Args...)
+// Run starts the specified command and waits for it to complete.
+// The returned error is nil if the command runs, has no problems copying
+// stdout and stderr, and exits with a zero exit status.
+func (c *Cmd) Run(name string) error {
+	cmd := exec.Command(name, c.Args...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	c.execCmd = cmd
 	return cmd.Run()
 }
 
-func (c *Cmd) Call() (string, error) {
+// Start without wait
+func (c *Cmd) BackendRun(name string) error {
+	cmd := exec.Command(name, c.Args...)
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	c.execCmd = cmd
+	return cmd.Start()
+}
+
+// Call starts the specified command and waits for it to complete, returning the
+// all stdout as a string.
+// The returned error is nil if the command runs, has no problems copying
+// stdout and stderr, and exits with a zero exit status.
+func (c *Cmd) Call(name string) (string, error) {
 	clone := *c
 	stdout := &bytes.Buffer{}
 	if clone.Stdout != nil {
@@ -63,63 +83,14 @@ func (c *Cmd) Call() (string, error) {
 	} else {
 		clone.Stderr = stderr
 	}
-	err := clone.Run()
+	err := clone.Run(name)
 	return stdout.String(), err
 }
 
-func (c *Cmd) Start() error {
-	clone := *c
-	stdout := &bytes.Buffer{}
-	if clone.Stdout != nil {
-		clone.Stdout = io.MultiWriter(clone.Stdout, stdout)
-	} else {
-		clone.Stdout = stdout
+func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
+	if scrcpy == "" {
+		return nil, ErrScrcpyNotFound
 	}
-	stderr := &bytes.Buffer{}
-	if clone.Stdout != nil {
-		clone.Stderr = io.MultiWriter(clone.Stdout, stderr)
-	} else {
-		clone.Stderr = stderr
-	}
-
-	cmd := exec.Command(scrcpy, c.Args...)
-	cmd.Stdout = c.Stdout
-	cmd.Stderr = c.Stderr
-
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
-	c.execCmd = cmd
-	log.Println(stderr.String())
-	log.Println(stdout.String())
-	return nil
-}
-
-func (c *Cmd) FFmpegStart() error {
-	cmd := exec.Command(ffmpeg, c.Args...)
-	cmd.Stdout = c.Stdout
-	cmd.Stderr = c.Stderr
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	c.execCmd = cmd
-	// go cmd.Wait()
-	return nil
-}
-
-func (c *Cmd) Kill() error {
-	if c.execCmd.Process != nil {
-		err := syscall.Kill(c.execCmd.Process.Pid, syscall.SIGINT)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func StartScrcpyRecord(serial, recDir string) (Cmd, error) {
-	recFile := path.Join(recDir, "rec.mp4")
 	cmd := Cmd{
 		Args: []string{
 			"-s", serial,
@@ -127,28 +98,27 @@ func StartScrcpyRecord(serial, recDir string) (Cmd, error) {
 		},
 	}
 
-	err := cmd.Start()
-	if err != nil {
-		return cmd, err
+	if err := cmd.BackendRun(scrcpy); err == nil {
+		return &cmd, nil
+	} else {
+		return nil, err
 	}
-	return cmd, nil
 }
 
-func StartVideoToImageTransform(srcVideoPath, desImgPath string) (Cmd, error) {
-	// outImgDir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/5"
-	outImgPath := path.Join(desImgPath, "%4d.png")
+func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
+	if ffmpeg == "" {
+		return nil, ErrFFmpegNotFound
+	}
 	cmd := Cmd{
 		Args: []string{
 			"-i", srcVideoPath,
 			"-threads", "8",
-			outImgPath,
+			destImagePath,
 		},
 	}
-	msg, err := cmd.Call()
-	if err != nil {
-		log.Printf("start ffmpge failed: %v", err)
-		return cmd, err
+	if err := cmd.BackendRun(ffmpeg); err == nil {
+		return &cmd, nil
+	} else {
+		return nil, err
 	}
-	log.Println(msg)
-	return cmd, nil
 }

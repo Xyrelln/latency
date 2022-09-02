@@ -7,7 +7,7 @@ import (
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/utils"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -21,9 +21,12 @@ const (
 // Api struct
 type Api struct {
 	ctx       context.Context
-	Cmd       cmd.Cmd
+	Cmd       *cmd.Cmd
 	VideoDir  string
 	ImagesDir string
+	// FFmpegFile fs.FS
+	// ScrcpyDir  fs.FS
+	AppData string
 }
 
 // NewApp creates a new Api application struct
@@ -62,7 +65,8 @@ func (a *Api) StartRecord(serial string) error {
 	log.Printf("start monitor")
 	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
 	log.Printf("workdir: %s", a.VideoDir)
-	cmd, err := cmd.StartScrcpyRecord(serial, a.VideoDir)
+	recFile := filepath.Join(a.VideoDir, recordFile)
+	cmd, err := cmd.StartScrcpyRecord(serial, recFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -119,9 +123,10 @@ func (a *Api) StopProcessing() error {
 
 func (a *Api) StartTransform() error {
 	log.Printf("prepare data")
-	srcVideoPath := path.Join(a.VideoDir, recordFile)
+	srcVideoPath := filepath.Join(a.VideoDir, recordFile)
+	destImagePath := filepath.Join(a.ImagesDir, "%4d.png")
 	a.emitInfo(eventTransformStart)
-	cmd, err := cmd.StartVideoToImageTransform(srcVideoPath, a.ImagesDir)
+	cmd, err := cmd.StartFFmpeg(srcVideoPath, destImagePath)
 	if err != nil {
 		// log.Fatal(err)
 		log.Print(err)
@@ -134,7 +139,7 @@ func (a *Api) StartTransform() error {
 }
 
 func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
-	firstImage := path.Join(a.ImagesDir, firstImageFile)
+	firstImage := filepath.Join(a.ImagesDir, firstImageFile)
 	mInfo, err := core.GetImageInfo(firstImage)
 	if err != nil {
 		return mInfo, err
