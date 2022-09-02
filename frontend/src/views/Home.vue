@@ -56,7 +56,7 @@ const deviceInfo = reactive({
 const imageInfo = reactive({
   // path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-08-31T14:29:46+08:00/images/0001.png',
   // path: '/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/0001.png',
-  path: '/Users/jason/Developer/epc/op-latency-mobile/frontend/src/assets/images/placeholder.png',
+  path: placeholder,
   width: 0,
   height: 0,
   size: 0

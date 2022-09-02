@@ -57,18 +57,19 @@ CompileMacAmd64:
     paths:
       - build/bin/op-latency-mobile.app
     expire_in: 24 hrs
-# CompileWinAmd64:
-#   stage: build
-#   tags:
-#     - mac
-#   script:
-#     - go install github.com/wailsapp/wails/v2/cmd/wails@latest
-#     - echo $env:$PATH
-#     - wails build -platform windows/amd64 -o perftool.exe
-#   artifacts:
-#     paths:
-#       - build/bin/perftool.exe
-#     expire_in: 24 hrs
+
+CompileWinAmd64:
+  stage: build
+  tags:
+    - mac
+  script:
+    - go install github.com/wailsapp/wails/v2/cmd/wails@latest
+    - echo $env:$PATH
+    - wails build -platform windows/amd64 -o latency-mobile.exe
+  artifacts:
+    paths:
+      - build/bin/latency-mobile.exe
+    expire_in: 24 hrs
 # PubBin:
 #   stage: delivery
 #   tags:

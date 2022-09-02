@@ -77,27 +77,6 @@ type Cmd struct {
 	Stderr io.Writer
 }
 
-// Run starts the specified command and waits for it to complete.
-// The returned error is nil if the command runs, has no problems copying
-// stdout and stderr, and exits with a zero exit status.
-// func (c *Cmd) Run() error {
-// 	args := []string{}
-// 	if c.Device != nil {
-// 		args = append(args, "-s", c.Device.Serial)
-// 	}
-// 	if c.Path != "" {
-// 		args = append(args, "shell", c.Path)
-// 	}
-// 	args = append(args, c.Args...)
-// 	log.Printf("adb: %s", adb)
-// 	log.Printf("args: %v", args)
-// 	cmd := exec.Command(adb, args...)
-// 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-// 	cmd.Stdout = c.Stdout
-// 	cmd.Stderr = c.Stderr
-// 	return cmd.Run()
-// }
-
 // Call starts the specified command and waits for it to complete, returning the
 // all stdout as a string.
 // The returned error is nil if the command runs, has no problems copying

@@ -17,6 +17,12 @@
 // Package adb provides an interface to the Android Debug Bridge.
 package adb
 
+import (
+	"syscall"
+	"log"
+	"os/exec"
+)
+
 func (c *Cmd) Run() error {
 	args := []string{}
 	if c.Device != nil {
