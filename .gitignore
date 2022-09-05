@@ -5,6 +5,5 @@
 **/.yarn
 .idea
 build
-**/dist/*
 .vscode/
 third

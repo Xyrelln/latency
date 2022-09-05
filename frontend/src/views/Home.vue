@@ -32,7 +32,7 @@ const data: {devices: Array<adb.Device>} = reactive({
 })
 
 const isAuth = ref(false)
-const placeholder = "/Users/jason/Developer/epc/op-latency-mobile/frontend/src/assets/images/placeholder.png"
+const placeholder = "./src/assets/images/placeholder.png"
 
 const rightContentRef = ref()
 const startButtonText = ref("开始")
