@@ -226,6 +226,16 @@ const isVerticalScreen = computed(()=>{
 })
 
 
+function enableCalcButton() {
+  calcButtonDisable.value = false
+}
+
+defineExpose({
+  enableCalcButton
+})
+
+
+
 </script>
 
 <template>

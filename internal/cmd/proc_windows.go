@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,13 +19,14 @@ var procAttrs = &windows.SysProcAttr{
 }
 
 func terminateProc(pid int, _ os.Signal) error {
+	fmt.Println("terminate proc")
 	dll, err := windows.LoadDLL("kernel32.dll")
 	if err != nil {
 		return err
 	}
 	defer dll.Release()
 
-	// pid := procs[proc].cmd.Process.Pid
+	// pid := cmd.Process.Pid
 
 	f, err := dll.FindProc("AttachConsole")
 	if err != nil {
@@ -45,10 +47,6 @@ func terminateProc(pid int, _ os.Signal) error {
 	}
 	f, err = dll.FindProc("GenerateConsoleCtrlEvent")
 	if err != nil {
-		return err
-	}
-	r1, _, err = f.Call(windows.CTRL_BREAK_EVENT, uintptr(pid))
-	if r1 == 0 {
 		return err
 	}
 	r1, _, err = f.Call(windows.CTRL_C_EVENT, uintptr(pid))

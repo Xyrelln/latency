@@ -4,17 +4,37 @@
 package cmd
 
 import (
+	"golang.org/x/sys/windows"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
-
-	"golang.org/x/sys/windows"
 )
 
+func init() {
+	if p, err := exec.LookPath("scrcpy.exe"); err == nil {
+		if p, err = filepath.Abs(p); err == nil {
+			scrcpy = p
+		}
+	}
+
+	if p, err := exec.LookPath("ffmpeg.exe"); err == nil {
+		if p, err = filepath.Abs(p); err == nil {
+			ffmpeg = p
+		}
+	}
+
+	// if p, err := exec.LookPath("taskkill.exe"); err == nil {
+	// 	if p, err = filepath.Abs(p); err == nil {
+	// 		taskkill = p
+	// 	}
+	// }
+}
+
 func (c *Cmd) BackendRun(name string) error {
-	cmd := exec.Command(name, c.Args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: windows.CREATE_NEW_PROCESS_GROUP}
+	cmd := exec.Command("cmd", c.Args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: windows.CREATE_UNICODE_ENVIRONMENT}
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	c.execCmd = cmd
@@ -23,21 +43,21 @@ func (c *Cmd) BackendRun(name string) error {
 	return cmd.Start()
 }
 
-func (c *Cmd) TaskKill(pid string) error {
-	if taskkill == "" {
-		return ErrTaskKillNotFound
-	}
-	cmd := Cmd{
-		Args: []string{
-			"/pid", pid,
-		},
-	}
-	if err := cmd.Run(taskkill); err == nil {
-		return nil
-	} else {
-		return err
-	}
-}
+// func (c *Cmd) TaskKill(pid string) error {
+// 	if taskkill == "" {
+// 		return ErrTaskKillNotFound
+// 	}
+// 	cmd := Cmd{
+// 		Args: []string{
+// 			"/pid", pid,
+// 		},
+// 	}
+// 	if err := cmd.Run(taskkill); err == nil {
+// 		return nil
+// 	} else {
+// 		return err
+// 	}
+// }
 
 func (c *Cmd) Kill() error {
 	if c.execCmd.Process != nil {
@@ -81,4 +101,23 @@ func SendCtrlBreak(pid int) error {
 	}
 
 	return nil
+}
+
+func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
+	if scrcpy == "" {
+		return nil, ErrScrcpyNotFound
+	}
+	cmd := Cmd{
+		Args: []string{
+			"/c", scrcpy,
+			"-s", serial,
+			"-Nr", recFile,
+		},
+	}
+
+	if err := cmd.BackendRun(scrcpy); err == nil {
+		return &cmd, nil
+	} else {
+		return nil, err
+	}
 }

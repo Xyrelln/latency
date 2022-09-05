@@ -2,6 +2,8 @@ package core
 
 import (
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"os"
 	"path/filepath"
@@ -194,11 +196,16 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 }
 
 func GetImageInfo(imagePath string) (ImageInfo, error) {
+	log.Printf("image path: %s", imagePath)
 	var imgInfo ImageInfo
-	fimg, _ := os.Open(imagePath)
+	fimg, err := os.Open(imagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer fimg.Close()
 	img, _, err := image.Decode(fimg)
 	if err != nil {
+		log.Fatal(err)
 		return imgInfo, err
 	}
 	imgInfo.Path = imagePath

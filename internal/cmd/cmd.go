@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"os/exec"
-	"path/filepath"
 	// "op-latency-mobile/third"
 )
 
@@ -15,27 +14,6 @@ var ErrTaskKillNotFound = errors.New("taskkill command not found on PATH")
 
 var scrcpy string
 var ffmpeg string
-var taskkill string
-
-func init() {
-	if p, err := exec.LookPath("scrcpy.exe"); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			scrcpy = p
-		}
-	}
-
-	if p, err := exec.LookPath("ffmpeg.exe"); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			ffmpeg = p
-		}
-	}
-
-	if p, err := exec.LookPath("taskkill.exe"); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			taskkill = p
-		}
-	}
-}
 
 type Cmd struct {
 	Path    string
@@ -87,23 +65,24 @@ func (c *Cmd) Call(name string) (string, error) {
 	return stdout.String(), err
 }
 
-func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
-	if scrcpy == "" {
-		return nil, ErrScrcpyNotFound
-	}
-	cmd := Cmd{
-		Args: []string{
-			"-s", serial,
-			"-Nr", recFile,
-		},
-	}
+// func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
+// 	if scrcpy == "" {
+// 		return nil, ErrScrcpyNotFound
+// 	}
+// 	cmd := Cmd{
+// 		Args: []string{
+// 			"/c", scrcpy,
+// 			"-s", serial,
+// 			"-Nr", recFile,
+// 		},
+// 	}
 
-	if err := cmd.BackendRun(scrcpy); err == nil {
-		return &cmd, nil
-	} else {
-		return nil, err
-	}
-}
+// 	if err := cmd.BackendRun(scrcpy); err == nil {
+// 		return &cmd, nil
+// 	} else {
+// 		return nil, err
+// 	}
+// }
 
 func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
 	if ffmpeg == "" {
@@ -116,7 +95,7 @@ func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
 			destImagePath,
 		},
 	}
-	if err := cmd.BackendRun(ffmpeg); err == nil {
+	if err := cmd.Run(ffmpeg); err == nil {
 		return &cmd, nil
 	} else {
 		return nil, err

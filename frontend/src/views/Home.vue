@@ -32,7 +32,7 @@ const data: {devices: Array<adb.Device>} = reactive({
 })
 
 const isAuth = ref(false)
-const placeholder = "./assets/images/placeholder.png"
+const placeholder = "/Users/jason/Developer/epc/op-latency-mobile/frontend/src/assets/images/placeholder.png"
 
 const rightContentRef = ref()
 const startButtonText = ref("开始")
@@ -41,6 +41,7 @@ const processStatus = ref(0)
 const developMode = ref(true)
 const countDownSecond = ref(0)
 const imageSrc = ref()
+const imagePreviewRef = ref()
 
 const tabName = ref('detail')
 const deviceInfo = reactive({
@@ -257,6 +258,7 @@ function getFirstImage(){
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
+    imagePreviewRef.value.enableCalcButton()
   })
 }
 
@@ -428,7 +430,7 @@ onUnmounted(()=>{
       <!-- <el-scrollbar height="calc(100vh - 60px)"> -->
 
       <ImagePreview 
-        ref="ImagePreviewRef"
+        ref="imagePreviewRef"
         :data="imageInfo"
         />
       <!-- <RightContent ref="rightContentRef"/> -->

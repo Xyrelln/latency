@@ -140,7 +140,9 @@ func (a *Api) StartTransform() error {
 
 func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	firstImage := filepath.Join(a.ImagesDir, firstImageFile)
+	log.Printf("first Image: %s", firstImage)
 	mInfo, err := core.GetImageInfo(firstImage)
+	log.Printf("Get first image: %v", mInfo)
 	if err != nil {
 		return mInfo, err
 	}
