@@ -16,6 +16,12 @@ interface Props {
   data: core.ImageInfo
 }
 
+const imageInfo = reactive({
+  path: '',
+  width: 0,
+  height: 0,
+  size: 0,
+})
 const props = defineProps<Props>()
 const selectBoxRef = ref()
 const previewImgRef = ref()
@@ -222,24 +228,33 @@ onUnmounted(()=>{
 // function isVerticalScreen() {
 //   return props.data.width < props.data.height
 // }
-watch(props.data, value => {
+// watch(props.data, value => {
 
-})
+// })
 
 /**
  * 判断是否竖屏
  */
-const isVerticalScreen = computed(()=>{
-  return props.data.width < props.data.height
-})
+// const isVerticalScreen = computed(()=>{
+//   return props.data.width < props.data.height
+// })
 
 
 function enableCalcButton() {
   calcButtonDisable.value = false
 }
 
+function loadNewImage(info: core.ImageInfo) {
+  console.log(previewImgRef.value)
+  previewImgRef.value.src = info.path
+  imageInfo.path = info.path
+  imageInfo.width = info.height
+  imageInfo.height = info.height
+}
+
 defineExpose({
-  enableCalcButton
+  enableCalcButton,
+  loadNewImage
 })
 
 
@@ -253,7 +268,7 @@ defineExpose({
       <el-col :span="22">
         <span>标识检测区域</span>
         <div class="out-img-box">
-          <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.data.path" alt=""/>
+          <img ref="previewImgRef" class="preview-img" draggable="false" src="../assets/images/placeholder.png" alt=""/>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>

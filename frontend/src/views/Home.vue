@@ -258,6 +258,7 @@ function getFirstImage(){
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
+    imagePreviewRef.value.loadNewImage(res)
     imagePreviewRef.value.enableCalcButton()
   })
 }
