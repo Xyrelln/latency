@@ -65,7 +65,7 @@ const imageInfo = reactive({
 
 const settingForm = reactive({
   diffScore: 20,
-  timeout: 10,
+  timeout: 5,
   prepareTimeout: 3,
   develop: false,
 })

@@ -25,7 +25,10 @@ const resizeTopRef = ref()
 const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
-
+const selectBoxStyle = reactive({
+  width: '200px', 
+  height: '200px'
+})
 const calcButtonDisable = ref(true)
 
 const delayTimes = ref<Array<number>>([])
@@ -76,20 +79,23 @@ function selectBoxInit() {
     document.onmousemove = (ev:any) => {
       const tx = ev.clientX - X
       const ty = ev.clientY - Y
+
+      const width = Number(selectBoxStyle.width.replace('px', ''))
+      const height = Number(selectBoxStyle.height.replace('px', ''))
       
       if (tx <= px) {
         selectBoxRef.value.style.left = px + 'px'
        
-      } else if (tx >= px + pw - 200) {
-        selectBoxRef.value.style.left = px + pw - 200  + 'px'
+      } else if (tx >= px + pw - width) {
+        selectBoxRef.value.style.left = px + pw - width  + 'px'
       } else {
         selectBoxRef.value.style.left = tx + 'px'
       }
 
       if (ty <= py) {
         selectBoxRef.value.style.top = py + 'px'
-      } else if (ty >= py + ph - 200){
-        selectBoxRef.value.style.top = py + ph - 200 + 'px'
+      } else if (ty >= py + ph - height){
+        selectBoxRef.value.style.top = py + ph - height + 'px'
       } else {
         selectBoxRef.value.style.top = ty + 'px'
       }
@@ -170,8 +176,10 @@ const mouseMoveHandler = function (e: any) {
     const dy = e.clientY - location.y;
     console.log(dx, dy)
     // Adjust the dimension of element
-    selectBoxRef.value.style.width = `${location.w + dx}px`;
-    selectBoxRef.value.style.height = `${location.h + dy}px`;
+    // selectBoxRef.value.style.width = `${location.w + dx}px`;
+    // selectBoxRef.value.style.height = `${location.h + dy}px`;
+    selectBoxStyle.width = `${location.w + dx}px`;
+    selectBoxStyle.height = `${location.h + dy}px`;
 };
 
 const mouseUpHandler = function () {
@@ -246,7 +254,7 @@ defineExpose({
         <span>标识检测区域</span>
         <div class="out-img-box">
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.data.path" alt=""/>
-          <div ref="selectBoxRef" class="s-move-content-header" id="select-box">
+          <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
             <div ref="resizeBottomRef" class="resizer resizer-b"></div>
@@ -288,8 +296,8 @@ defineExpose({
 }
 
 #select-box {
-  width: 200px;
-  height: 200px;
+  /* width: 200px;
+  height: 200px; */
   background: rgba(255, 255, 0, 0.4);
   position: absolute;
   display: none;

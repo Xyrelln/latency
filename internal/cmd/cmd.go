@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"log"
 	"os/exec"
 	// "op-latency-mobile/third"
 )
@@ -31,6 +32,8 @@ func (c *Cmd) Run(name string) error {
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	c.execCmd = cmd
+	log.Printf("cmd: %s", name)
+	log.Printf("args: %v", c.Args)
 	return cmd.Run()
 }
 
@@ -65,25 +68,6 @@ func (c *Cmd) Call(name string) (string, error) {
 	return stdout.String(), err
 }
 
-// func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
-// 	if scrcpy == "" {
-// 		return nil, ErrScrcpyNotFound
-// 	}
-// 	cmd := Cmd{
-// 		Args: []string{
-// 			"/c", scrcpy,
-// 			"-s", serial,
-// 			"-Nr", recFile,
-// 		},
-// 	}
-
-// 	if err := cmd.BackendRun(scrcpy); err == nil {
-// 		return &cmd, nil
-// 	} else {
-// 		return nil, err
-// 	}
-// }
-
 func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
 	if ffmpeg == "" {
 		return nil, ErrFFmpegNotFound
@@ -91,7 +75,7 @@ func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
 	cmd := Cmd{
 		Args: []string{
 			"-i", srcVideoPath,
-			"-threads", "8",
+			// "-threads", "8",
 			destImagePath,
 		},
 	}
