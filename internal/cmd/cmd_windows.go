@@ -5,8 +5,23 @@ package cmd
 
 import (
 	"log"
+	"os"
+	"os/exec"
 	"syscall"
+
+	"golang.org/x/sys/windows"
 )
+
+func (c *Cmd) BackendRun(name string) error {
+	cmd := exec.Command(name, c.Args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: windows.CREATE_NEW_PROCESS_GROUP}
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	c.execCmd = cmd
+	log.Printf("cmd: %s", name)
+	log.Printf("args: %v", c.Args)
+	return cmd.Start()
+}
 
 func (c *Cmd) TaskKill(pid string) error {
 	if taskkill == "" {
@@ -26,9 +41,13 @@ func (c *Cmd) TaskKill(pid string) error {
 
 func (c *Cmd) Kill() error {
 	if c.execCmd.Process != nil {
+		signal := os.Interrupt
 		// https://github.com/golang/go/issues/46345  windows not implemented signal
 		// return c.TaskKill(strconv.Itoa(c.execCmd.Process.Pid))
-		return SendCtrlBreak(c.execCmd.Process.Pid)
+		log.Printf("PID: %d", c.execCmd.Process.Pid)
+		return terminateProc(c.execCmd.Process.Pid, signal)
+		// return SendCtrlBreak(c.execCmd.Process.Pid)
+
 	}
 	return nil
 }

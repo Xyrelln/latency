@@ -57,13 +57,13 @@ func (c *Cmd) Run(name string) error {
 }
 
 // Start without wait
-func (c *Cmd) BackendRun(name string) error {
-	cmd := exec.Command(name, c.Args...)
-	cmd.Stdout = c.Stdout
-	cmd.Stderr = c.Stderr
-	c.execCmd = cmd
-	return cmd.Start()
-}
+// func (c *Cmd) BackendRun(name string) error {
+// 	cmd := exec.Command(name, c.Args...)
+// 	cmd.Stdout = c.Stdout
+// 	cmd.Stderr = c.Stderr
+// 	c.execCmd = cmd
+// 	return cmd.Start()
+// }
 
 // Call starts the specified command and waits for it to complete, returning the
 // all stdout as a string.
