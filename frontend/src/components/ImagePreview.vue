@@ -244,6 +244,14 @@ function enableCalcButton() {
   calcButtonDisable.value = false
 }
 
+function setCalcButtonDisable(value: boolean) {
+  calcButtonDisable.value = value
+}
+
+function setImagePlaceHolder(value: boolean) {
+  previewImgRef.value.src = "../assets/images/placeholder.png"
+}
+
 function loadNewImage(info: core.ImageInfo) {
   console.log(previewImgRef.value)
   previewImgRef.value.src = info.path
@@ -254,6 +262,8 @@ function loadNewImage(info: core.ImageInfo) {
 
 defineExpose({
   enableCalcButton,
+  setCalcButtonDisable,
+  setImagePlaceHolder,
   loadNewImage
 })
 

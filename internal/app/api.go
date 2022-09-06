@@ -184,3 +184,7 @@ func (a *Api) ClearImages() {
 func (a *Api) ClearVideos() {
 
 }
+
+func (a *Api) ClearCacheData() {
+	utils.ClearCacheDir()
+}

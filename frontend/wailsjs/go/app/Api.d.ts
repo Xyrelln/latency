@@ -3,6 +3,8 @@
 import {core} from '../models';
 import {adb} from '../models';
 
+export function ClearCacheData():void;
+
 export function ClearImages():void;
 
 export function ClearVideos():void;

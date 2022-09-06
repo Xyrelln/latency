@@ -24,7 +24,7 @@ func GetExecuteRoot() string {
 func CreateWorkDir() (string, string) {
 	root := GetExecuteRoot()
 	timestamp := GetTimeStamp()
-	workDir := filepath.Join(root, timestamp)
+	workDir := filepath.Join(root, "cache", timestamp)
 	videoDir := filepath.Join(workDir, "video")
 	imagesDir := filepath.Join(workDir, "images")
 
@@ -43,6 +43,12 @@ func CreateWorkDir() (string, string) {
 	}
 
 	return videoDir, imagesDir
+}
+
+func ClearCacheDir() {
+	root := GetExecuteRoot()
+	workDir := filepath.Join(root, "cache")
+	go os.RemoveAll(workDir)
 }
 
 // isWindowsDrivePath returns true if the file path is of the form used by

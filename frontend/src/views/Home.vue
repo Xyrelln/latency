@@ -15,7 +15,8 @@ import {
   StartAnalyse,
   SetPointerLocationOff,
   SetPointerLocationOn,
-  GetFirstImageInfo
+  GetFirstImageInfo,
+  ClearCacheData
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import RightContent from '../components/RightContent.vue';
@@ -190,6 +191,10 @@ function runUntilCountDown(second: number, callback?: Function){
   interval.value = setInterval(countDown, 1000)
 }
 
+function handleResetStatus() {
+  imagePreviewRef.value.setCalcButtonDisable(true)
+  imagePreviewRef.value.setImagePlaceHolder(true)
+}
 async function handlePrepare(){
   if (deviceSelected.value === "") {
     ElMessage({
@@ -198,6 +203,7 @@ async function handlePrepare(){
     })
     return
   }
+  handleResetStatus()
   NProgress.start()
   const result = await setPointerLocationOn()
   if (result) {
@@ -316,6 +322,9 @@ onMounted(()=> {
   // })
   
 })
+function handleClearCache() {
+  ClearCacheData()
+}
 
 function handleReload() {
   WindowReload();
@@ -412,7 +421,7 @@ onUnmounted(()=>{
                     <el-switch v-model="settingForm.develop" />
                   </el-form-item>
                   <el-form-item label="数据清理">
-                    <el-button>清理缓存数据</el-button>
+                    <el-button @click="handleClearCache">清理缓存数据</el-button>
                   </el-form-item>
                   <el-form-item label="其他">
                     <el-button @click="handleReload">reload</el-button>
