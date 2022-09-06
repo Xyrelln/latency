@@ -101,12 +101,19 @@ func (a *Api) Start(serial string, recordSecond int64) error {
 	// }
 	a.StartRecord(serial)
 	time.Sleep(time.Duration(recordSecond) * time.Second)
-	a.StopProcessing()
+	// a.StopProcessing()
+	a.StopScrcpyServer(serial)
+
 	a.StartTransform()
 	// a.StartAnalyse()
 
 	return nil
 
+}
+
+func (a *Api) StopScrcpyServer(serial string) error {
+	device := adb.GetDevice(serial)
+	return device.KillScrcyServer()
 }
 
 func (a *Api) StopRecord(serial string) error {
@@ -119,6 +126,7 @@ func (a *Api) StopRecord(serial string) error {
 func (a *Api) StopProcessing() error {
 	log.Printf("stop monitor")
 	a.emitInfo(eventRecordFilish)
+
 	return a.Cmd.Kill()
 }
 
@@ -131,6 +139,7 @@ func (a *Api) StartTransform() error {
 	if err != nil {
 		// log.Fatal(err)
 		log.Print(err)
+		a.emitInfo(eventTransformError)
 		return err
 	}
 

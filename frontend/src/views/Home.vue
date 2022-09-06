@@ -192,8 +192,11 @@ function runUntilCountDown(second: number, callback?: Function){
 }
 
 function handleResetStatus() {
+  if (NProgress.isStarted()) {
+    NProgress.done()
+  }
   imagePreviewRef.value.setCalcButtonDisable(true)
-  imagePreviewRef.value.setImagePlaceHolder(true)
+  imagePreviewRef.value.setImagePlaceHolder()
 }
 async function handlePrepare(){
   if (deviceSelected.value === "") {
@@ -288,12 +291,13 @@ onMounted(()=> {
       message: "录制成功",
     })
   })
-  EventsOn("latency:transform_start", ()=>{
-    // ElNotification({
-    //   title: '进度提示',
-    //   type: 'info',
-    //   message: "开始数据预处理",
-    // })
+  EventsOn("latency:transform_error", ()=>{
+    ElNotification({
+      title: '进度提示',
+      type: 'error',
+      message: "数据预处理失败，请重试",
+      duration: 0,
+    })
   })
   EventsOn("latency:transform_filish", ()=>{
     ElNotification({

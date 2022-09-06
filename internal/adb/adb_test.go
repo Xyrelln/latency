@@ -168,3 +168,9 @@ Packages:
 		}
 	}
 }
+
+func TestParsePids(t *testing.T) {
+	serial := "b9f8ef93"
+	device := GetDevice(serial)
+	device.KillScrcyServer()
+}

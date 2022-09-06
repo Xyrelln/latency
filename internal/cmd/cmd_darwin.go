@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"path/filepath"
@@ -37,6 +38,7 @@ func (c *Cmd) BackendRun(name string) error {
 
 func (c *Cmd) Kill() error {
 	if c.execCmd.Process != nil {
+		fmt.Println("kill proces")
 		if c.execCmd.Process != nil {
 			return syscall.Kill(c.execCmd.Process.Pid, syscall.SIGINT)
 		}
@@ -52,6 +54,8 @@ func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
 		Args: []string{
 			"-s", serial,
 			"-Nr", recFile,
+			// "-n", // no-control
+			// "-w", // stay awake
 		},
 	}
 

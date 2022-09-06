@@ -31,4 +31,6 @@ export function StopProcessing():Promise<Error>;
 
 export function StopRecord(arg1:string):Promise<Error>;
 
+export function StopScrcpyServer(arg1:string):Promise<Error>;
+
 export function StopTransform():void;

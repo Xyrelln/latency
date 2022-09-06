@@ -16,6 +16,14 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  build: {
+    target: 'es2015',
+    minify: 'terser', // 是否进行压缩,boolean | 'terser' | 'esbuild',默认使用terser
+    manifest: false, // 是否产出maifest.json
+    sourcemap: false, // 是否产出soucemap.json
+    outDir: 'dist', // 产出目录
+    emptyOutDir: false,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

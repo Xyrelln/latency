@@ -5,6 +5,7 @@ const (
 	eventRecordStart           = "latency:record_start"
 	eventRecordFilish          = "latency:record_filish"
 	eventTransformStart        = "latency:transform_start"
+	eventTransformError        = "latency:transform_error"
 	eventTransformFilish       = "latency:transform_filish"
 	eventAnalyseStart          = "latency:analyse_start"
 	eventAnalyseFilish         = "latency:analyse_filish"

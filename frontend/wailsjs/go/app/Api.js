@@ -58,6 +58,10 @@ export function StopRecord(arg1) {
   return window['go']['app']['Api']['StopRecord'](arg1);
 }
 
+export function StopScrcpyServer(arg1) {
+  return window['go']['app']['Api']['StopScrcpyServer'](arg1);
+}
+
 export function StopTransform() {
   return window['go']['app']['Api']['StopTransform']();
 }

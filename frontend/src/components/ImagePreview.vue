@@ -248,8 +248,8 @@ function setCalcButtonDisable(value: boolean) {
   calcButtonDisable.value = value
 }
 
-function setImagePlaceHolder(value: boolean) {
-  previewImgRef.value.src = "../assets/images/placeholder.png"
+function setImagePlaceHolder() {
+  previewImgRef.value.src = ""
 }
 
 function loadNewImage(info: core.ImageInfo) {
@@ -278,7 +278,7 @@ defineExpose({
       <el-col :span="22">
         <span>标识检测区域</span>
         <div class="out-img-box">
-          <img ref="previewImgRef" class="preview-img" draggable="false" src="../assets/images/placeholder.png" alt=""/>
+          <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? ' ./static/images/placeholder.png' : imageInfo.path" alt=""/>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>

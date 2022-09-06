@@ -75,7 +75,7 @@ func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
 	cmd := Cmd{
 		Args: []string{
 			"-i", srcVideoPath,
-			// "-threads", "8",
+			"-threads", "4",
 			destImagePath,
 		},
 	}
