@@ -8,6 +8,7 @@ import (
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/utils"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -140,11 +141,13 @@ func (a *Api) StartTransform() error {
 
 func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	firstImage := filepath.Join(a.ImagesDir, firstImageFile)
-	log.Printf("first Image: %s", firstImage)
 	mInfo, err := core.GetImageInfo(firstImage)
 	log.Printf("Get first image: %v", mInfo)
 	if err != nil {
 		return mInfo, err
+	}
+	if utils.IsWindowsDrivePath(mInfo.Path) {
+		mInfo.Path = "/" + strings.ReplaceAll(mInfo.Path, "\\", "/")
 	}
 	return mInfo, nil
 }

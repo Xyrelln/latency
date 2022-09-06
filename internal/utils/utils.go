@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"unicode"
 )
 
 func GetTimeStamp() string {
@@ -42,4 +43,21 @@ func CreateWorkDir() (string, string) {
 	}
 
 	return videoDir, imagesDir
+}
+
+// isWindowsDrivePath returns true if the file path is of the form used by
+// Windows. We check if the path begins with a drive letter, followed by a ":".
+// For example: C:/x/y/z.
+func IsWindowsDrivePath(path string) bool {
+	if len(path) < 3 {
+		return false
+	}
+	return unicode.IsLetter(rune(path[0])) && path[1] == ':'
+}
+
+func IsWindowsDrivePathURI(path string) bool {
+	if len(path) < 3 {
+		return false
+	}
+	return unicode.IsLetter(rune(path[1])) && path[2] == ':'
 }

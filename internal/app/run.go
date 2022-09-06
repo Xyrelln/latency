@@ -9,6 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+
+	"op-latency-mobile/internal/utils"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -34,6 +37,11 @@ func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	requestedFilename := req.URL.Path
 	// requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
 	println("Requesting file:", requestedFilename)
+	if utils.IsWindowsDrivePathURI(requestedFilename) {
+		requestedFilename = strings.Replace(requestedFilename, "/", "", 1)
+		requestedFilename = strings.ReplaceAll(requestedFilename, "/", "\\")
+	}
+
 	fileData, err := os.ReadFile(requestedFilename)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
