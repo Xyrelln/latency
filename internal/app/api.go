@@ -64,12 +64,13 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 
 func (a *Api) StartRecord(serial string) error {
 	log.Printf("start monitor")
-	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
 	log.Printf("workdir: %s", a.VideoDir)
+	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
 	recFile := filepath.Join(a.VideoDir, recordFile)
 	cmd, err := cmd.StartScrcpyRecord(serial, recFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return err
 	}
 	a.Cmd = cmd
 	a.emitInfo(eventRecordStart)
@@ -77,43 +78,35 @@ func (a *Api) StartRecord(serial string) error {
 }
 
 func (a *Api) Start(serial string, recordSecond int64) error {
-	// timeout := time.After(time.Duration(recordSecond) * time.Second)
-	// ch := make(chan string, 1)
-	// go func() {
-	// 	err := a.StartRecord(serial)
-	// 	ch <- err.Error()
-	// }()
-
-	// flag := false
-	// for {
-	// 	select {
-	// 	case out := <-ch:
-	// 		fmt.Print(out)
-	// 		flag = true
-	// 	case <-timeout:
-	// 		a.StopProcessing()
-	// 		fmt.Println("timeout 1")
-	// 		flag = true
-	// 	}
-	// 	if flag {
-	// 		break
-	// 	}
-	// }
-	a.StartRecord(serial)
+	err := a.StartRecord(serial)
+	if err != nil {
+		a.emitInfo(eventRecordStartError)
+		return err
+	}
+	// wait for filish
 	time.Sleep(time.Duration(recordSecond) * time.Second)
-	// a.StopProcessing()
-	a.StopScrcpyServer(serial)
-
-	a.StartTransform()
-	// a.StartAnalyse()
-
+	err = a.StopScrcpyServer(serial)
+	if err != nil {
+		a.emitInfo(eventRecordStopError)
+		return err
+	}
+	err = a.StartTransform()
+	if err != nil {
+		a.emitInfo(eventTransformStartError)
+		return err
+	}
 	return nil
-
 }
 
 func (a *Api) StopScrcpyServer(serial string) error {
 	device := adb.GetDevice(serial)
-	return device.KillScrcyServer()
+	err := device.KillScrcyServer()
+	if err != nil {
+		a.emitInfo(eventRecordStopError)
+		return err
+	}
+	a.emitInfo(eventRecordFilish)
+	return nil
 }
 
 func (a *Api) StopRecord(serial string) error {
@@ -137,9 +130,8 @@ func (a *Api) StartTransform() error {
 	a.emitInfo(eventTransformStart)
 	cmd, err := cmd.StartFFmpeg(srcVideoPath, destImagePath)
 	if err != nil {
-		// log.Fatal(err)
 		log.Print(err)
-		a.emitInfo(eventTransformError)
+		a.emitInfo(eventTransformStartError)
 		return err
 	}
 
@@ -155,18 +147,18 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	if err != nil {
 		return mInfo, err
 	}
+	// path to uri format for FileLoader on win
 	if utils.IsWindowsDrivePath(mInfo.Path) {
 		mInfo.Path = "/" + strings.ReplaceAll(mInfo.Path, "\\", "/")
 	}
 	return mInfo, nil
 }
 
-func (a *Api) StartAnalyse(imageRect core.ImageRectInfo) error {
-	log.Printf("analyse data")
+func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, diffScore int) error {
 	log.Printf("current rect: %v", imageRect)
 	log.Printf("workdir: %s", a.ImagesDir)
 	a.emitInfo(eventAnalyseStart)
-	responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect)
+	responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect, diffScore)
 	a.emitData(eventAnalyseFilish, responseTimes)
 	return nil
 }
@@ -179,19 +171,8 @@ func (a *Api) emitData(eventName string, data interface{}) {
 	runtime.EventsEmit(a.ctx, eventName, data)
 }
 
-func (a *Api) StopAnalyse() {
-}
-
 func (a *Api) StopTransform() {
 	a.Cmd.Kill()
-}
-
-func (a *Api) ClearImages() {
-
-}
-
-func (a *Api) ClearVideos() {
-
 }
 
 func (a *Api) ClearCacheData() {

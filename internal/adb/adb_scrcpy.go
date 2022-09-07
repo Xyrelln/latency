@@ -10,20 +10,23 @@ import (
 
 func (d *Device) KillScrcyServer() error {
 	cmd := d.Command("ps -ef | grep scrcpy")
-	if out, err := cmd.Call(); err == nil {
-		fmt.Print(out)
-		pids, err := parsePids(out)
-		if err == nil {
-			for _, pid := range pids {
-				fmt.Printf("kill %d", pid)
-				d.Command(fmt.Sprintf("kill %d", pid)).Run()
-			}
-		} else {
-			log.Print(err)
-		}
-	} else {
-		log.Print(err)
+
+	out, err := cmd.Call()
+	if err != nil {
+		log.Println(err)
 		return err
+	}
+
+	// fmt.Print(out)
+	pids, err := parsePids(out)
+	if err != nil {
+		log.Println(err)
+		return err
+
+	}
+	for _, pid := range pids {
+		fmt.Printf("kill %d", pid)
+		d.Command(fmt.Sprintf("kill %d", pid)).Run()
 	}
 	return nil
 }

@@ -6,14 +6,6 @@ export function ClearCacheData() {
   return window['go']['app']['Api']['ClearCacheData']();
 }
 
-export function ClearImages() {
-  return window['go']['app']['Api']['ClearImages']();
-}
-
-export function ClearVideos() {
-  return window['go']['app']['Api']['ClearVideos']();
-}
-
 export function GetFirstImageInfo() {
   return window['go']['app']['Api']['GetFirstImageInfo']();
 }
@@ -34,8 +26,8 @@ export function Start(arg1, arg2) {
   return window['go']['app']['Api']['Start'](arg1, arg2);
 }
 
-export function StartAnalyse(arg1) {
-  return window['go']['app']['Api']['StartAnalyse'](arg1);
+export function StartAnalyse(arg1, arg2) {
+  return window['go']['app']['Api']['StartAnalyse'](arg1, arg2);
 }
 
 export function StartRecord(arg1) {
@@ -44,10 +36,6 @@ export function StartRecord(arg1) {
 
 export function StartTransform() {
   return window['go']['app']['Api']['StartTransform']();
-}
-
-export function StopAnalyse() {
-  return window['go']['app']['Api']['StopAnalyse']();
 }
 
 export function StopProcessing() {

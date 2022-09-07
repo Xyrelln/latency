@@ -3,9 +3,11 @@ package app
 const (
 	eventInit                  = "latency:init"
 	eventRecordStart           = "latency:record_start"
+	eventRecordStartError      = "latency:record_start_error"
 	eventRecordFilish          = "latency:record_filish"
+	eventRecordStopError       = "latency:record_stop_error"
 	eventTransformStart        = "latency:transform_start"
-	eventTransformError        = "latency:transform_error"
+	eventTransformStartError   = "latency:transform_start_error"
 	eventTransformFilish       = "latency:transform_filish"
 	eventAnalyseStart          = "latency:analyse_start"
 	eventAnalyseFilish         = "latency:analyse_filish"

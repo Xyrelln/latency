@@ -14,11 +14,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var (
-	threshold_t = 20
-	threshold_c = 20
-)
-
 type ImageFile struct {
 	Path string
 	Img  image.Image
@@ -215,7 +210,7 @@ func GetImageInfo(imagePath string) (ImageInfo, error) {
 
 }
 
-func CalcTime(imgPath string, imageRect ImageRectInfo) ([]int, error) {
+func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, error) {
 	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
 
 	rect, err := GetCropRect(imageRect)
@@ -248,7 +243,7 @@ func CalcTime(imgPath string, imageRect ImageRectInfo) ([]int, error) {
 			log.Printf("scoreC: %d", scoreC)
 
 			if touched {
-				if scoreC >= threshold_c {
+				if scoreC >= threshold {
 					costTime := (index - touchedIndex) * (1000 / 60)
 					responseTime = append(responseTime, costTime)
 
@@ -258,7 +253,7 @@ func CalcTime(imgPath string, imageRect ImageRectInfo) ([]int, error) {
 				}
 
 			} else {
-				if scoreT >= threshold_t {
+				if scoreT >= threshold {
 					touched = true
 					touchedIndex = index
 				}

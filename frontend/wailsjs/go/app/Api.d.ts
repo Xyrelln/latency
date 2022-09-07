@@ -5,10 +5,6 @@ import {adb} from '../models';
 
 export function ClearCacheData():void;
 
-export function ClearImages():void;
-
-export function ClearVideos():void;
-
 export function GetFirstImageInfo():Promise<core.ImageInfo>;
 
 export function ListDevices():Promise<Array<adb.Device>>;
@@ -19,13 +15,11 @@ export function SetPointerLocationOn(arg1:string):Promise<Error>;
 
 export function Start(arg1:string,arg2:number):Promise<Error>;
 
-export function StartAnalyse(arg1:core.ImageRectInfo):Promise<Error>;
+export function StartAnalyse(arg1:core.ImageRectInfo,arg2:number):Promise<Error>;
 
 export function StartRecord(arg1:string):Promise<Error>;
 
 export function StartTransform():Promise<Error>;
-
-export function StopAnalyse():void;
 
 export function StopProcessing():Promise<Error>;
 

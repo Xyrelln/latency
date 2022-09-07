@@ -57,12 +57,13 @@ const selectArea = reactive({
     paint: false
 })
 
+const threshold = inject('threshold') as number
 
 function handleImageAnalyse() {
   const rectinfo = core.ImageRectInfo.createFrom({
 
   })
-  StartAnalyse(rectinfo).then((res)=>{
+  StartAnalyse(rectinfo, threshold).then((res)=>{
   })
 }
 
@@ -125,7 +126,7 @@ onMounted(()=>{
 })
 
 
-function getImage() {
+function handleCalcCostTime() {
   const rectinfo = core.ImageRectInfo.createFrom({
     x: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft,
     y: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop,
@@ -137,7 +138,8 @@ function getImage() {
     source_height: props.data.height,
   })
 
-  StartAnalyse(rectinfo)
+  StartAnalyse(rectinfo, threshold)
+  NProgress.start()
 }
 // cropBtn.addEventListener('click', () => {
 //   const sX = previewImgRef.value.offsetLeft - previewImgRef.value.offsetLeft;  // 区域选择框左侧位置
@@ -207,12 +209,12 @@ onMounted(()=>{
     // processStatus.value = 0
     // rightContentRef.value.loadResponseTimeData(res)
     delayTimes.value = res
-    NProgress.done()
     ElNotification({
       title: '进度提示: 3/3',
       type: 'success',
       message: "数据处理完成",
     })
+    NProgress.done()
   })
 
 })
@@ -290,7 +292,7 @@ defineExpose({
     </el-row>
     <el-row justify="end">
       <el-col :span="4">
-        <el-button type="primary" @click="getImage" :disabled="calcButtonDisable" style="float:right">计算延迟</el-button>
+        <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable" style="float:right">计算延迟</el-button>
       </el-col>
     </el-row>
     <el-row>

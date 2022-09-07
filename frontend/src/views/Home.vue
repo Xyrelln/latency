@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {reactive, ref, h, inject, Ref, onMounted, computed, watch, onUnmounted} from 'vue'
+import {reactive, ref, h, inject, Ref, provide, onMounted, computed, watch, onUnmounted} from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
@@ -31,6 +31,7 @@ const deviceSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
+
 
 const isAuth = ref(false)
 const placeholder = "./src/assets/images/placeholder.png"
@@ -70,6 +71,10 @@ const settingForm = reactive({
   prepareTimeout: 3,
   develop: false,
 })
+
+// const threshold = ref(20)
+
+provide('threshold', settingForm.diffScore)
 
 const rules =  {
   diffScore: [
@@ -125,9 +130,11 @@ function checkGreaterEqualZero (rule: any, value: any, callback: any)  {
 
 
 
-function getDeviceList () {
-    ListDevices().then(result => {
-    data.devices = result
+function getDeviceList (value: any) {
+  ListDevices().then(result => {
+    if (result != null) {
+      data.devices = result
+    }
   })
 }
 
@@ -143,6 +150,10 @@ function handleStartRecord() {
   runUntilCountDown(settingForm.timeout)
 }
 
+function handleStart() {
+  StartRecord(deviceSelected.value)
+}
+
 function handleStopRecord() {
   // clear first
   clearCurrentInterval()
@@ -152,21 +163,13 @@ function handleStopRecord() {
   SetPointerLocationOff(deviceSelected.value)
 }
 
+
 function handleStopProcessing() {
   StopProcessing()
 }
 
 function handleToImage() {
   StartTransform()
-  rightContentRef.value.setPrepareDataPercent(100)
-}
-
-function handleImageAnalyse() {
-  const rectinfo = core.ImageRectInfo.createFrom({
-
-  })
-  StartAnalyse(rectinfo).then((res)=>{
-  })
 }
 
 function clearCurrentInterval() {
@@ -261,19 +264,7 @@ function setPointerLocationOff():Boolean {
   return false
 }
 
-
-function getFirstImage(){
-  GetFirstImageInfo().then((res: core.ImageInfo) => {
-    imageInfo.path = res.path
-    imageInfo.width = res.width
-    imageInfo.height = res.height
-    imagePreviewRef.value.loadNewImage(res)
-    imagePreviewRef.value.enableCalcButton()
-  })
-}
-
-
-onMounted(()=> {
+function addEventLister() {
   EventsOn("latency:record_start", ()=>{
     console.log("record_start")
     ElNotification({
@@ -291,13 +282,23 @@ onMounted(()=> {
       message: "录制成功",
     })
   })
-  EventsOn("latency:transform_error", ()=>{
+  EventsOn("latency:transform_start_error", ()=>{
     ElNotification({
       title: '进度提示',
       type: 'error',
       message: "数据预处理失败，请重试",
       duration: 0,
     })
+    NProgress.done()
+  })
+  EventsOn("latency:record_start_error", ()=>{
+    ElNotification({
+      title: '进度提示',
+      type: 'error',
+      message: "录制失败，请重试",
+      duration: 0,
+    })
+    NProgress.done()
   })
   EventsOn("latency:transform_filish", ()=>{
     ElNotification({
@@ -306,6 +307,7 @@ onMounted(()=> {
       message: "数据预处理完成，加载首帧画面",
     })
     getFirstImage()
+    NProgress.done()
   })
   // EventsOn("latency:analyse_start", ()=>{
   //   ElNotification({
@@ -324,6 +326,32 @@ onMounted(()=> {
   //     message: "数据处理完成",
   //   })
   // })
+}
+
+function getFirstImage(){
+  GetFirstImageInfo().then((res: core.ImageInfo) => {
+    imageInfo.path = res.path
+    imageInfo.width = res.width
+    imageInfo.height = res.height
+    imagePreviewRef.value.loadNewImage(res)
+    imagePreviewRef.value.enableCalcButton()
+  })
+}
+
+function removeEventLister() {
+  EventsOff("latency:record_start")
+  EventsOff("latency:record_filish")
+  EventsOff("latency:transform_start")
+  EventsOff("latency:transform_filish")
+   
+  // EventsOff("latency:analyse_start")
+  // EventsOff("latency:analyse_filish")
+}
+
+
+
+onMounted(()=> {
+  addEventLister()
   
 })
 function handleClearCache() {
@@ -335,12 +363,7 @@ function handleReload() {
 }
 
 onUnmounted(()=>{
-  EventsOff("latency:record_start")
-  EventsOff("latency:record_filish")
-  EventsOff("latency:transform_start")
-  EventsOff("latency:transform_filish")
-  // EventsOff("latency:analyse_start")
-  // EventsOff("latency:analyse_filish")
+  removeEventLister()
 })
 
 </script>
@@ -354,7 +377,7 @@ onUnmounted(()=>{
       <el-row class="row-item">
         <el-select
             v-model="deviceSelected"
-            @focus="getDeviceList"
+            @visible-change="getDeviceList"
             filterable
             placeholder="请选择设备"
             style="width:100%">
@@ -373,12 +396,13 @@ onUnmounted(()=>{
         <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
       </el-row>
       <el-row class="row-item" v-if="settingForm.develop">
-        <el-button @click="handleStartRecord">rec</el-button>
-        <el-button @click="handleStopProcessing">stop</el-button>
-        <el-button @click="handleToImage">to_img</el-button>
-        <el-button @click="handleImageAnalyse">ana</el-button>
-        <el-button @click="setPointerLocationOn">set_pl_on</el-button>
-        <el-button @click="setPointerLocationOff">set_pl_off</el-button>
+        <el-button-group>
+          <el-button @click="handleStart">rec</el-button>
+          <el-button @click="handleStopProcessing">stop</el-button>
+          <el-button @click="handleToImage">to_img</el-button>
+          <el-button @click="setPointerLocationOn">pl_on</el-button>
+          <el-button @click="setPointerLocationOff">pl_off</el-button>
+        </el-button-group>
       </el-row>
 
       <el-tabs 
@@ -414,6 +438,7 @@ onUnmounted(()=>{
                 <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
                   <el-form-item label="图片比对阈值" prop="diffScore">
                     <el-input v-model.number="settingForm.diffScore"/>
+                    <!-- <el-input-numbe v-model="settingForm.diffScore" :min="1" :max="100" ></el-input-numbe> -->
                   </el-form-item>
                   <el-form-item label="录制时长(秒)" prop="timeout">
                     <el-input v-model.number="settingForm.timeout"/>
