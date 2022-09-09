@@ -11,7 +11,3 @@ func (d *Device) SetPointerLocationOff() error {
 	cmd := strings.Split("put system pointer_location 0", " ")
 	return d.Command("settings", cmd...).Run()
 }
-
-func GetDevice(serial string) *Device {
-	return &Device{Serial: serial}
-}

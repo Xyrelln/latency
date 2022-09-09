@@ -16,10 +16,12 @@ import {
   SetPointerLocationOff,
   SetPointerLocationOn,
   GetFirstImageInfo,
-  ClearCacheData
+  ClearCacheData,
+  SetAutoSwipeOn,
+  SetAutoSwipeOff,
+  GetDisplay
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
-import RightContent from '../components/RightContent.vue';
 import ImagePreview from '../components/ImagePreview.vue';
 import {
   EventsOn,
@@ -45,7 +47,7 @@ const countDownSecond = ref(0)
 const imageSrc = ref()
 const imagePreviewRef = ref()
 
-const tabName = ref('detail')
+const tabName = ref('setting')
 const deviceInfo = reactive({
   android_version: null,
   cpu_arch: '',
@@ -53,7 +55,9 @@ const deviceInfo = reactive({
   hardware: '',
   mem_total: 0,
   openGLES_version: '',
-  product_model: ''
+  product_model: '',
+  width: 0,
+  height: 0,
 })
 
 const imageInfo = reactive({
@@ -182,12 +186,14 @@ function clearCurrentInterval() {
 function runUntilCountDown(second: number, callback?: Function){
   countDownSecond.value = second
   function countDown() {
-    if (countDownSecond.value  > 0) {
-      countDownSecond.value  --
-    } else {
-      // clearCurrentInterval()
+    // 启动需要时间，提前1s启动
+    if (countDownSecond.value  == 1) {
       if (callback) { callback() }
     }
+    if (countDownSecond.value  > 0) {
+      countDownSecond.value  --
+    }
+
   }
 
   clearCurrentInterval()
@@ -282,6 +288,15 @@ function addEventLister() {
       message: "录制成功",
     })
   })
+  EventsOn("latency:transform_start", ()=>{
+    ElNotification({
+      title: '进度提示',
+      type: 'success',
+      message: "数据预处理中，请稍后...",
+      duration: 6000,
+    })
+    NProgress.done()
+  })
   EventsOn("latency:transform_start_error", ()=>{
     ElNotification({
       title: '进度提示',
@@ -309,23 +324,6 @@ function addEventLister() {
     getFirstImage()
     NProgress.done()
   })
-  // EventsOn("latency:analyse_start", ()=>{
-  //   ElNotification({
-  //     title: '进度提示',
-  //     type: 'info',
-  //     message: "开始数据分析",
-  //   })
-  // })
-  // EventsOn("latency:analyse_filish", (res)=>{
-  //   // processStatus.value = 0
-  //   rightContentRef.value.loadResponseTimeData(res)
-  //   NProgress.done()
-  //   ElNotification({
-  //     title: '进度提示: 3/3',
-  //     type: 'success',
-  //     message: "数据处理完成",
-  //   })
-  // })
 }
 
 function getFirstImage(){
@@ -338,10 +336,44 @@ function getFirstImage(){
   })
 }
 
+async function handleGetDisplay() {
+  await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
+    console.log(res)
+    deviceInfo.width = res.width
+    deviceInfo.height = res.height
+  })
+}
+async function setAutoOn() {
+  await handleGetDisplay()
+  const swipeEvent = adb.SwipeEvent.createFrom(
+    { 
+      // sx: deviceInfo.width/2,
+      // sy: deviceInfo.height/2,
+      // dx: deviceInfo.width/2 + deviceInfo.width/2/2,
+      // dy: deviceInfo.height/2,
+      sx: deviceInfo.height/2,
+      sy: deviceInfo.width/2,
+      dx: deviceInfo.height/2 + deviceInfo.height/2/2,
+      dy: deviceInfo.width/2,
+      speed: 500
+    }
+  )
+  const interval = 2
+  console.log(swipeEvent)
+  SetAutoSwipeOn(swipeEvent, interval)
+}
+
+function setAutoOff() {
+  SetAutoSwipeOff()
+  
+}
+
 function removeEventLister() {
   EventsOff("latency:record_start")
   EventsOff("latency:record_filish")
   EventsOff("latency:transform_start")
+  EventsOff("latency:transform_start_error")
+  EventsOff("latency:record_start_error")
   EventsOff("latency:transform_filish")
    
   // EventsOff("latency:analyse_start")
@@ -402,36 +434,15 @@ onUnmounted(()=>{
           <el-button @click="handleToImage">to_img</el-button>
           <el-button @click="setPointerLocationOn">pl_on</el-button>
           <el-button @click="setPointerLocationOff">pl_off</el-button>
+          <el-button @click="setAutoOn">auto_on</el-button>
+          <el-button @click="setAutoOff">auto_off</el-button>
         </el-button-group>
       </el-row>
 
       <el-tabs 
           v-model="tabName" 
           class="platform-tabs">
-          <el-tab-pane label="帮助" name="detail">
-            <el-scrollbar style="height:60vh">
-              <div>
-                <!-- <el-row class="info-list">
-                  <el-col :span="12" class="info-line">
-                    <span class="info-key">名称</span>
-                  </el-col >
-                  <el-col :span="12" class="info-line">
-                    <span class="info-value">数值</span>
-                  </el-col>
-                  <el-row class="info-list">
-                  <el-col :span="12" class="info-line">
-                    <span class="info-key">Version</span>
-                  </el-col >
-                  <el-col :span="12" class="info-line">
-                    <span class="info-value">{{ deviceInfo.android_version }}</span>
-                  </el-col>
-                </el-row>
-                </el-row> -->
-                
-              </div>
-            </el-scrollbar>
-          </el-tab-pane>
-
+         
           <el-tab-pane label="设置" name="setting">
             <el-scrollbar style="height:60vh">
               <el-row>
@@ -459,6 +470,29 @@ onUnmounted(()=>{
               </el-row>
             </el-scrollbar>
           </el-tab-pane>
+          <el-tab-pane label="帮助" name="detail">
+            <el-scrollbar style="height:60vh">
+              <div>
+                <!-- <el-row class="info-list">
+                  <el-col :span="12" class="info-line">
+                    <span class="info-key">名称</span>
+                  </el-col >
+                  <el-col :span="12" class="info-line">
+                    <span class="info-value">数值</span>
+                  </el-col>
+                  <el-row class="info-list">
+                  <el-col :span="12" class="info-line">
+                    <span class="info-key">Version</span>
+                  </el-col >
+                  <el-col :span="12" class="info-line">
+                    <span class="info-value">{{ deviceInfo.android_version }}</span>
+                  </el-col>
+                </el-row>
+                </el-row> -->
+                
+              </div>
+            </el-scrollbar>
+          </el-tab-pane>
           <el-tab-pane label="关于" name="about">
             <span>www.vrviu.com</span>
           </el-tab-pane>
@@ -472,7 +506,6 @@ onUnmounted(()=>{
         ref="imagePreviewRef"
         :data="imageInfo"
         />
-      <!-- <RightContent ref="rightContentRef"/> -->
     <!-- </el-scrollbar> -->
     </el-main>
    

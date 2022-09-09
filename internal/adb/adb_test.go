@@ -14,6 +14,8 @@
 package adb
 
 import (
+	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -173,4 +175,24 @@ func TestParsePids(t *testing.T) {
 	serial := "b9f8ef93"
 	device := GetDevice(serial)
 	device.KillScrcyServer()
+}
+
+func TestParseDisplay(t *testing.T) {
+	serial := "b9f8ef93"
+	device := GetDevice(serial)
+	ds, _ := device.DisplaySize()
+	fmt.Printf("current display siez:%v", ds)
+}
+
+func TestRegexp(t *testing.T) {
+	// match, _ := regexp.MatchString("p([a-z]+)ch", "peach")
+	// fmt.Println(match)
+
+	// r, _ := regexp.Compile("p([a-z]+)ch")
+	// fmt.Println(r.MatchString("peach"))
+
+	re := regexp.MustCompile(`displayWidth=[0-9]+`)
+	re2 := regexp.MustCompile(`displayHeight=[0-9]+`)
+	fmt.Printf("%s \n", re.Find([]byte(`{displayWidth=1080 displayHeight=2400 density={3.0} cuto`)))
+	fmt.Printf("%q\n", re2.FindAll([]byte(`{displayWidth=1080 displayHeight=2400 density={3.0} cuto`), -1))
 }

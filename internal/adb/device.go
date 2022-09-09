@@ -154,3 +154,8 @@ func parseDevices(out string) ([]*Device, error) {
 	}
 	return devices, nil
 }
+
+// GetDevice get device instance by serial
+func GetDevice(serial string) *Device {
+	return &Device{Serial: serial}
+}

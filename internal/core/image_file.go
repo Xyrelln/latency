@@ -155,14 +155,9 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 			eg.Go(func() error {
 				img, err := LoadImage(path, info, e)
 				if img != nil {
-					// log.Println(path)
-					// images = append(images, img)
 					cropImgT, _ := CropImage(img, touchArea)
 					extImgHashT, _ := goimagehash.ExtDifferenceHash(cropImgT, 16, 16)
 
-					// width := img.Bounds().Dx() // @todo get x,y by phone
-					// height := img.Bounds().Dy()
-					// centerArea := image.Rect(width/4, height/4, width/4*3, height/4*3)
 					cropImgC, _ := CropImage(img, rect)
 					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
 					imgs = append(imgs, ImageFile{

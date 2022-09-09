@@ -1,5 +1,19 @@
 export namespace adb {
 	
+	export class Display {
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Display(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
 	export class Device {
 	    Serial: string;
 	    State: number;
@@ -16,11 +30,49 @@ export namespace adb {
 	        this.abi = source["abi"];
 	    }
 	}
+	export class SwipeEvent {
+	    sx: number;
+	    sy: number;
+	    dx: number;
+	    dy: number;
+	    speed: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SwipeEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sx = source["sx"];
+	        this.sy = source["sy"];
+	        this.dx = source["dx"];
+	        this.dy = source["dy"];
+	        this.speed = source["speed"];
+	    }
+	}
 
 }
 
 export namespace core {
 	
+	export class ImageInfo {
+	    path: string;
+	    width: number;
+	    height: number;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	        this.size = source["size"];
+	    }
+	}
 	export class ImageRectInfo {
 	    x: number;
 	    y: number;
@@ -45,24 +97,6 @@ export namespace core {
 	        this.preview_height = source["preview_height"];
 	        this.source_width = source["source_width"];
 	        this.source_height = source["source_height"];
-	    }
-	}
-	export class ImageInfo {
-	    path: string;
-	    width: number;
-	    height: number;
-	    size: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new ImageInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source["path"];
-	        this.width = source["width"];
-	        this.height = source["height"];
-	        this.size = source["size"];
 	    }
 	}
 

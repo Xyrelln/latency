@@ -19,6 +19,8 @@ const (
 	firstImageFile = "0001.png"
 )
 
+var autorun = true
+
 // Api struct
 type Api struct {
 	ctx       context.Context
@@ -48,6 +50,38 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 		return nil, err
 	}
 	return devices, nil
+}
+
+func (a *Api) GetDisplay(serial string) (adb.Display, error) {
+	log.Printf("get display %s", serial)
+	device := adb.GetDevice(serial)
+	display, _ := device.DisplaySize()
+	return *display, nil
+}
+
+func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
+	autorun = true
+	devices, err := adb.Devices()
+	if err != nil {
+		log.Fatalf("ListDevices failed: %v", err)
+		return err
+	}
+	for {
+		for _, device := range devices {
+			go device.AutoSwipe(sw)
+		}
+		time.Sleep(time.Duration(interval) * time.Second)
+		if !autorun {
+			break
+		}
+	}
+
+	return nil
+}
+
+func (a *Api) SetAutoSwipeOff() error {
+	autorun = false
+	return nil
 }
 
 func (a *Api) SetPointerLocationOn(serial string) error {

@@ -17,7 +17,7 @@ interface Props {
 }
 
 const imageInfo = reactive({
-  path: '',
+  path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/20220908141417.464/images/0001.png',
   width: 0,
   height: 0,
   size: 0,
@@ -202,12 +202,11 @@ onMounted(()=>{
     ElNotification({
       title: '进度提示',
       type: 'info',
-      message: "开始数据分析",
+      message: "数据分析中， 请稍后...",
+      duration: 6000,
     })
   })
   EventsOn("latency:analyse_filish", (res: Array<number>)=>{
-    // processStatus.value = 0
-    // rightContentRef.value.loadResponseTimeData(res)
     delayTimes.value = res
     ElNotification({
       title: '进度提示: 3/3',
@@ -262,6 +261,24 @@ function loadNewImage(info: core.ImageInfo) {
   imageInfo.height = info.height
 }
 
+const currentPage1 = ref(5)
+const currentPage2 = ref(5)
+const currentPage3 = ref(5)
+const currentPage4 = ref(4)
+const pageSize2 = ref(100)
+const pageSize3 = ref(100)
+const pageSize4 = ref(1)
+const small = ref(false)
+const background = ref(false)
+const disabled = ref(false)
+
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+}
+
 defineExpose({
   enableCalcButton,
   setCalcButtonDisable,
@@ -277,10 +294,12 @@ defineExpose({
   <div>
     <el-scrollbar height="calc(95vh)">
     <el-row justify="center" class="preview-content">
-      <el-col :span="22">
+      <el-col :span="24">
         <span>标识检测区域</span>
         <div class="out-img-box">
-          <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? ' ./static/images/placeholder.png' : imageInfo.path" alt=""/>
+          <span class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? ' ./assets/images/placeholder.png' : imageInfo.path" alt=""/>
+          <span class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
@@ -288,6 +307,22 @@ defineExpose({
             <div ref="resizeLeftRef" class="resizer resizer-l"></div>
           </div>
         </div>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col>
+        <!-- 1/300 -->
+        <el-pagination
+          v-model:currentPage="currentPage4"
+          v-model:page-size="pageSize4"
+          :small="small"
+          :disabled="disabled"
+          :background="background"
+          layout="total, prev, pager, next, jumper"
+          :total="400"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
       </el-col>
     </el-row>
     <el-row justify="end">
@@ -398,8 +433,13 @@ img {
   display: block;
 }
 
-.preview-content {
 
+.demo-pagination-block + .demo-pagination-block {
+  margin-top: 10px;
 }
+.demo-pagination-block .demonstration {
+  margin-bottom: 16px;
+}
+
 
 </style>

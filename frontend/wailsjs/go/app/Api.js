@@ -6,12 +6,24 @@ export function ClearCacheData() {
   return window['go']['app']['Api']['ClearCacheData']();
 }
 
+export function GetDisplay(arg1) {
+  return window['go']['app']['Api']['GetDisplay'](arg1);
+}
+
 export function GetFirstImageInfo() {
   return window['go']['app']['Api']['GetFirstImageInfo']();
 }
 
 export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
+}
+
+export function SetAutoSwipeOff() {
+  return window['go']['app']['Api']['SetAutoSwipeOff']();
+}
+
+export function SetAutoSwipeOn(arg1, arg2) {
+  return window['go']['app']['Api']['SetAutoSwipeOn'](arg1, arg2);
 }
 
 export function SetPointerLocationOff(arg1) {

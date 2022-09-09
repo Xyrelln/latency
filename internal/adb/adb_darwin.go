@@ -41,3 +41,20 @@ func (c *Cmd) Run() error {
 	cmd.Stderr = c.Stderr
 	return cmd.Run()
 }
+
+func (c *Cmd) BackendRun() error {
+	args := []string{}
+	if c.Device != nil {
+		args = append(args, "-s", c.Device.Serial)
+	}
+	if c.Path != "" {
+		args = append(args, "shell", c.Path)
+	}
+	args = append(args, c.Args...)
+	log.Printf("adb: %s", adb)
+	log.Printf("args: %v", args)
+	cmd := exec.Command(adb, args...)
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	return cmd.Start()
+}

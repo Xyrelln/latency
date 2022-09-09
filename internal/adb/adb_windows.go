@@ -18,9 +18,9 @@
 package adb
 
 import (
-	"syscall"
 	"log"
 	"os/exec"
+	"syscall"
 )
 
 func (c *Cmd) Run() error {
@@ -39,4 +39,22 @@ func (c *Cmd) Run() error {
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	return cmd.Run()
+}
+
+func (c *Cmd) BackendRun() error {
+	args := []string{}
+	if c.Device != nil {
+		args = append(args, "-s", c.Device.Serial)
+	}
+	if c.Path != "" {
+		args = append(args, "shell", c.Path)
+	}
+	args = append(args, c.Args...)
+	log.Printf("adb: %s", adb)
+	log.Printf("args: %v", args)
+	cmd := exec.Command(adb, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	return cmd.Start()
 }
