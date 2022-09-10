@@ -49,8 +49,8 @@ const countDownSecond = ref(0)
 const imageSrc = ref()
 const imagePreviewRef = ref()
 
-const topTabName = ref('latency')
-// const topTabName = ref('automation')
+// const topTabName = ref('latency')
+const topTabName = ref('automation')
 
 const tabName = ref('setting')
 const deviceInfo = reactive({
@@ -529,7 +529,7 @@ function handleGetImage() {
           </el-container>
         </el-scrollbar>
       </el-tab-pane>
-      <el-tab-pane label="辅助工具" name="automation">
+      <el-tab-pane label="滑动工具" name="automation">
         <el-scrollbar style="height:calc(100vh - 120px);width: calc(100vw - 60px)">
           <Automation/>
         </el-scrollbar>

@@ -33,13 +33,14 @@ const form = reactive({
   resource: '',
   desc: '',
   devices: [],
+  device: '',
   sx: 0,
   sy: 0,
   dx: 0,
   dy: 0,
   speed: 500,
   interval: 2000,
-  scene_id: 0,
+  scene_id: '',
   location: true
 })
 
@@ -153,27 +154,41 @@ function getDeviceList (value: any) {
 }
 
 async function handleGetDisplay() {
-  await GetDisplay(form.devices[0]).then((res: adb.Display) => {
+  await GetDisplay(form.device).then((res: adb.Display) => {
     console.log(res)
-    deviceInfo.width = res.width
-    deviceInfo.height = res.height
+    if (res) {
+      deviceInfo.width = res.width
+      deviceInfo.height = res.height
+    } else {
+      ElNotification({
+        title: '获取数据异常',
+        type: 'error',
+        message: "获取手机分辨率失败，请手动设置移动坐标",
+        duration: 0,
+      })
+    }
+
   })
 }
 
 async function setPointerLocationOn():Promise<Boolean> {
   let result = false
-  await SetPointerLocationOn(form.devices[0]).then(res =>{ 
+  await SetPointerLocationOn(form.device).then(res =>{ 
     if (res) {
-      ElMessage({
+      ElNotification({
+        title: '操作失败',
         type: 'error',
-        message: '开启指针失败'
+        message: '开启指针位置失败，请在开发者选项中手动开启或关闭"权限监控"',
+        duration: 0,
       })
       result = false
+
       
     } else {
-      ElMessage({
+      ElNotification({
+        title: '操作成功',
         type: 'success',
-        message: '开启指针成功'
+        message: '开启指针位置成功"',
       })
      result = true
     }
@@ -182,7 +197,7 @@ async function setPointerLocationOn():Promise<Boolean> {
 }
 
 function setPointerLocationOff():Boolean {
-  SetPointerLocationOff(form.devices[0]).then(res =>{ 
+  SetPointerLocationOff(form.device).then(res =>{ 
     if (res) {
       ElMessage({
         type: 'error',
@@ -204,7 +219,13 @@ function setPointerLocationOff():Boolean {
 
 async function handleStartRun() {
   // await handleGetDisplay()
-  await setPointerLocationOn()
+  if (form.location) {
+    const res = await setPointerLocationOn()
+    if (!res) {
+      return
+    }
+  }
+
   const swipeEvent = adb.SwipeEvent.createFrom(
     { 
       sx: form.sx,
@@ -263,8 +284,7 @@ function handleDeviceChange(value: string) {
       >
       <el-form-item label="设备" prop="devices">
         <el-select
-          v-model="form.devices"
-          multiple
+          v-model="form.device"
           @visible-change="getDeviceList"
           filterable
           @change="handleDeviceChange"
@@ -326,12 +346,12 @@ function handleDeviceChange(value: string) {
           </el-form-item>
         </el-col>
       </el-form-item>
-      <el-form-item label="移动速率" prop="speed">
+      <el-form-item label="移动速率(ms)" prop="speed">
         <el-col :span="8">
           <el-input v-model.number="form.speed" placeholder="速率（毫秒）"></el-input>
         </el-col>
       </el-form-item>
-      <el-form-item label="间隔时间" prop="interval">
+      <el-form-item label="间隔时间(ms)" prop="interval">
         <el-col :span="8">
           <el-input v-model.number="form.interval" placeholder="间隔时间(毫秒)"></el-input>
         </el-col>
