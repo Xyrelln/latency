@@ -6,6 +6,7 @@ import NProgress from 'nprogress'
 import {adb, core} from '../../wailsjs/go/models'
 import { 
   StartAnalyse,
+  GetImageFiles
 } from '../../wailsjs/go/app/Api'
 import {
   EventsOn,
@@ -17,7 +18,7 @@ interface Props {
 }
 
 const imageInfo = reactive({
-  path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/20220908141417.464/images/0001.png',
+  path: '',
   width: 0,
   height: 0,
   size: 0,
@@ -25,8 +26,6 @@ const imageInfo = reactive({
 const props = defineProps<Props>()
 const selectBoxRef = ref()
 const previewImgRef = ref()
-// const canvasRef = ref()
-// const resizeRef = ref()
 const resizeTopRef = ref()
 const resizeRightRef = ref()
 const resizeBottomRef = ref()
@@ -56,6 +55,10 @@ const selectArea = reactive({
     height: 0,
     paint: false
 })
+
+const imageInfos = ref([
+  { path: ''},
+])
 
 const threshold = inject('threshold') as number
 
@@ -197,13 +200,13 @@ const mouseUpHandler = function () {
 };
 
 
-onMounted(()=>{
+function addEventLister() {
   EventsOn("latency:analyse_start", ()=>{
     ElNotification({
       title: '进度提示',
       type: 'info',
       message: "数据分析中， 请稍后...",
-      duration: 6000,
+      duration: 12000,
     })
   })
   EventsOn("latency:analyse_filish", (res: Array<number>)=>{
@@ -216,6 +219,11 @@ onMounted(()=>{
     NProgress.done()
   })
 
+}
+
+onMounted(()=>{
+  addEventLister()
+  
 })
 
 onUnmounted(()=>{
@@ -261,29 +269,40 @@ function loadNewImage(info: core.ImageInfo) {
   imageInfo.height = info.height
 }
 
-const currentPage1 = ref(5)
-const currentPage2 = ref(5)
-const currentPage3 = ref(5)
-const currentPage4 = ref(4)
-const pageSize2 = ref(100)
-const pageSize3 = ref(100)
-const pageSize4 = ref(1)
+const currentPage = ref(1)
+const pageSize = ref(1)
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
+const total = ref(10)
+const imgs = ref<Array<string>>([])
+const isImgLoaded = ref(false)
 
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
+  imageInfo.path = imgs.value[val -1]
+}
+
+
+function handleGetImage () {
+  GetImageFiles().then(res => {
+    if (res.length > 0) {
+      imgs.value = res
+      total.value = imgs.value.length
+      imageInfo.path = imgs.value[0]
+    }
+  })
 }
 
 defineExpose({
   enableCalcButton,
   setCalcButtonDisable,
   setImagePlaceHolder,
-  loadNewImage
+  loadNewImage,
+  handleGetImage
 })
 
 
@@ -292,14 +311,14 @@ defineExpose({
 
 <template>
   <div>
-    <el-scrollbar height="calc(95vh)">
+    <el-scrollbar height="95vh" style="width:calc(100vw - 320px); height: 82vh;">
     <el-row justify="center" class="preview-content">
       <el-col :span="24">
-        <span>标识检测区域</span>
+        <!-- <span>标识检测区域</span> -->
         <div class="out-img-box">
-          <span class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <!-- <span class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? ' ./assets/images/placeholder.png' : imageInfo.path" alt=""/>
-          <span class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <!-- <span class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
@@ -309,33 +328,37 @@ defineExpose({
         </div>
       </el-col>
     </el-row>
-    <el-row>
-      <el-col>
-        <!-- 1/300 -->
+    <el-row v-if="isImgLoaded" justify="center">
+      <el-col :span="20">
         <el-pagination
-          v-model:currentPage="currentPage4"
-          v-model:page-size="pageSize4"
+          v-model:currentPage="currentPage"
+          v-model:page-size="pageSize"
           :small="small"
           :disabled="disabled"
           :background="background"
           layout="total, prev, pager, next, jumper"
-          :total="400"
+          :total="total"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
       </el-col>
     </el-row>
-    <el-row justify="end">
+    <!-- <el-row justify="end">
       <el-col :span="4">
         <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable" style="float:right">计算延迟</el-button>
       </el-col>
+    </el-row> -->
+    <el-row justify="space-between" class="item-result">
+      <el-col :span="4">
+        <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable">计算延迟</el-button>
+      </el-col>
+      <el-col :span="12">
+        <span class="data-item">检测到操作总数: {{ delayTimes.length }}</span>
+        <span class="data-item">计算延迟数据为: {{ delayTimes.join(", ") }}</span>
+      </el-col>
     </el-row>
     <el-row>
-      <span class="data-item">检测到操作总数: {{ delayTimes.length }}</span>
-      <!-- <span class="data-item">延迟: {{ delayTimes.join(", ") }}</span> -->
-    </el-row>
-    <el-row>
-      <span class="data-item">计算延迟数据为: {{ delayTimes.join(", ") }}</span>
+     
     </el-row>
   </el-scrollbar>
   </div>
@@ -344,17 +367,17 @@ defineExpose({
 <style>
 
 .out-img-box {
-    width: calc(70vw);
-    height: calc(70vh);
-    /* line-height: 600px; */
-    text-align: center;
+  width: 100%;
+  /* width: 500px; */
+  height: 100%;
+  /* line-height: 600px; */
+  text-align: center;
 }
 
 .preview-img {
     max-width: 100%;
     max-height: 100%;
     vertical-align: middle;
-    
 }
 
 #select-box {
@@ -439,6 +462,10 @@ img {
 }
 .demo-pagination-block .demonstration {
   margin-bottom: 16px;
+}
+
+.item-result {
+  margin-top: 0.5rem;
 }
 
 

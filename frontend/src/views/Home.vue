@@ -19,10 +19,12 @@ import {
   ClearCacheData,
   SetAutoSwipeOn,
   SetAutoSwipeOff,
-  GetDisplay
+  GetDisplay,
+  GetImageFiles
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import ImagePreview from '../components/ImagePreview.vue';
+import Automation from '../components/Automation.vue';
 import {
   EventsOn,
   EventsOff,
@@ -46,6 +48,9 @@ const developMode = ref(true)
 const countDownSecond = ref(0)
 const imageSrc = ref()
 const imagePreviewRef = ref()
+
+const topTabName = ref('latency')
+// const topTabName = ref('automation')
 
 const tabName = ref('setting')
 const deviceInfo = reactive({
@@ -380,7 +385,15 @@ function removeEventLister() {
   // EventsOff("latency:analyse_filish")
 }
 
-
+// function handleGetImage () {
+//   GetImageFiles().then(res => {
+//     if (res.length > 0) {
+//       imgs.value = res
+//       total.value = imgs.value.length
+//       imageInfo.path = imgs.value[0]
+//     }
+//   })
+// }
 
 onMounted(()=> {
   addEventLister()
@@ -398,116 +411,130 @@ onUnmounted(()=>{
   removeEventLister()
 })
 
+function handleGetImage() {
+  imagePreviewRef.value.handleGetImage()
+}
+
 </script>
 
 <template>
   <el-container>
-    <el-aside class="aside-content" width="220px">
-      <el-row class="row-item" v-if="isAuth">
-        <el-avatar :icon="UserFilled" />
-      </el-row>
-      <el-row class="row-item">
-        <el-select
-            v-model="deviceSelected"
-            @visible-change="getDeviceList"
-            filterable
-            placeholder="请选择设备"
-            style="width:100%">
-          <el-option
-            v-for="item in data.devices"
-            :key="item.Serial"
-            :label="item.Serial"
-            :value="item.Serial"
-          >
-          </el-option>
-        </el-select>
-      </el-row>
-      <el-row class="row-item">
-        <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" >准备</el-button>
-        <el-button class="operation-button" v-if="processStatus===1" type="success" @click="handleStartRecord" >开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
-        <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
-      </el-row>
-      <el-row class="row-item" v-if="settingForm.develop">
-        <el-button-group>
-          <el-button @click="handleStart">rec</el-button>
-          <el-button @click="handleStopProcessing">stop</el-button>
-          <el-button @click="handleToImage">to_img</el-button>
-          <el-button @click="setPointerLocationOn">pl_on</el-button>
-          <el-button @click="setPointerLocationOff">pl_off</el-button>
-          <el-button @click="setAutoOn">auto_on</el-button>
-          <el-button @click="setAutoOff">auto_off</el-button>
-        </el-button-group>
-      </el-row>
-
-      <el-tabs 
-          v-model="tabName" 
-          class="platform-tabs">
-         
-          <el-tab-pane label="设置" name="setting">
-            <el-scrollbar style="height:60vh">
-              <el-row>
-                <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
-                  <el-form-item label="图片比对阈值" prop="diffScore">
-                    <el-input v-model.number="settingForm.diffScore"/>
-                    <!-- <el-input-numbe v-model="settingForm.diffScore" :min="1" :max="100" ></el-input-numbe> -->
-                  </el-form-item>
-                  <el-form-item label="录制时长(秒)" prop="timeout">
-                    <el-input v-model.number="settingForm.timeout"/>
-                  </el-form-item>
-                  <el-form-item label="准备时长(秒)" prop="prepareTimeout">
-                    <el-input v-model.number="settingForm.prepareTimeout"/>
-                  </el-form-item>
-                  <el-form-item label="调试开关">
-                    <el-switch v-model="settingForm.develop" />
-                  </el-form-item>
-                  <el-form-item label="数据清理">
-                    <el-button @click="handleClearCache">清理缓存数据</el-button>
-                  </el-form-item>
-                  <el-form-item label="其他">
-                    <el-button @click="handleReload">reload</el-button>
-                  </el-form-item>
-                </el-form>
+    <el-tabs type="border-card" v-model="topTabName" >
+      <el-tab-pane label="延迟测试" name="latency">
+        <el-scrollbar style="height: calc(100vh - 120px);width: calc(100vw - 60px)">
+          <el-container>
+            <el-aside class="aside-content" width="220px">
+              <el-row class="row-item" v-if="isAuth">
+                <el-avatar :icon="UserFilled" />
               </el-row>
-            </el-scrollbar>
-          </el-tab-pane>
-          <el-tab-pane label="帮助" name="detail">
-            <el-scrollbar style="height:60vh">
-              <div>
-                <!-- <el-row class="info-list">
-                  <el-col :span="12" class="info-line">
-                    <span class="info-key">名称</span>
-                  </el-col >
-                  <el-col :span="12" class="info-line">
-                    <span class="info-value">数值</span>
-                  </el-col>
-                  <el-row class="info-list">
-                  <el-col :span="12" class="info-line">
-                    <span class="info-key">Version</span>
-                  </el-col >
-                  <el-col :span="12" class="info-line">
-                    <span class="info-value">{{ deviceInfo.android_version }}</span>
-                  </el-col>
-                </el-row>
-                </el-row> -->
+              <el-row class="row-item">
+                <el-select
+                    v-model="deviceSelected"
+                    @visible-change="getDeviceList"
+                    filterable
+                    placeholder="请选择设备"
+                    style="width:100%">
+                  <el-option
+                    v-for="item in data.devices"
+                    :key="item.Serial"
+                    :label="item.Serial"
+                    :value="item.Serial"
+                  >
+                  </el-option>
+                </el-select>
+              </el-row>
+              <el-row class="row-item">
+                <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" >准备</el-button>
+                <el-button class="operation-button" v-if="processStatus===1" type="success" @click="handleStartRecord" >开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+                <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+              </el-row>
+              <el-row class="row-item" v-if="settingForm.develop">
+                <el-button-group>
+                  <el-button @click="handleStart">rec</el-button>
+                  <el-button @click="handleStopProcessing">stop</el-button>
+                  <el-button @click="handleToImage">to_img</el-button>
+                  <el-button @click="setPointerLocationOn">pl_on</el-button>
+                  <el-button @click="setPointerLocationOff">pl_off</el-button>
+                  <el-button @click="setAutoOn">auto_on</el-button>
+                  <el-button @click="setAutoOff">auto_off</el-button>
+                  <el-button @click="handleGetImage">get_imgs</el-button>
+                </el-button-group>
+              </el-row>
+
+              <el-tabs 
+                  v-model="tabName" 
+                  class="platform-tabs">
                 
-              </div>
-            </el-scrollbar>
-          </el-tab-pane>
-          <el-tab-pane label="关于" name="about">
-            <span>www.vrviu.com</span>
-          </el-tab-pane>
-        </el-tabs>
-
-    </el-aside>
-    <el-main class="main-content">
-      <!-- <el-scrollbar height="calc(100vh - 60px)"> -->
-
-      <ImagePreview 
-        ref="imagePreviewRef"
-        :data="imageInfo"
-        />
-    <!-- </el-scrollbar> -->
-    </el-main>
+                  <el-tab-pane label="设置" name="setting">
+                    <el-scrollbar style="height:60vh">
+                      <el-row>
+                        <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
+                          <el-form-item label="图片比对阈值" prop="diffScore">
+                            <el-input v-model.number="settingForm.diffScore"/>
+                            <!-- <el-input-numbe v-model="settingForm.diffScore" :min="1" :max="100" ></el-input-numbe> -->
+                          </el-form-item>
+                          <el-form-item label="录制时长(秒)" prop="timeout">
+                            <el-input v-model.number="settingForm.timeout"/>
+                          </el-form-item>
+                          <el-form-item label="准备时长(秒)" prop="prepareTimeout">
+                            <el-input v-model.number="settingForm.prepareTimeout"/>
+                          </el-form-item>
+                          <el-form-item label="调试开关">
+                            <el-switch v-model="settingForm.develop" />
+                          </el-form-item>
+                          <el-form-item label="数据清理">
+                            <el-button @click="handleClearCache">清理缓存数据</el-button>
+                          </el-form-item>
+                          <el-form-item label="其他">
+                            <el-button @click="handleReload">reload</el-button>
+                          </el-form-item>
+                        </el-form>
+                      </el-row>
+                    </el-scrollbar>
+                  </el-tab-pane>
+                  <el-tab-pane label="帮助" name="detail">
+                    <el-scrollbar style="height:60vh">
+                      <div>
+                        <!-- <el-row class="info-list">
+                          <el-col :span="12" class="info-line">
+                            <span class="info-key">名称</span>
+                          </el-col >
+                          <el-col :span="12" class="info-line">
+                            <span class="info-value">数值</span>
+                          </el-col>
+                          <el-row class="info-list">
+                          <el-col :span="12" class="info-line">
+                            <span class="info-key">Version</span>
+                          </el-col >
+                          <el-col :span="12" class="info-line">
+                            <span class="info-value">{{ deviceInfo.android_version }}</span>
+                          </el-col>
+                        </el-row>
+                        </el-row> -->
+                        
+                      </div>
+                    </el-scrollbar>
+                  </el-tab-pane>
+                  <el-tab-pane label="关于" name="about">
+                    <span>www.vrviu.com</span>
+                  </el-tab-pane>
+                </el-tabs>
+            </el-aside>
+            <el-main class="main-content">
+              <ImagePreview 
+                ref="imagePreviewRef"
+                :data="imageInfo"
+                />
+            </el-main>
+          </el-container>
+        </el-scrollbar>
+      </el-tab-pane>
+      <el-tab-pane label="辅助工具" name="automation">
+        <el-scrollbar style="height:calc(100vh - 120px);width: calc(100vw - 60px)">
+          <Automation/>
+        </el-scrollbar>
+      </el-tab-pane>
+    </el-tabs>
    
   </el-container>
     
@@ -537,6 +564,7 @@ onUnmounted(()=>{
   border: solid 1px #e6e6e6;
   padding: 0.5rem;
   border-radius: 4px;
+  height: 86vh;
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 
@@ -545,6 +573,7 @@ onUnmounted(()=>{
   padding: 0.5rem;
   border-radius: 4px;
   margin-left: 1rem;
+  width: calc(100vw - 320px);
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 </style>

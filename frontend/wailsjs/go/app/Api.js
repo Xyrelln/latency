@@ -14,6 +14,10 @@ export function GetFirstImageInfo() {
   return window['go']['app']['Api']['GetFirstImageInfo']();
 }
 
+export function GetImageFiles() {
+  return window['go']['app']['Api']['GetImageFiles']();
+}
+
 export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
 }

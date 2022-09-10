@@ -9,6 +9,8 @@ export function GetDisplay(arg1:string):Promise<adb.Display>;
 
 export function GetFirstImageInfo():Promise<core.ImageInfo>;
 
+export function GetImageFiles():Promise<Array<string>>;
+
 export function ListDevices():Promise<Array<adb.Device>>;
 
 export function SetAutoSwipeOff():Promise<Error>;

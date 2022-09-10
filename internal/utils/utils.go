@@ -2,9 +2,13 @@ package utils
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -66,4 +70,26 @@ func IsWindowsDrivePathURI(path string) bool {
 		return false
 	}
 	return unicode.IsLetter(rune(path[1])) && path[2] == ':'
+}
+
+func GetImageFiles(pathname string, s []string) ([]string, error) {
+	// var imgs []string
+	rd, err := ioutil.ReadDir(pathname)
+	if err != nil {
+		fmt.Println("read dir fail:", err)
+		return s, err
+	}
+
+	for _, fi := range rd {
+		if !fi.IsDir() && strings.HasSuffix(fi.Name(), "png") {
+			fullName := pathname + "/" + fi.Name()
+			s = append(s, fullName)
+		}
+	}
+	// sorted
+	sort.Slice(s, func(i, j int) bool {
+		return s[i] < s[j] // filename as 0001   0002
+	})
+
+	return s, nil
 }

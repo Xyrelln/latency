@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
@@ -52,11 +53,14 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 	return devices, nil
 }
 
-func (a *Api) GetDisplay(serial string) (adb.Display, error) {
+func (a *Api) GetDisplay(serial string) (*adb.Display, error) {
 	log.Printf("get display %s", serial)
 	device := adb.GetDevice(serial)
-	display, _ := device.DisplaySize()
-	return *display, nil
+	display, err := device.DisplaySize()
+	if err != nil {
+		return nil, err
+	}
+	return display, nil
 }
 
 func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
@@ -70,7 +74,7 @@ func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 		for _, device := range devices {
 			go device.AutoSwipe(sw)
 		}
-		time.Sleep(time.Duration(interval) * time.Second)
+		time.Sleep(time.Duration(interval) * time.Millisecond)
 		if !autorun {
 			break
 		}
@@ -207,6 +211,16 @@ func (a *Api) emitData(eventName string, data interface{}) {
 
 func (a *Api) StopTransform() {
 	a.Cmd.Kill()
+}
+
+func (a *Api) GetImageFiles() ([]string, error) {
+	var imgs []string
+	imgs, err := utils.GetImageFiles(a.ImagesDir, imgs)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return imgs, nil
 }
 
 func (a *Api) ClearCacheData() {
