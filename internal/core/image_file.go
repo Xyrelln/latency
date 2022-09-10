@@ -20,6 +20,8 @@ type ImageFile struct {
 	// ExtImgHash  *goimagehash.ExtImageHash
 	ExtImgHashT *goimagehash.ExtImageHash // touch area
 	ExtImgHashC *goimagehash.ExtImageHash // center area
+	ScoreT      int
+	ScoreC      int
 }
 
 type ImageRectInfo struct {
@@ -31,6 +33,16 @@ type ImageRectInfo struct {
 	PreviewHeight int `json:"preview_height"`
 	SourceWidth   int `json:"source_width"`
 	SourceHeight  int `json:"source_height"`
+}
+
+type ImageResponse struct {
+	StartImgPath string `json:"start_image_path"`
+	StartScoreT  int    `json:"stat_score_t"`
+	StartScoreC  int    `json:"start_score_c"`
+	EndImgPath   string `json:"end_img_path"`
+	EndScoreT    int    `json:"end_score_t"`
+	EndScoreC    int    `json:"end_score_c"`
+	CostTime     int    `json:"cost_time"`
 }
 
 // func GetFileNamesByPath(dirPath, extension string) ([]string, error) {
@@ -219,6 +231,7 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, er
 	}
 
 	var previousImg ImageFile
+	var startImg ImageFile
 	var touched = false
 	var touchedIndex = 0
 	// var touchIndex = 0
@@ -229,18 +242,35 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, er
 	3. 计算中间时间差
 	**/
 	var responseTime []int
+	var imgResps []ImageResponse
 	for index, imageFile := range imgs {
 		if index > 0 {
 			// start diff in second item
 			scoreT, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
 			scoreC, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
-			log.Printf("scoreT: %d", scoreT)
-			log.Printf("scoreC: %d", scoreC)
+			// log.Printf("scoreT: %d, path: %s", scoreT, imageFile.Path)
+			// log.Printf("scoreC: %d", scoreC)
 
 			if touched {
+				log.Printf("scoreT: %d, path: %s", scoreT, imageFile.Path)
+				log.Printf("scoreC: %d", scoreC)
+
+				if scoreT >= threshold {
+					touched = false // 下一个点击到来未计算的直接跳过
+					continue
+				}
 				if scoreC >= threshold {
 					costTime := (index - touchedIndex) * (1000 / 60)
 					responseTime = append(responseTime, costTime)
+					imgResps = append(imgResps, ImageResponse{
+						StartImgPath: startImg.Path,
+						StartScoreT:  startImg.ScoreT,
+						StartScoreC:  startImg.ScoreC,
+						EndImgPath:   imageFile.Path,
+						EndScoreT:    scoreT,
+						EndScoreC:    scoreC,
+						CostTime:     costTime,
+					})
 
 					// reset touched
 					log.Printf("current file: %s", imageFile.Path)
@@ -249,8 +279,14 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, er
 
 			} else {
 				if scoreT >= threshold {
+					log.Printf("scoreT: %d, path: %s", scoreT, imageFile.Path)
+					log.Printf("scoreC: %d", scoreC)
 					touched = true
 					touchedIndex = index
+
+					startImg = imageFile
+					startImg.ScoreT = scoreT
+					startImg.ScoreC = scoreC
 				}
 			}
 

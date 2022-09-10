@@ -65,7 +65,7 @@ CompileWinAmd64:
   script:
     - go install github.com/wailsapp/wails/v2/cmd/wails@latest
     - echo $env:$PATH
-    - wails build -platform windows/amd64 -o latency-mobile.exe
+    - wails build -platform windows/amd64 -o latency-mobile.exe -webview2 embed
   artifacts:
     paths:
       - build/bin/latency-mobile.exe

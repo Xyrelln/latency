@@ -220,10 +220,10 @@ function setPointerLocationOff():Boolean {
 async function handleStartRun() {
   // await handleGetDisplay()
   if (form.location) {
-    const res = await setPointerLocationOn()
-    if (!res) {
-      return
-    }
+    setPointerLocationOn()
+    // if (!res) {
+    //   return
+    // }
   }
 
   const swipeEvent = adb.SwipeEvent.createFrom(
