@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
@@ -47,7 +47,7 @@ func (a *Api) startup(ctx context.Context) {
 func (a *Api) ListDevices() ([]*adb.Device, error) {
 	devices, err := adb.Devices()
 	if err != nil {
-		log.Fatalf("ListDevices failed: %v", err)
+		log.Errorf("ListDevices failed: %v", err)
 		return nil, err
 	}
 	return devices, nil
@@ -67,7 +67,7 @@ func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 	autorun = true
 	devices, err := adb.Devices()
 	if err != nil {
-		log.Fatalf("ListDevices failed: %v", err)
+		log.Errorf("ListDevices failed: %v", err)
 		return err
 	}
 	for {
@@ -89,25 +89,25 @@ func (a *Api) SetAutoSwipeOff() error {
 }
 
 func (a *Api) SetPointerLocationOn(serial string) error {
-	log.Printf("set pointer location on")
+	log.Info("set pointer location on")
 	device := adb.GetDevice(serial)
 	return device.SetPointerLocationOn()
 }
 
 func (a *Api) SetPointerLocationOff(serial string) error {
-	log.Printf("set pointer location off")
+	log.Info("set pointer location off")
 	device := adb.GetDevice(serial)
 	return device.SetPointerLocationOff()
 }
 
 func (a *Api) StartRecord(serial string) error {
-	log.Printf("start monitor")
-	log.Printf("workdir: %s", a.VideoDir)
+	log.Info("start monitor")
+	log.Infof("workdir: %s", a.VideoDir)
 	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
 	recFile := filepath.Join(a.VideoDir, recordFile)
 	cmd, err := cmd.StartScrcpyRecord(serial, recFile)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return err
 	}
 	a.Cmd = cmd
@@ -148,7 +148,7 @@ func (a *Api) StopScrcpyServer(serial string) error {
 }
 
 func (a *Api) StopRecord(serial string) error {
-	log.Printf("stop monitor")
+	log.Infof("stop monitor")
 	a.emitInfo(eventRecordFilish)
 	return a.Cmd.Kill()
 
@@ -162,13 +162,13 @@ func (a *Api) StopProcessing() error {
 }
 
 func (a *Api) StartTransform() error {
-	log.Printf("prepare data")
+	log.Infof("prepare data")
 	srcVideoPath := filepath.Join(a.VideoDir, recordFile)
 	destImagePath := filepath.Join(a.ImagesDir, "%4d.png")
 	a.emitInfo(eventTransformStart)
 	cmd, err := cmd.StartFFmpeg(srcVideoPath, destImagePath)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		a.emitInfo(eventTransformStartError)
 		return err
 	}
@@ -181,7 +181,7 @@ func (a *Api) StartTransform() error {
 func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	firstImage := filepath.Join(a.ImagesDir, firstImageFile)
 	mInfo, err := core.GetImageInfo(firstImage)
-	log.Printf("Get first image: %v", mInfo)
+	log.Infof("Get first image: %v", mInfo)
 	if err != nil {
 		return mInfo, err
 	}
@@ -193,8 +193,8 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 }
 
 func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, diffScore int) error {
-	log.Printf("current rect: %v", imageRect)
-	log.Printf("workdir: %s", a.ImagesDir)
+	log.Infof("current rect: %v", imageRect)
+	log.Infof("workdir: %s", a.ImagesDir)
 	a.emitInfo(eventAnalyseStart)
 	responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect, diffScore)
 	a.emitData(eventAnalyseFilish, responseTimes)

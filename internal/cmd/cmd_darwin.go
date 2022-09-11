@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"path/filepath"
 	"syscall"
@@ -31,14 +31,14 @@ func (c *Cmd) BackendRun(name string) error {
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	c.execCmd = cmd
-	log.Printf("cmd: %s", name)
-	log.Printf("args: %v", c.Args)
+	log.Infof("cmd: %s", name)
+	log.Infof("args: %v", c.Args)
 	return cmd.Start()
 }
 
 func (c *Cmd) Kill() error {
 	if c.execCmd.Process != nil {
-		fmt.Println("kill proces")
+		log.Info("kill proces")
 		if c.execCmd.Process != nil {
 			return syscall.Kill(c.execCmd.Process.Pid, syscall.SIGINT)
 		}

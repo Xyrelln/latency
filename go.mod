@@ -4,8 +4,12 @@ go 1.17
 
 require (
 	github.com/corona10/goimagehash v1.1.0
+	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0-beta.44.2
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
+
+require github.com/BurntSushi/toml v1.2.0 // indirect
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
@@ -30,7 +34,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
 	golang.org/x/text v0.3.7 // indirect
 )
 

@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 
 	"golang.org/x/sys/windows"
@@ -47,8 +47,8 @@ func (c *Cmd) BackendRun(name string) error {
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	c.execCmd = cmd
-	log.Printf("cmd: %s", name)
-	log.Printf("args: %v", c.Args)
+	log.Infof("cmd: %s", name)
+	log.Infof("args: %v", c.Args)
 	return cmd.Start()
 }
 
@@ -79,7 +79,7 @@ func (c *Cmd) Kill() error {
 		for i := 0; i < 5; i++ {
 			err := terminateProc(c.execCmd.Process.Pid)
 			if err != nil {
-				log.Print(err)
+				log.Error(err)
 			}
 			time.Sleep(time.Duration(100) * time.Millisecond)
 		}

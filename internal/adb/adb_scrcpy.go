@@ -3,7 +3,7 @@ package adb
 import (
 	"errors"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 )
@@ -13,19 +13,19 @@ func (d *Device) KillScrcyServer() error {
 
 	out, err := cmd.Call()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 	}
 
 	// fmt.Print(out)
 	pids, err := parsePids(out)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 
 	}
 	for _, pid := range pids {
-		fmt.Printf("kill %d", pid)
+		log.Infof("kill %d", pid)
 		d.Command(fmt.Sprintf("kill %d", pid)).Run()
 	}
 	return nil
@@ -44,11 +44,11 @@ func parsePids(out string) ([]int, error) {
 			if pid, err := strconv.Atoi(fields[1]); err == nil {
 				pids = append(pids, pid)
 			} else {
-				log.Print(err)
+				log.Error(err)
 				return nil, errors.New("pid read wrong")
 			}
 		}
 	}
-	fmt.Printf("find scrcpy pids: %v", pids)
+	log.Infof("find scrcpy pids: %v", pids)
 	return pids, nil
 }

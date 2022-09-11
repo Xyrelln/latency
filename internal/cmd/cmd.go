@@ -3,8 +3,8 @@ package cmd
 import (
 	"bytes"
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"os/exec"
 	// "op-latency-mobile/third"
 )

@@ -3,7 +3,7 @@ package adb
 import (
 	"errors"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,7 +26,7 @@ func (d *Device) AutoSwipe(se SwipeEvent) error {
 	cmd := d.Command(fmt.Sprintf("input swipe %d %d %d %d %d", se.Sx, se.Sy, se.Dx, se.Dy, se.Speed))
 	err := cmd.BackendRun()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 	}
 
@@ -38,7 +38,7 @@ func (d *Device) AutoTouch() error {
 
 	err := cmd.BackendRun()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 	}
 
@@ -50,13 +50,13 @@ func (d *Device) DisplaySize() (*Display, error) {
 
 	out, err := cmd.Call()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return nil, err
 	}
 	// fmt.Print(out)
 	display, err := parseSize(out)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return nil, err
 	}
 	fmt.Printf("display: %v", display)
@@ -108,7 +108,7 @@ func (d *Device) IsHorizontal() error {
 
 	err := cmd.Run()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 	}
 

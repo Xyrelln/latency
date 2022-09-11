@@ -1,10 +1,10 @@
 package core
 
 import (
+	log "github.com/sirupsen/logrus"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -144,7 +144,8 @@ func ListImageFile(dirName string) ([]ImageFile, error) {
 	)
 	err := eg.Wait()
 	if err != nil {
-		log.Fatal("Specified directory with images inside does not exists or is corrupted")
+		log.Errorf("Specified directory with images inside does not exists or is corrupted: %v", err)
+		return nil, err
 	}
 	// sorted
 	sort.Slice(imgs, func(i, j int) bool {
@@ -186,7 +187,8 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 	)
 	err := eg.Wait()
 	if err != nil {
-		log.Fatal("Specified directory with images inside does not exists or is corrupted")
+		log.Errorf("Specified directory with images inside does not exists or is corrupted: %v", err)
+		return nil, err
 	}
 	// sorted
 	sort.Slice(imgs, func(i, j int) bool {
@@ -202,12 +204,12 @@ func GetImageInfo(imagePath string) (ImageInfo, error) {
 	var imgInfo ImageInfo
 	fimg, err := os.Open(imagePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	defer fimg.Close()
 	img, _, err := image.Decode(fimg)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 		return imgInfo, err
 	}
 	imgInfo.Path = imagePath
@@ -222,12 +224,12 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, er
 
 	rect, err := GetCropRect(imageRect)
 	if err != nil {
-		log.Fatal("image with wrong scaling")
+		log.Error("image with wrong scaling")
 	}
 	log.Printf("rect: %v", rect)
 	imgs, err := ListImageFileWithCrop(imgPath, rect)
 	if err != nil {
-		log.Fatal("Specified directory with images inside does not exists or is corrupted")
+		log.Error("Specified directory with images inside does not exists or is corrupted")
 	}
 
 	var previousImg ImageFile

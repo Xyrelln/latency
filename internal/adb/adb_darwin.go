@@ -7,7 +7,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@
 package adb
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os/exec"
 )
 
@@ -34,8 +34,8 @@ func (c *Cmd) Run() error {
 		args = append(args, "shell", c.Path)
 	}
 	args = append(args, c.Args...)
-	log.Printf("adb: %s", adb)
-	log.Printf("args: %v", args)
+	log.Infof("adb: %s", adb)
+	log.Infof("args: %v", args)
 	cmd := exec.Command(adb, args...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
@@ -51,8 +51,8 @@ func (c *Cmd) BackendRun() error {
 		args = append(args, "shell", c.Path)
 	}
 	args = append(args, c.Args...)
-	log.Printf("adb: %s", adb)
-	log.Printf("args: %v", args)
+	log.Infof("adb: %s", adb)
+	log.Infof("args: %v", args)
 	cmd := exec.Command(adb, args...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
