@@ -367,8 +367,9 @@ defineExpose({
 <style>
 
 .out-img-box {
-  width: 100%;
-  /* width: 500px; */
+  /* width: 100%; */
+  width: 500px;
+  width: 500px;
   height: 100%;
   /* line-height: 600px; */
   text-align: center;
