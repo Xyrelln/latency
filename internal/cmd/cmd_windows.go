@@ -135,6 +135,7 @@ func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
 		Args: []string{
 			"/c", scrcpy,
 			"-s", serial,
+			"--max-fps", "60",
 			// "-n", // no-control
 			// "-w", // stay awake
 			"-Nr", recFile,

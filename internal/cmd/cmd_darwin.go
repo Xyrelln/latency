@@ -53,6 +53,7 @@ func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
 	cmd := Cmd{
 		Args: []string{
 			"-s", serial,
+			"--max-fps", "60",
 			"-Nr", recFile,
 			// "-n", // no-control
 			// "-w", // stay awake
