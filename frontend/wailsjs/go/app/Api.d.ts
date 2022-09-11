@@ -11,6 +11,8 @@ export function GetFirstImageInfo():Promise<core.ImageInfo>;
 
 export function GetImageFiles():Promise<Array<string>>;
 
+export function InputSwipe(arg1:string,arg2:adb.SwipeEvent):Promise<Error>;
+
 export function ListDevices():Promise<Array<adb.Device>>;
 
 export function SetAutoSwipeOff():Promise<Error>;

@@ -3,10 +3,11 @@ package adb
 import (
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type SwipeEvent struct {
@@ -25,6 +26,17 @@ type Display struct {
 func (d *Device) AutoSwipe(se SwipeEvent) error {
 	cmd := d.Command(fmt.Sprintf("input swipe %d %d %d %d %d", se.Sx, se.Sy, se.Dx, se.Dy, se.Speed))
 	err := cmd.BackendRun()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *Device) InputSwipe(se SwipeEvent) error {
+	cmd := d.Command(fmt.Sprintf("input swipe %d %d %d %d %d", se.Sx, se.Sy, se.Dx, se.Dy, se.Speed))
+	err := cmd.Run()
 	if err != nil {
 		log.Error(err)
 		return err

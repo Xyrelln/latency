@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
@@ -11,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -81,6 +82,11 @@ func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 	}
 
 	return nil
+}
+
+func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
+	device := adb.GetDevice(serial)
+	return device.InputSwipe(sw)
 }
 
 func (a *Api) SetAutoSwipeOff() error {

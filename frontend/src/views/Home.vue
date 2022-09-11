@@ -20,7 +20,8 @@ import {
   SetAutoSwipeOn,
   SetAutoSwipeOff,
   GetDisplay,
-  GetImageFiles
+  GetImageFiles,
+  InputSwipe
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import ImagePreview from '../components/ImagePreview.vue';
@@ -49,8 +50,8 @@ const countDownSecond = ref(0)
 const imageSrc = ref()
 const imagePreviewRef = ref()
 
-// const topTabName = ref('latency')
-const topTabName = ref('automation')
+const topTabName = ref('latency')
+// const topTabName = ref('automation')
 
 const tabName = ref('setting')
 const deviceInfo = reactive({
@@ -76,7 +77,7 @@ const imageInfo = reactive({
 
 const settingForm = reactive({
   diffScore: 20,
-  timeout: 5,
+  timeout: 3,
   prepareTimeout: 3,
   develop: false,
 })
@@ -147,16 +148,96 @@ function getDeviceList (value: any) {
   })
 }
 
+const form = reactive({
+  name: 'Hello',
+  region: '',
+  count: '',
+  date1: '',
+  date2: '',
+  delivery: false,
+  type: [],
+  resource: '',
+  desc: '',
+  devices: [],
+  device: '',
+  sx: 0,
+  sy: 0,
+  dx: 0,
+  dy: 0,
+  speed: 500,
+  interval: 2000,
+  scene_id: '',
+  location: true
+})
 
-function handleStartRecord() {
+const status = ref(false)
+
+// async function handleStartRun() {
+//   // await handleGetDisplay()
+//   if (form.location) {
+//     setPointerLocationOn()
+//     // if (!res) {
+//     //   return
+//     // }
+//   }
+
+//   const swipeEvent = adb.SwipeEvent.createFrom(
+//     { 
+//       sx: form.sx,
+//       sy: form.sy,
+//       dx: form.dx,
+//       dy: form.dy,
+//       speed: form.speed
+//     }
+//   )
+//   // const interval = 2
+//   console.log(swipeEvent)
+//   SetAutoSwipeOn(swipeEvent, form.interval)
+//   status.value = 1
+// }
+
+/**
+ * 发送拖动事件
+ */
+function handleInputSwipe() {
+  const swipeEvent = adb.SwipeEvent.createFrom(
+    { 
+      sx: deviceInfo.height/2,
+      sy:  deviceInfo.width/2,
+      dx: deviceInfo.height/2 + deviceInfo.height/2/2,
+      dy: deviceInfo.width/2,
+      speed: form.speed
+    }
+  )
+  // const interval = 2
+  console.log(swipeEvent)
+  InputSwipe(deviceSelected.value, swipeEvent)
+}
+
+/**
+ * 启动录制
+ */
+async function handleStartRecord() {
   // clear first
-  clearCurrentInterval()
+  // clearCurrentInterval()
+  handleResetStatus()
+  NProgress.start()
+  const result = await setPointerLocationOn()
+
+  await handleGetDisplay()
 
   Start(deviceSelected.value, settingForm.timeout)
+
+  // 1s 后拖动
+  // doSwipe()
 
   // add stop count down
   processStatus.value = 2
   runUntilCountDown(settingForm.timeout)
+
+  setTimeout(() => {
+    handleInputSwipe()
+  }, 1200);
 }
 
 function handleStart() {
@@ -212,6 +293,8 @@ function handleResetStatus() {
   imagePreviewRef.value.setCalcButtonDisable(true)
   imagePreviewRef.value.setImagePlaceHolder()
 }
+
+
 async function handlePrepare(){
   if (deviceSelected.value === "") {
     ElMessage({
@@ -344,8 +427,17 @@ function getFirstImage(){
 async function handleGetDisplay() {
   await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
     console.log(res)
-    deviceInfo.width = res.width
-    deviceInfo.height = res.height
+    if (res) {
+      deviceInfo.width = res.width
+      deviceInfo.height = res.height
+    } else {
+      ElNotification({
+        title: '获取数据异常',
+        type: 'error',
+        message: "获取手机分辨率失败，请手动设置移动坐标",
+        duration: 0,
+      })
+    }
   })
 }
 async function setAutoOn() {
@@ -444,8 +536,9 @@ function handleGetImage() {
                 </el-select>
               </el-row>
               <el-row class="row-item">
-                <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" >准备</el-button>
-                <el-button class="operation-button" v-if="processStatus===1" type="success" @click="handleStartRecord" >开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+                <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStartRecord" >开始</el-button>
+                <!-- <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" >准备</el-button> -->
+                <!-- <el-button class="operation-button" v-if="processStatus===1" type="success" @click="handleStartRecord" >开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button> -->
                 <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
               </el-row>
               <el-row class="row-item" v-if="settingForm.develop">
@@ -476,9 +569,9 @@ function handleGetImage() {
                           <el-form-item label="录制时长(秒)" prop="timeout">
                             <el-input v-model.number="settingForm.timeout"/>
                           </el-form-item>
-                          <el-form-item label="准备时长(秒)" prop="prepareTimeout">
+                          <!-- <el-form-item label="准备时长(秒)" prop="prepareTimeout">
                             <el-input v-model.number="settingForm.prepareTimeout"/>
-                          </el-form-item>
+                          </el-form-item> -->
                           <el-form-item label="调试开关">
                             <el-switch v-model="settingForm.develop" />
                           </el-form-item>
