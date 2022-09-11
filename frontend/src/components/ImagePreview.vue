@@ -31,8 +31,8 @@ const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
 const selectBoxStyle = reactive({
-  width: '200px', 
-  height: '200px'
+  width: '446px', 
+  height: '70px'
 })
 const calcButtonDisable = ref(true)
 
@@ -70,10 +70,17 @@ function handleImageAnalyse() {
   })
 }
 
+const scene_dwrg_crop = reactive({
+  top: 26,
+  left: 20,
+  width: 446,
+  height: 90
+})
+
 function selectBoxInit() {
   previewImgRef.value.addEventListener('load', ()=>{
-    selectBoxRef.value.style.top = previewImgRef.value.offsetTop + 'px'
-    selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + 'px'
+    selectBoxRef.value.style.top = previewImgRef.value.offsetTop + scene_dwrg_crop.top + 'px'
+    selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + scene_dwrg_crop.left + 'px'
   })
 
   selectBoxRef.value.addEventListener('mousedown', (ev:any) => {
@@ -359,9 +366,18 @@ defineExpose({
         />
       </el-col>
     </el-row>
-    <!-- <el-row justify="end">
+    <!-- <el-row >
       <el-col :span="4">
-        <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable" style="float:right">计算延迟</el-button>
+        <el-input></el-input>
+      </el-col>
+      <el-col :span="4">
+        <el-input></el-input>
+      </el-col>
+      <el-col :span="4">
+        <el-input></el-input>
+      </el-col>
+      <el-col :span="4">
+        <el-input></el-input>
       </el-col>
     </el-row> -->
     <el-row justify="space-between" class="item-result">

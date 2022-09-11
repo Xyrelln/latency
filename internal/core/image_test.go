@@ -53,6 +53,18 @@ func TestLoadImage(t *testing.T) {
 
 }
 
-// func TestCropImage(t *testing.T) {
-// 	CalcTime()
-// }
+func TestCalcTime(t *testing.T) {
+	imagePath := "/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/20220911175724.387/images"
+	imgRect := ImageRectInfo{
+		X:             20,
+		Y:             26,
+		W:             446,
+		H:             70,
+		PreviewWidth:  500,
+		PreviewHeight: 281,
+		SourceWidth:   1920,
+		SourceHeight:  1080,
+	}
+
+	CalcTime(imagePath, imgRect, 20)
+}

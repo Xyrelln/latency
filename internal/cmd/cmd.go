@@ -3,9 +3,10 @@ package cmd
 import (
 	"bytes"
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
+
+	log "github.com/sirupsen/logrus"
 	// "op-latency-mobile/third"
 )
 
@@ -66,22 +67,4 @@ func (c *Cmd) Call(name string) (string, error) {
 	}
 	err := clone.Run(name)
 	return stdout.String(), err
-}
-
-func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
-	if ffmpeg == "" {
-		return nil, ErrFFmpegNotFound
-	}
-	cmd := Cmd{
-		Args: []string{
-			"-i", srcVideoPath,
-			"-threads", "4",
-			destImagePath,
-		},
-	}
-	if err := cmd.Run(ffmpeg); err == nil {
-		return &cmd, nil
-	} else {
-		return nil, err
-	}
 }

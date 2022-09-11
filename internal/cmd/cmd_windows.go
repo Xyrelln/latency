@@ -183,3 +183,23 @@ func terminateProc(pid int) error {
 	}
 	return nil
 }
+
+func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
+	if ffmpeg == "" {
+		return nil, ErrFFmpegNotFound
+	}
+	cmd := Cmd{
+		Args: []string{
+			"-r", "1",
+			"-i", srcVideoPath,
+			"-r", "1",
+			"-threads", "4",
+			destImagePath,
+		},
+	}
+	if err := cmd.BackendRun(ffmpeg); err == nil {
+		return &cmd, nil
+	} else {
+		return nil, err
+	}
+}

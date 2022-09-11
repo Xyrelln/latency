@@ -115,7 +115,7 @@ func ListImageFile(dirName string) ([]ImageFile, error) {
 					// log.Println(path)
 					// images = append(images, img)
 					cropImgT, _ := CropImage(img, touchArea)
-					extImgHashT, _ := goimagehash.ExtDifferenceHash(cropImgT, 16, 16)
+					extImgHashT, _ := goimagehash.ExtAverageHash(cropImgT, 8, 8)
 
 					width := img.Bounds().Dx() // @todo get x,y by phone
 					height := img.Bounds().Dy()
@@ -161,7 +161,7 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 				img, err := LoadImage(path, info, e)
 				if img != nil {
 					cropImgT, _ := CropImage(img, touchArea)
-					extImgHashT, _ := goimagehash.ExtDifferenceHash(cropImgT, 16, 16)
+					extImgHashT, _ := goimagehash.ExtAverageHash(cropImgT, 8, 8)
 
 					cropImgC, _ := CropImage(img, rect)
 					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
@@ -245,7 +245,7 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) (float64, 
 				}
 			} else {
 				diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
-				if diffTop >= threshold {
+				if diffTop >= 4 {
 					log.Printf("find diffTop: %d > threshold, index: %d", diffTop, index)
 					touched = true
 					touchedIndex = index

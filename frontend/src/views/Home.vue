@@ -432,12 +432,14 @@ async function handleGetDisplay() {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
     } else {
-      ElNotification({
-        title: '获取数据异常',
-        type: 'error',
-        message: "获取手机分辨率失败，请手动设置移动坐标",
-        duration: 0,
-      })
+      deviceInfo.width = 1080
+      deviceInfo.height = 720
+      // ElNotification({
+      //   title: '获取数据异常',
+      //   type: 'error',
+      //   message: "获取手机分辨率失败，请手动设置移动坐标",
+      //   duration: 0,
+      // })
     }
   })
 }
@@ -575,7 +577,7 @@ function handleGetImage() {
                       </el-row>
                     </el-scrollbar>
                   </el-tab-pane>
-                  <el-tab-pane label="帮助" name="detail">
+                  <el-tab-pane label="帮助" name="detail" disabled>
                     <el-scrollbar style="height:60vh">
                       <div>
                         <!-- <el-row class="info-list">
@@ -598,7 +600,7 @@ function handleGetImage() {
                       </div>
                     </el-scrollbar>
                   </el-tab-pane>
-                  <el-tab-pane label="关于" name="about">
+                  <el-tab-pane label="关于" name="about" disabled>
                     <span>www.vrviu.com</span>
                   </el-tab-pane>
                 </el-tabs>

@@ -5,10 +5,11 @@ package cmd
 
 import (
 	//"fmt"
-	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"path/filepath"
 	"syscall"
+
+	log "github.com/sirupsen/logrus"
 	// "op-latency-mobile/third"
 )
 
@@ -60,6 +61,26 @@ func StartScrcpyRecord(serial, recFile string) (*Cmd, error) {
 	}
 
 	if err := cmd.BackendRun(scrcpy); err == nil {
+		return &cmd, nil
+	} else {
+		return nil, err
+	}
+}
+
+func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
+	if ffmpeg == "" {
+		return nil, ErrFFmpegNotFound
+	}
+	cmd := Cmd{
+		Args: []string{
+			// "-r", "1",
+			"-i", srcVideoPath,
+			// "-r", "1",
+			"-threads", "4",
+			destImagePath,
+		},
+	}
+	if err := cmd.Run(ffmpeg); err == nil {
 		return &cmd, nil
 	} else {
 		return nil, err
