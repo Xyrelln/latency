@@ -5,28 +5,39 @@ package cmd
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows"
 	"log"
-	// "os"
+	"os"
+
+	"golang.org/x/sys/windows"
 	"os/exec"
 	"path/filepath"
 	"syscall"
 	"time"
 )
 
-func init() {
-	if p, err := exec.LookPath("scrcpy.exe"); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			scrcpy = p
-		}
+func initScrcpyPath() error {
+	exePath, err := os.Executable()
+	if err != nil {
+		return err
 	}
+	scrcpy = filepath.Join(filepath.Dir(exePath), "scrcpy.exe")
 
-	if p, err := exec.LookPath("ffmpeg.exe"); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			ffmpeg = p
-		}
+	if _, err := os.Stat(scrcpy); os.IsNotExist(err) {
+		return ErrScrcpyNotFound
 	}
+	return nil
+}
 
+func initFFmpegPath() error {
+	exePath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	ffmpeg = filepath.Join(filepath.Dir(exePath), "ffmpeg.exe")
+	if _, err := os.Stat(ffmpeg); os.IsNotExist(err) {
+		return ErrScrcpyNotFound
+	}
+	return nil
 }
 
 func (c *Cmd) BackendRun(name string) error {
