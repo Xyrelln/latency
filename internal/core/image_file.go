@@ -1,7 +1,7 @@
 package core
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/corona10/goimagehash"
 	"golang.org/x/sync/errgroup"
@@ -33,16 +35,6 @@ type ImageRectInfo struct {
 	PreviewHeight int `json:"preview_height"`
 	SourceWidth   int `json:"source_width"`
 	SourceHeight  int `json:"source_height"`
-}
-
-type ImageResponse struct {
-	StartImgPath string `json:"start_image_path"`
-	StartScoreT  int    `json:"stat_score_t"`
-	StartScoreC  int    `json:"start_score_c"`
-	EndImgPath   string `json:"end_img_path"`
-	EndScoreT    int    `json:"end_score_t"`
-	EndScoreC    int    `json:"end_score_c"`
-	CostTime     int    `json:"cost_time"`
 }
 
 // func GetFileNamesByPath(dirPath, extension string) ([]string, error) {
@@ -219,9 +211,9 @@ func GetImageInfo(imagePath string) (ImageInfo, error) {
 
 }
 
-func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, error) {
+// CalcTime ...
+func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) (float64, error) {
 	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
-
 	rect, err := GetCropRect(imageRect)
 	if err != nil {
 		log.Error("image with wrong scaling")
@@ -233,7 +225,6 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, er
 	}
 
 	var previousImg ImageFile
-	var startImg ImageFile
 	var touched = false
 	var touchedIndex = 0
 	// var touchIndex = 0
@@ -243,58 +234,25 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) ([]int, er
 	2. 触控开始后检测中心内容区域评分
 	3. 计算中间时间差
 	**/
-	var responseTime []int
-	var imgResps []ImageResponse
 	for index, imageFile := range imgs {
 		if index > 0 {
-			// start diff in second item
-			scoreT, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
-			scoreC, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
-			// log.Printf("scoreT: %d, path: %s", scoreT, imageFile.Path)
-			// log.Printf("scoreC: %d", scoreC)
-
 			if touched {
-				log.Printf("scoreT: %d, path: %s", scoreT, imageFile.Path)
-				log.Printf("scoreC: %d", scoreC)
-
-				if scoreT >= threshold {
-					touched = false // 下一个点击到来未计算的直接跳过
-					continue
+				diffCenter, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
+				if diffCenter >= threshold {
+					log.Printf("find diffCenter: %d > threshold, index: %d", diffCenter, index)
+					costTime := (float64(index - touchedIndex)) * (1000.0 / 60.0)
+					return costTime, nil
 				}
-				if scoreC >= threshold {
-					costTime := (index - touchedIndex) * (1000 / 60)
-					responseTime = append(responseTime, costTime)
-					imgResps = append(imgResps, ImageResponse{
-						StartImgPath: startImg.Path,
-						StartScoreT:  startImg.ScoreT,
-						StartScoreC:  startImg.ScoreC,
-						EndImgPath:   imageFile.Path,
-						EndScoreT:    scoreT,
-						EndScoreC:    scoreC,
-						CostTime:     costTime,
-					})
-
-					// reset touched
-					log.Printf("current file: %s", imageFile.Path)
-					touched = false
-				}
-
 			} else {
-				if scoreT >= threshold {
-					log.Printf("scoreT: %d, path: %s", scoreT, imageFile.Path)
-					log.Printf("scoreC: %d", scoreC)
+				diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
+				if diffTop >= threshold {
+					log.Printf("find diffTop: %d > threshold, index: %d", diffTop, index)
 					touched = true
 					touchedIndex = index
-
-					startImg = imageFile
-					startImg.ScoreT = scoreT
-					startImg.ScoreC = scoreC
 				}
 			}
-
 		}
 		previousImg = imageFile
 	}
-	log.Printf("responseTime: %v", responseTime)
-	return responseTime, nil
+	return 0.0, fmt.Errorf("failed to find response")
 }

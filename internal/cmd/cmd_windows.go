@@ -40,6 +40,15 @@ func initFFmpegPath() error {
 	return nil
 }
 
+func init() {
+	if err := initFFmpegPath(); err != nil {
+		log.Fatal(err)
+	}
+	if err := initScrcpyPath(); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (c *Cmd) BackendRun(name string) error {
 	cmd := exec.Command("cmd", c.Args...)
 	// stdout and stderr, and exits with a zero exit status.
