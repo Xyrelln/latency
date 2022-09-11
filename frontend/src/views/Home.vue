@@ -292,6 +292,7 @@ function handleResetStatus() {
   }
   imagePreviewRef.value.setCalcButtonDisable(true)
   imagePreviewRef.value.setImagePlaceHolder()
+  imagePreviewRef.value.setDefaultTime()
 }
 
 
@@ -444,10 +445,6 @@ async function setAutoOn() {
   await handleGetDisplay()
   const swipeEvent = adb.SwipeEvent.createFrom(
     { 
-      // sx: deviceInfo.width/2,
-      // sy: deviceInfo.height/2,
-      // dx: deviceInfo.width/2 + deviceInfo.width/2/2,
-      // dy: deviceInfo.height/2,
       sx: deviceInfo.height/2,
       sy: deviceInfo.width/2,
       dx: deviceInfo.height/2 + deviceInfo.height/2/2,
@@ -472,22 +469,15 @@ function removeEventLister() {
   EventsOff("latency:transform_start_error")
   EventsOff("latency:record_start_error")
   EventsOff("latency:transform_filish")
-   
-  // EventsOff("latency:analyse_start")
-  // EventsOff("latency:analyse_filish")
 }
 
-// function handleGetImage () {
-//   GetImageFiles().then(res => {
-//     if (res.length > 0) {
-//       imgs.value = res
-//       total.value = imgs.value.length
-//       imageInfo.path = imgs.value[0]
-//     }
-//   })
-// }
+
+function initCheck() {
+  console.log("init check")
+}
 
 onMounted(()=> {
+  initCheck()
   addEventLister()
   
 })
@@ -622,7 +612,7 @@ function handleGetImage() {
           </el-container>
         </el-scrollbar>
       </el-tab-pane>
-      <el-tab-pane label="滑动工具" name="automation">
+      <el-tab-pane label="滑动工具" name="automation" disabled>
         <el-scrollbar style="height:calc(100vh - 120px);width: calc(100vw - 60px)">
           <Automation/>
         </el-scrollbar>

@@ -36,7 +36,7 @@ const selectBoxStyle = reactive({
 })
 const calcButtonDisable = ref(true)
 
-const delayTimes = ref<Array<number>>([])
+const delayTimes = ref<number>()
 const location = reactive({
   x: 0,
   y: 0,
@@ -121,7 +121,6 @@ function selectBoxInit() {
 
 onMounted(()=>{
   selectBoxInit()
-
   resizeTopRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeRightRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeBottomRef.value.addEventListener('mousedown', mouseDownHandler);
@@ -143,6 +142,8 @@ function handleCalcCostTime() {
 
   StartAnalyse(rectinfo, threshold)
   NProgress.start()
+  delayTimes.value = 0 
+  calcButtonDisable.value = true
 }
 // cropBtn.addEventListener('click', () => {
 //   const sX = previewImgRef.value.offsetLeft - previewImgRef.value.offsetLeft;  // 区域选择框左侧位置
@@ -206,17 +207,27 @@ function addEventLister() {
       title: '进度提示',
       type: 'info',
       message: "数据分析中， 请稍后...",
-      duration: 12000,
     })
   })
-  EventsOn("latency:analyse_filish", (res: Array<number>)=>{
-    delayTimes.value = res
-    ElNotification({
-      title: '进度提示: 3/3',
-      type: 'success',
-      message: "数据处理完成",
-    })
-    NProgress.done()
+  EventsOn("latency:analyse_filish", (res: number)=>{
+    if (res) {
+      delayTimes.value =  Math.floor(res * 100)/100
+      ElNotification({
+        title: '进度提示: 3/3',
+        type: 'success',
+        message: "数据处理完成",
+      })
+      NProgress.done()
+      calcButtonDisable.value = false
+    } else {
+      ElNotification({
+        title: '进度提示: 3/3',
+        type: 'error',
+        message: "数据处理失败， 请重试",
+      })
+      NProgress.done()
+      calcButtonDisable.value = false
+    }
   })
 
 }
@@ -258,7 +269,11 @@ function setCalcButtonDisable(value: boolean) {
 }
 
 function setImagePlaceHolder() {
-  previewImgRef.value.src = ""
+  imageInfo.path = ""
+}
+
+function setDefaultTime() {
+  delayTimes.value = 0
 }
 
 function loadNewImage(info: core.ImageInfo) {
@@ -302,7 +317,8 @@ defineExpose({
   setCalcButtonDisable,
   setImagePlaceHolder,
   loadNewImage,
-  handleGetImage
+  handleGetImage,
+  setDefaultTime
 })
 
 
@@ -315,7 +331,7 @@ defineExpose({
     <el-row justify="center" class="preview-content">
       <el-col :span="24">
         <!-- <span>标识检测区域</span> -->
-        <div class="out-img-box">
+        <!-- <div class="out-img-box"> -->
           <!-- <span class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? ' ./assets/images/placeholder.png' : imageInfo.path" alt=""/>
           <!-- <span class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
@@ -325,7 +341,7 @@ defineExpose({
             <div ref="resizeBottomRef" class="resizer resizer-b"></div>
             <div ref="resizeLeftRef" class="resizer resizer-l"></div>
           </div>
-        </div>
+        <!-- </div> -->
       </el-col>
     </el-row>
     <el-row v-if="isImgLoaded" justify="center">
@@ -353,8 +369,8 @@ defineExpose({
         <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable">计算延迟</el-button>
       </el-col>
       <el-col :span="12">
-        <span class="data-item">检测到操作总数: {{ delayTimes.length }}</span>
-        <span class="data-item">计算延迟数据为: {{ delayTimes.join(", ") }}</span>
+        <!-- <span class="data-item">检测到操作总数: {{ delayTimes.length }}</span> -->
+        <span class="data-item">结果（毫秒）: {{ delayTimes }}</span>
       </el-col>
     </el-row>
     <el-row>
