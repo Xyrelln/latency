@@ -376,8 +376,8 @@ defineExpose({
 }
 
 .preview-img {
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 500px;
+    max-height: 500px;
     vertical-align: middle;
 }
 
