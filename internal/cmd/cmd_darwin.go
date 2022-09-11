@@ -4,7 +4,7 @@
 package cmd
 
 import (
-	"fmt"
+	//"fmt"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"path/filepath"
