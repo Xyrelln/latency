@@ -19,7 +19,6 @@ import (
 	"errors"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	// "android.googlesource.com/platform/tools/gpu/maker"
@@ -48,10 +47,20 @@ func init() {
 		}
 	}
 	// Fallback to searching on PATH.
-	if p, err := exec.LookPath("adb"); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			adb = p
-		}
+	// if p, err := exec.LookPath("adb"); err == nil {
+	// 	if p, err = filepath.Abs(p); err == nil {
+	// 		adb = p
+	// 	}
+	// }
+
+	exePath, err := os.Executable()
+	if err != nil {
+		return
+	}
+	adb = filepath.Join(filepath.Dir(exePath), "adb")
+
+	if _, err := os.Stat(adb); os.IsNotExist(err) {
+		return
 	}
 }
 

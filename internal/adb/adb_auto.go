@@ -68,6 +68,7 @@ func (d *Device) DisplaySize() (*Display, error) {
 	// fmt.Print(out)
 	display, err := parseSize(out)
 	if err != nil {
+		log.Info(out) // check out when error
 		log.Error(err)
 		return nil, err
 	}

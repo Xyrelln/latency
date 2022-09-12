@@ -334,7 +334,7 @@ defineExpose({
 
 <template>
   <div>
-    <el-scrollbar height="95vh" style="width:calc(100vw - 320px); height: 82vh;">
+    <!-- <el-scrollbar height="95vh" style="width:calc(100vw - 320px); height: 82vh;"> -->
     <el-row justify="center" class="preview-content">
       <el-col :span="24">
         <!-- <span>标识检测区域</span> -->
@@ -392,7 +392,7 @@ defineExpose({
     <el-row>
      
     </el-row>
-  </el-scrollbar>
+  <!-- </el-scrollbar> -->
   </div>
 </template>
 

@@ -5,6 +5,9 @@ import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+
+import ImagePreview from '../components/ImagePreview.vue';
+import Automation from '../components/Automation.vue';
 import { 
   ListDevices,
   Start,
@@ -24,8 +27,6 @@ import {
   InputSwipe
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
-import ImagePreview from '../components/ImagePreview.vue';
-import Automation from '../components/Automation.vue';
 import {
   EventsOn,
   EventsOff,
@@ -38,16 +39,16 @@ const data: {devices: Array<adb.Device>} = reactive({
 })
 
 
-const isAuth = ref(false)
+// const isAuth = ref(false)
 const placeholder = "./src/assets/images/placeholder.png"
 
-const rightContentRef = ref()
-const startButtonText = ref("开始")
+// const rightContentRef = ref()
+// const startButtonText = ref("开始")
 const interval = ref()
 const processStatus = ref(0)
-const developMode = ref(true)
+// const developMode = ref(true)
 const countDownSecond = ref(0)
-const imageSrc = ref()
+// const imageSrc = ref()
 const imagePreviewRef = ref()
 
 const topTabName = ref('latency')
@@ -55,20 +56,18 @@ const topTabName = ref('latency')
 
 const tabName = ref('setting')
 const deviceInfo = reactive({
-  android_version: null,
-  cpu_arch: '',
-  cpu_core_count: null,
-  hardware: '',
-  mem_total: 0,
-  openGLES_version: '',
-  product_model: '',
+  // android_version: null,
+  // cpu_arch: '',
+  // cpu_core_count: null,
+  // hardware: '',
+  // mem_total: 0,
+  // openGLES_version: '',
+  // product_model: '',
   width: 0,
   height: 0,
 })
 
 const imageInfo = reactive({
-  // path: '/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-08-31T14:29:46+08:00/images/0001.png',
-  // path: '/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/0001.png',
   path: placeholder,
   width: 0,
   height: 0,
@@ -82,7 +81,6 @@ const settingForm = reactive({
   develop: false,
 })
 
-// const threshold = ref(20)
 
 provide('threshold', settingForm.diffScore)
 
@@ -109,17 +107,17 @@ const rules =  {
       trigger: 'blur',
     }
   ],
-  prepareTimeout: [
-    {
-      required: true,
-      message: '准备时长',
-      trigger: 'blur',
-    },
-    {
-      validator: checkGreaterEqualZero,
-      trigger: 'blur',
-    }
-  ]
+  // prepareTimeout: [
+  //   {
+  //     required: true,
+  //     message: '准备时长',
+  //     trigger: 'blur',
+  //   },
+  //   {
+  //     validator: checkGreaterEqualZero,
+  //     trigger: 'blur',
+  //   }
+  // ]
 }
 
 function checkGreaterThanZero (rule: any, value: any, callback: any)  {
@@ -295,7 +293,6 @@ function handleResetStatus() {
   imagePreviewRef.value.setDefaultTime()
 }
 
-
 async function handlePrepare(){
   if (deviceSelected.value === "") {
     ElMessage({
@@ -359,7 +356,10 @@ function setPointerLocationOff():Boolean {
   return false
 }
 
-function addEventLister() {
+/**
+ * 绑定监听
+ */
+async function addEventLister() {
   EventsOn("latency:record_start", ()=>{
     console.log("record_start")
     ElNotification({
@@ -432,8 +432,8 @@ async function handleGetDisplay() {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
     } else {
-      deviceInfo.width = 1080
-      deviceInfo.height = 720
+      deviceInfo.width = 720
+      deviceInfo.height = 1080
       // ElNotification({
       //   title: '获取数据异常',
       //   type: 'error',
@@ -441,30 +441,33 @@ async function handleGetDisplay() {
       //   duration: 0,
       // })
     }
+  }).catch(err => {
+    deviceInfo.width = 720
+    deviceInfo.height = 1080
   })
 }
-async function setAutoOn() {
-  await handleGetDisplay()
-  const swipeEvent = adb.SwipeEvent.createFrom(
-    { 
-      sx: deviceInfo.height/2,
-      sy: deviceInfo.width/2,
-      dx: deviceInfo.height/2 + deviceInfo.height/2/2,
-      dy: deviceInfo.width/2,
-      speed: 500
-    }
-  )
-  const interval = 2
-  console.log(swipeEvent)
-  SetAutoSwipeOn(swipeEvent, interval)
-}
+// async function setAutoOn() {
+//   await handleGetDisplay()
+//   const swipeEvent = adb.SwipeEvent.createFrom(
+//     { 
+//       sx: deviceInfo.height/2,
+//       sy: deviceInfo.width/2,
+//       dx: deviceInfo.height/2 + deviceInfo.height/2/2,
+//       dy: deviceInfo.width/2,
+//       speed: 500
+//     }
+//   )
+//   const interval = 2
+//   console.log(swipeEvent)
+//   SetAutoSwipeOn(swipeEvent, interval)
+// }
 
-function setAutoOff() {
-  SetAutoSwipeOff()
+// function setAutoOff() {
+//   SetAutoSwipeOff()
   
-}
+// }
 
-function removeEventLister() {
+async function removeEventLister() {
   EventsOff("latency:record_start")
   EventsOff("latency:record_filish")
   EventsOff("latency:transform_start")
@@ -474,7 +477,7 @@ function removeEventLister() {
 }
 
 
-function initCheck() {
+async function initCheck() {
   console.log("init check")
 }
 
@@ -483,6 +486,7 @@ onMounted(()=> {
   addEventLister()
   
 })
+
 function handleClearCache() {
   ClearCacheData()
 }
@@ -505,12 +509,12 @@ function handleGetImage() {
   <el-container>
     <el-tabs type="border-card" v-model="topTabName" >
       <el-tab-pane label="延迟测试" name="latency">
-        <el-scrollbar style="height: calc(100vh - 120px);width: calc(100vw - 60px)">
+        <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
           <el-container>
             <el-aside class="aside-content" width="220px">
-              <el-row class="row-item" v-if="isAuth">
+              <!-- <el-row class="row-item" v-if="isAuth">
                 <el-avatar :icon="UserFilled" />
-              </el-row>
+              </el-row> -->
               <el-row class="row-item">
                 <el-select
                     v-model="deviceSelected"
@@ -540,8 +544,8 @@ function handleGetImage() {
                   <el-button @click="handleToImage">to_img</el-button>
                   <el-button @click="setPointerLocationOn">pl_on</el-button>
                   <el-button @click="setPointerLocationOff">pl_off</el-button>
-                  <el-button @click="setAutoOn">auto_on</el-button>
-                  <el-button @click="setAutoOff">auto_off</el-button>
+                  <!-- <el-button @click="setAutoOn">auto_on</el-button>
+                  <el-button @click="setAutoOff">auto_off</el-button> -->
                   <el-button @click="handleGetImage">get_imgs</el-button>
                 </el-button-group>
               </el-row>
@@ -551,7 +555,7 @@ function handleGetImage() {
                   class="platform-tabs">
                 
                   <el-tab-pane label="设置" name="setting">
-                    <el-scrollbar style="height:60vh">
+                    <!-- <el-scrollbar style="height:60vh"> -->
                       <el-row>
                         <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
                           <el-form-item label="图片比对阈值" prop="diffScore">
@@ -575,10 +579,10 @@ function handleGetImage() {
                           </el-form-item>
                         </el-form>
                       </el-row>
-                    </el-scrollbar>
+                    <!-- </el-scrollbar> -->
                   </el-tab-pane>
                   <el-tab-pane label="帮助" name="detail" disabled>
-                    <el-scrollbar style="height:60vh">
+                    <!-- <el-scrollbar style="height:60vh"> -->
                       <div>
                         <!-- <el-row class="info-list">
                           <el-col :span="12" class="info-line">
@@ -598,7 +602,7 @@ function handleGetImage() {
                         </el-row> -->
                         
                       </div>
-                    </el-scrollbar>
+                    <!-- </el-scrollbar> -->
                   </el-tab-pane>
                   <el-tab-pane label="关于" name="about" disabled>
                     <span>www.vrviu.com</span>
@@ -615,9 +619,9 @@ function handleGetImage() {
         </el-scrollbar>
       </el-tab-pane>
       <el-tab-pane label="滑动工具" name="automation" disabled>
-        <el-scrollbar style="height:calc(100vh - 120px);width: calc(100vw - 60px)">
+        <!-- <el-scrollbar style="height:calc(100vh - 120px);width: calc(100vw - 60px)"> -->
           <Automation/>
-        </el-scrollbar>
+        <!-- </el-scrollbar> -->
       </el-tab-pane>
     </el-tabs>
    
@@ -626,16 +630,6 @@ function handleGetImage() {
 </template>
 
 <style scoped>
-/* .v-enter-active,
-.v-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-} */
 
 .operation-button {
   width: 100%;

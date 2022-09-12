@@ -23,16 +23,6 @@ import {
 const formSize = ref('default')
 const formRef = ref<FormInstance>()
 const form = reactive({
-  name: 'Hello',
-  region: '',
-  count: '',
-  date1: '',
-  date2: '',
-  delivery: false,
-  type: [],
-  resource: '',
-  desc: '',
-  devices: [],
   device: '',
   sx: 0,
   sy: 0,

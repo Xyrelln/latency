@@ -27,6 +27,17 @@ func init() {
 	}
 
 }
+
+func (c *Cmd) Run(name string) error {
+	cmd := exec.Command(name, c.Args...)
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	c.execCmd = cmd
+	log.Printf("cmd: %s", name)
+	log.Printf("args: %v", c.Args)
+	return cmd.Run()
+}
+
 func (c *Cmd) BackendRun(name string) error {
 	cmd := exec.Command(name, c.Args...)
 	cmd.Stdout = c.Stdout

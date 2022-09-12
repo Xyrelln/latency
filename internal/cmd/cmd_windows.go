@@ -61,6 +61,17 @@ func (c *Cmd) BackendRun(name string) error {
 	return cmd.Start()
 }
 
+func (c *Cmd) Run(name string) error {
+	cmd := exec.Command(name, c.Args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: windows.CREATE_UNICODE_ENVIRONMENT}
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	c.execCmd = cmd
+	log.Printf("cmd: %s", name)
+	log.Printf("args: %v", c.Args)
+	return cmd.Run()
+}
+
 // func (c *Cmd) TaskKill(pid string) error {
 // 	if taskkill == "" {
 // 		return ErrTaskKillNotFound
@@ -198,7 +209,7 @@ func StartFFmpeg(srcVideoPath, destImagePath string) (*Cmd, error) {
 			destImagePath,
 		},
 	}
-	if err := cmd.BackendRun(ffmpeg); err == nil {
+	if err := cmd.Run(ffmpeg); err == nil {
 		return &cmd, nil
 	} else {
 		return nil, err

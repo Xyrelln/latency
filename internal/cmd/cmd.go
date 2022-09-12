@@ -5,14 +5,11 @@ import (
 	"errors"
 	"io"
 	"os/exec"
-
-	log "github.com/sirupsen/logrus"
 	// "op-latency-mobile/third"
 )
 
 var ErrScrcpyNotFound = errors.New("scrcpy command not found on PATH")
 var ErrFFmpegNotFound = errors.New("ffmpeg command not found on PATH")
-var ErrTaskKillNotFound = errors.New("taskkill command not found on PATH")
 
 var scrcpy string
 var ffmpeg string
@@ -28,15 +25,15 @@ type Cmd struct {
 // Run starts the specified command and waits for it to complete.
 // The returned error is nil if the command runs, has no problems copying
 // stdout and stderr, and exits with a zero exit status.
-func (c *Cmd) Run(name string) error {
-	cmd := exec.Command(name, c.Args...)
-	cmd.Stdout = c.Stdout
-	cmd.Stderr = c.Stderr
-	c.execCmd = cmd
-	log.Printf("cmd: %s", name)
-	log.Printf("args: %v", c.Args)
-	return cmd.Run()
-}
+// func (c *Cmd) Run(name string) error {
+// 	cmd := exec.Command(name, c.Args...)
+// 	cmd.Stdout = c.Stdout
+// 	cmd.Stderr = c.Stderr
+// 	c.execCmd = cmd
+// 	log.Printf("cmd: %s", name)
+// 	log.Printf("args: %v", c.Args)
+// 	return cmd.Run()
+// }
 
 // Start without wait
 // func (c *Cmd) BackendRun(name string) error {
