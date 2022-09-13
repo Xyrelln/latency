@@ -57,6 +57,7 @@ func (d *Device) AutoTouch() error {
 	return nil
 }
 
+// 获取屏幕分辨率
 func (d *Device) DisplaySize() (*Display, error) {
 	cmd := d.Command("dumpsys window displays")
 
@@ -65,14 +66,13 @@ func (d *Device) DisplaySize() (*Display, error) {
 		log.Error(err)
 		return nil, err
 	}
-	// fmt.Print(out)
 	display, err := parseSize(out)
 	if err != nil {
 		log.Info(out) // check out when error
 		log.Error(err)
 		return nil, err
 	}
-	fmt.Printf("display: %v", display)
+	log.Infof("display: %v", display)
 	return display, nil
 }
 

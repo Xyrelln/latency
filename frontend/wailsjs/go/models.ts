@@ -1,5 +1,21 @@
 export namespace adb {
 	
+	export class Device {
+	    Serial: string;
+	    State: number;
+	    abi: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Device(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Serial = source["Serial"];
+	        this.State = source["State"];
+	        this.abi = source["abi"];
+	    }
+	}
 	export class Display {
 	    width: number;
 	    height: number;
@@ -32,22 +48,6 @@ export namespace adb {
 	        this.dx = source["dx"];
 	        this.dy = source["dy"];
 	        this.speed = source["speed"];
-	    }
-	}
-	export class Device {
-	    Serial: string;
-	    State: number;
-	    abi: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Device(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Serial = source["Serial"];
-	        this.State = source["State"];
-	        this.abi = source["abi"];
 	    }
 	}
 

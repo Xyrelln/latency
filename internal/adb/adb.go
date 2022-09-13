@@ -17,11 +17,12 @@ package adb
 import (
 	"bytes"
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
-	// "android.googlesource.com/platform/tools/gpu/maker"
 )
 
 // ErrADBNotFound is returned when the ADB executable is not found.
@@ -35,6 +36,7 @@ var ErrDeviceUnauthorized = errors.New("Device unauthorized")
 // not found.
 var adb string
 
+
 func init() {
 	// Search for ADB using ANDROID_HOME
 	if home := os.Getenv("ANDROID_HOME"); home != "" {
@@ -47,20 +49,20 @@ func init() {
 		}
 	}
 	// Fallback to searching on PATH.
-	// if p, err := exec.LookPath("adb"); err == nil {
-	// 	if p, err = filepath.Abs(p); err == nil {
-	// 		adb = p
-	// 	}
-	// }
-
-	exePath, err := os.Executable()
-	if err != nil {
-		return
+	if p, err := exec.LookPath("adb"); err == nil {
+		if p, err = filepath.Abs(p); err == nil {
+			adb = p
+			return
+		}
 	}
-	adb = filepath.Join(filepath.Dir(exePath), "adb")
 
-	if _, err := os.Stat(adb); os.IsNotExist(err) {
-		return
+	// Fallback to searching on CurrentDirectory.
+	if execPath, err := os.Executable(); err == nil {
+		p := filepath.Join(filepath.Dir(execPath), "lib", "adb", adbExecFile)
+		if _, err := os.Stat(adb); os.IsNotExist(err) {
+			adb = p
+			return
+		}
 	}
 }
 
@@ -86,6 +88,46 @@ type Cmd struct {
 	Stderr io.Writer
 }
 
+// Run starts the specified command and waits for it to complete.
+// The returned error is nil if the command runs, has no problems copying
+// stdout and stderr, and exits with a zero exit status.
+func (c *Cmd) Run() error {
+	args := []string{}
+	if c.Device != nil {
+		args = append(args, "-s", c.Device.Serial)
+	}
+	if c.Path != "" {
+		args = append(args, "shell", c.Path)
+	}
+	args = append(args, c.Args...)
+	log.Infof("adb: %s", adb)
+	log.Infof("args: %v", args)
+	cs := append(cmdStart, adb)
+	cs = append(cmdStart, args...)
+	cmd := exec.Command(cs[0], cs[1:]...)
+	//cmd := exec.Command(adb, args...)
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	return cmd.Run()
+}
+
+func (c *Cmd) BackendRun() error {
+	args := []string{}
+	if c.Device != nil {
+		args = append(args, "-s", c.Device.Serial)
+	}
+	if c.Path != "" {
+		args = append(args, "shell", c.Path)
+	}
+	args = append(args, c.Args...)
+	log.Infof("adb: %s", adb)
+	log.Infof("args: %v", args)
+	cmd := exec.Command(adb, args...)
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	return cmd.Start()
+}
+
 // Call starts the specified command and waits for it to complete, returning the
 // all stdout as a string.
 // The returned error is nil if the command runs, has no problems copying
@@ -109,4 +151,8 @@ func (c *Cmd) Call() (string, error) {
 		err = ErrDeviceUnauthorized
 	}
 	return stdout.String(), err
+}
+
+func IsAdbReady() bool {
+	return adb != ""
 }

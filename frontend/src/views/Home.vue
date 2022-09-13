@@ -12,8 +12,8 @@ import {
   ListDevices,
   Start,
   StartRecord,
-  StopRecord,
-  StopProcessing,
+  // StopRecord,
+  // StopProcessing,
   StartTransform,
   StartAnalyse,
   SetPointerLocationOff,
@@ -24,7 +24,9 @@ import {
   SetAutoSwipeOff,
   GetDisplay,
   GetImageFiles,
-  InputSwipe
+  InputSwipe,
+  IsAppReady,
+  // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import {
@@ -44,6 +46,19 @@ const placeholder = "./src/assets/images/placeholder.png"
 
 // const rightContentRef = ref()
 // const startButtonText = ref("开始")
+const status = ref(false)
+const form = reactive({
+  device: '',
+  sx: 0,
+  sy: 0,
+  dx: 0,
+  dy: 0,
+  speed: 500,
+  interval: 2000,
+  scene_id: '',
+  location: true
+})
+
 const interval = ref()
 const processStatus = ref(0)
 // const developMode = ref(true)
@@ -137,38 +152,24 @@ function checkGreaterEqualZero (rule: any, value: any, callback: any)  {
 }
 
 
-
+/**
+ * 获取设备列表
+ * @param value 设备序列号
+ */
 function getDeviceList (value: any) {
   ListDevices().then(result => {
     if (result != null) {
       data.devices = result
     }
+  }).catch(err => {
+    ElMessage({
+      type: 'error',
+      message: '设备获取失败'
+    })
   })
 }
 
-const form = reactive({
-  name: 'Hello',
-  region: '',
-  count: '',
-  date1: '',
-  date2: '',
-  delivery: false,
-  type: [],
-  resource: '',
-  desc: '',
-  devices: [],
-  device: '',
-  sx: 0,
-  sy: 0,
-  dx: 0,
-  dy: 0,
-  speed: 500,
-  interval: 2000,
-  scene_id: '',
-  location: true
-})
 
-const status = ref(false)
 
 // async function handleStartRun() {
 //   // await handleGetDisplay()
@@ -242,18 +243,17 @@ function handleStart() {
   StartRecord(deviceSelected.value)
 }
 
-function handleStopRecord() {
-  // clear first
-  clearCurrentInterval()
-
-  StopRecord(deviceSelected.value)
-  processStatus.value = 0
-  SetPointerLocationOff(deviceSelected.value)
-}
+// function handleStopRecord() {
+//   // clear first
+//   clearCurrentInterval()
+//
+//   StopRecord(deviceSelected.value)
+//   processStatus.value = 0
+//   SetPointerLocationOff(deviceSelected.value)
+// }
 
 
 function handleStopProcessing() {
-  StopProcessing()
 }
 
 function handleToImage() {
@@ -293,65 +293,62 @@ function handleResetStatus() {
   imagePreviewRef.value.setDefaultTime()
 }
 
-async function handlePrepare(){
-  if (deviceSelected.value === "") {
-    ElMessage({
-      type: 'error',
-      message: '请选择设备'
-    })
-    return
-  }
-  handleResetStatus()
-  NProgress.start()
-  const result = await setPointerLocationOn()
-  if (result) {
-    if (settingForm.prepareTimeout === 0) {
-      processStatus.value = 2
-      handleStartRecord()
-    } else {
-      processStatus.value = 1
-      runUntilCountDown(settingForm.prepareTimeout, handleStartRecord)
-    }
-  }
-}
+// async function handlePrepare(){
+//   if (deviceSelected.value === "") {
+//     ElMessage({
+//       type: 'error',
+//       message: '请选择设备'
+//     })
+//     return
+//   }
+//   handleResetStatus()
+//   NProgress.start()
+//   const result = await setPointerLocationOn()
+//   if (result) {
+//     if (settingForm.prepareTimeout === 0) {
+//       processStatus.value = 2
+//       handleStartRecord()
+//     } else {
+//       processStatus.value = 1
+//       runUntilCountDown(settingForm.prepareTimeout, handleStartRecord)
+//     }
+//   }
+// }
 
+/**
+ * 开启指针显示
+ */
 async function setPointerLocationOn():Promise<Boolean> {
   let result = false
   await SetPointerLocationOn(deviceSelected.value).then(res =>{ 
-    if (res) {
-      ElMessage({
-        type: 'error',
-        message: '开启指针失败'
-      })
-      result = false
-      
-    } else {
-      ElMessage({
-        type: 'success',
-        message: '开启指针成功'
-      })
+    ElMessage({
+      type: 'success',
+      message: '开启指针成功'
+    })
      result = true
     }
+  ).catch(err => {
+    ElMessage({
+      type: 'error',
+      message: '开启指针失败'
+    })
+    result = false
   })
   return result
 }
 
 function setPointerLocationOff():Boolean {
   SetPointerLocationOff(deviceSelected.value).then(res =>{ 
-    if (res) {
-      ElMessage({
-        type: 'error',
-        message: '关闭指针失败'
-      })
-      return false
-      
-    } else {
       ElMessage({
         type: 'success',
         message: '关闭指针成功'
       })
       return true
-    }
+  }).catch(err => {
+    ElMessage({
+      type: 'error',
+      message: '关闭指针失败'
+    })
   })
   return false
 }
@@ -427,45 +424,13 @@ function getFirstImage(){
 
 async function handleGetDisplay() {
   await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
-    console.log(res)
-    if (res) {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
-    } else {
-      deviceInfo.width = 720
-      deviceInfo.height = 1080
-      // ElNotification({
-      //   title: '获取数据异常',
-      //   type: 'error',
-      //   message: "获取手机分辨率失败，请手动设置移动坐标",
-      //   duration: 0,
-      // })
-    }
   }).catch(err => {
     deviceInfo.width = 720
     deviceInfo.height = 1080
   })
 }
-// async function setAutoOn() {
-//   await handleGetDisplay()
-//   const swipeEvent = adb.SwipeEvent.createFrom(
-//     { 
-//       sx: deviceInfo.height/2,
-//       sy: deviceInfo.width/2,
-//       dx: deviceInfo.height/2 + deviceInfo.height/2/2,
-//       dy: deviceInfo.width/2,
-//       speed: 500
-//     }
-//   )
-//   const interval = 2
-//   console.log(swipeEvent)
-//   SetAutoSwipeOn(swipeEvent, interval)
-// }
-
-// function setAutoOff() {
-//   SetAutoSwipeOff()
-  
-// }
 
 async function removeEventLister() {
   EventsOff("latency:record_start")
@@ -476,9 +441,19 @@ async function removeEventLister() {
   EventsOff("latency:transform_filish")
 }
 
-
+/**
+ * 环境检查
+ */
 async function initCheck() {
-  console.log("init check")
+  IsAppReady().then(res => {
+  }).catch(err => {
+    ElNotification({
+      title: '环境检查',
+      type: 'error',
+      message: err,
+      duration: 0,
+    })
+  })
 }
 
 onMounted(()=> {

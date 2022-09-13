@@ -22,6 +22,10 @@ export function InputSwipe(arg1, arg2) {
   return window['go']['app']['Api']['InputSwipe'](arg1, arg2);
 }
 
+export function IsAppReady() {
+  return window['go']['app']['Api']['IsAppReady']();
+}
+
 export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
 }
@@ -58,18 +62,6 @@ export function StartTransform() {
   return window['go']['app']['Api']['StartTransform']();
 }
 
-export function StopProcessing() {
-  return window['go']['app']['Api']['StopProcessing']();
-}
-
-export function StopRecord(arg1) {
-  return window['go']['app']['Api']['StopRecord'](arg1);
-}
-
 export function StopScrcpyServer(arg1) {
   return window['go']['app']['Api']['StopScrcpyServer'](arg1);
-}
-
-export function StopTransform() {
-  return window['go']['app']['Api']['StopTransform']();
 }

@@ -2,17 +2,11 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
-	// "op-latency-mobile/third"
 )
 
-var ErrScrcpyNotFound = errors.New("scrcpy command not found on PATH")
-var ErrFFmpegNotFound = errors.New("ffmpeg command not found on PATH")
-
-var scrcpy string
-var ffmpeg string
 
 type Cmd struct {
 	Path    string
@@ -22,33 +16,37 @@ type Cmd struct {
 	Stderr  io.Writer
 }
 
+
 // Run starts the specified command and waits for it to complete.
 // The returned error is nil if the command runs, has no problems copying
 // stdout and stderr, and exits with a zero exit status.
-// func (c *Cmd) Run(name string) error {
-// 	cmd := exec.Command(name, c.Args...)
-// 	cmd.Stdout = c.Stdout
-// 	cmd.Stderr = c.Stderr
-// 	c.execCmd = cmd
-// 	log.Printf("cmd: %s", name)
-// 	log.Printf("args: %v", c.Args)
-// 	return cmd.Run()
-// }
+func (c *Cmd) Run() error {
+	cs := append(cmdStart, c.Args...)
+	cmd := exec.Command(cs[0], cs[1:]...)
+	cmd.SysProcAttr = procAttrs
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	c.execCmd = cmd
+	log.Infof("args: %v", c.Args)
+	return cmd.Run()
+}
 
-// Start without wait
-// func (c *Cmd) BackendRun(name string) error {
-// 	cmd := exec.Command(name, c.Args...)
-// 	cmd.Stdout = c.Stdout
-// 	cmd.Stderr = c.Stderr
-// 	c.execCmd = cmd
-// 	return cmd.Start()
-// }
+// BackendRun Start without wait
+func (c *Cmd) BackendRun() error {
+	cs := append(cmdStart, c.Args...)
+	cmd := exec.Command(cs[0], cs[1:]...)
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
+	c.execCmd = cmd
+	log.Infof("args: %v", c.Args)
+	return cmd.Start()
+}
 
 // Call starts the specified command and waits for it to complete, returning the
 // all stdout as a string.
 // The returned error is nil if the command runs, has no problems copying
 // stdout and stderr, and exits with a zero exit status.
-func (c *Cmd) Call(name string) (string, error) {
+func (c *Cmd) Call() (string, error) {
 	clone := *c
 	stdout := &bytes.Buffer{}
 	if clone.Stdout != nil {
@@ -62,6 +60,6 @@ func (c *Cmd) Call(name string) (string, error) {
 	} else {
 		clone.Stderr = stderr
 	}
-	err := clone.Run(name)
+	err := clone.Run()
 	return stdout.String(), err
 }

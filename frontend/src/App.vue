@@ -3,11 +3,11 @@ import Home from './views/Home.vue';
 </script>
 
 <template>
-  <div class="common-layout">
+  <!-- <div class="common-layout"> -->
     <el-container>
       <Home/>
     </el-container>
-  </div>
+  <!-- </div> -->
 </template>
 
 <style>

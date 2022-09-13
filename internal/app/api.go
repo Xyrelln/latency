@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
@@ -45,6 +46,7 @@ func (a *Api) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
+// 获取设备列表
 func (a *Api) ListDevices() ([]*adb.Device, error) {
 	devices, err := adb.Devices()
 	if err != nil {
@@ -54,8 +56,30 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 	return devices, nil
 }
 
+// 检查 app 环境信息
+func (a *Api) IsAppReady() error {
+	ok := adb.IsAdbReady()
+	if !ok {
+		log.Error("adb path wrong")
+		return errors.New("adb path wrong")
+	}
+
+	err := cmd.IsFFmpegReady()
+	if err != nil {
+		log.Error("ffmpeg path wrong")
+		return err
+	}
+
+	err = cmd.IsScrcpyReady()
+	if err != nil {
+		log.Error("scrcpy path wrong")
+		return err
+	}
+	return nil
+}
+
+// 获取屏幕信息
 func (a *Api) GetDisplay(serial string) (*adb.Display, error) {
-	log.Printf("get display %s", serial)
 	device := adb.GetDevice(serial)
 	display, err := device.DisplaySize()
 	if err != nil {
@@ -84,6 +108,7 @@ func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 	return nil
 }
 
+// 发送拖动事件
 func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
 	device := adb.GetDevice(serial)
 	return device.InputSwipe(sw)
@@ -94,12 +119,25 @@ func (a *Api) SetAutoSwipeOff() error {
 	return nil
 }
 
+// 开启指针位置显示
 func (a *Api) SetPointerLocationOn(serial string) error {
-	log.Info("set pointer location on")
 	device := adb.GetDevice(serial)
-	return device.SetPointerLocationOn()
+	if err := device.SetPointerLocationOn(); err == nil {
+		on, err := device.IsPointerLocationOn()
+		if err != nil {
+			return err
+		}
+		if !on {
+			return errors.New("set pointer location failed")
+		}
+	} else {
+		return err
+	}
+
+	return nil
 }
 
+// 关闭指针位置显示
 func (a *Api) SetPointerLocationOff(serial string) error {
 	log.Info("set pointer location off")
 	device := adb.GetDevice(serial)
@@ -111,7 +149,7 @@ func (a *Api) StartRecord(serial string) error {
 	log.Infof("workdir: %s", a.VideoDir)
 	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
 	recFile := filepath.Join(a.VideoDir, recordFile)
-	cmd, err := cmd.StartScrcpyRecord(serial, recFile)
+	cmd, err := cmd.StartScrcpy(serial, recFile)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -121,6 +159,7 @@ func (a *Api) StartRecord(serial string) error {
 	return nil
 }
 
+// 启动延迟测试
 func (a *Api) Start(serial string, recordSecond int64) error {
 	err := a.StartRecord(serial)
 	if err != nil {
@@ -142,6 +181,7 @@ func (a *Api) Start(serial string, recordSecond int64) error {
 	return nil
 }
 
+// 停止 scrcpy server
 func (a *Api) StopScrcpyServer(serial string) error {
 	device := adb.GetDevice(serial)
 	err := device.KillScrcyServer()
@@ -153,19 +193,19 @@ func (a *Api) StopScrcpyServer(serial string) error {
 	return nil
 }
 
-func (a *Api) StopRecord(serial string) error {
-	log.Infof("stop monitor")
-	a.emitInfo(eventRecordFilish)
-	return a.Cmd.Kill()
+//func (a *Api) StopRecord(serial string) error {
+//	log.Infof("stop monitor")
+//	a.emitInfo(eventRecordFilish)
+//	return a.Cmd.Kill()
+//
+//}
 
-}
-
-func (a *Api) StopProcessing() error {
-	log.Printf("stop monitor")
-	a.emitInfo(eventRecordFilish)
-
-	return a.Cmd.Kill()
-}
+//func (a *Api) StopProcessing() error {
+//	log.Printf("stop monitor")
+//	a.emitInfo(eventRecordFilish)
+//
+//	return a.Cmd.Kill()
+//}
 
 func (a *Api) StartTransform() error {
 	log.Infof("prepare data")
@@ -215,9 +255,9 @@ func (a *Api) emitData(eventName string, data interface{}) {
 	runtime.EventsEmit(a.ctx, eventName, data)
 }
 
-func (a *Api) StopTransform() {
-	a.Cmd.Kill()
-}
+//func (a *Api) StopTransform() {
+//	a.Cmd.Kill()
+//}
 
 func (a *Api) GetImageFiles() ([]string, error) {
 	var imgs []string

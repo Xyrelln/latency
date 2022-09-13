@@ -13,6 +13,8 @@ export function GetImageFiles():Promise<Array<string>>;
 
 export function InputSwipe(arg1:string,arg2:adb.SwipeEvent):Promise<Error>;
 
+export function IsAppReady():Promise<Error>;
+
 export function ListDevices():Promise<Array<adb.Device>>;
 
 export function SetAutoSwipeOff():Promise<Error>;
@@ -31,10 +33,4 @@ export function StartRecord(arg1:string):Promise<Error>;
 
 export function StartTransform():Promise<Error>;
 
-export function StopProcessing():Promise<Error>;
-
-export function StopRecord(arg1:string):Promise<Error>;
-
 export function StopScrcpyServer(arg1:string):Promise<Error>;
-
-export function StopTransform():void;

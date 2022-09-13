@@ -1,5 +1,5 @@
-//go:build windows
-// +build windows
+//go:build !windows
+// +build !windows
 
 // Copyright (C) 2015 The Android Open Source Project
 //
@@ -17,8 +17,10 @@
 // Package adb provides an interface to the Android Debug Bridge.
 package adb
 
-var adbExecFile = "adb.exe"
-var cmdStart = []string{"cmd", "/c"}
-var procAttrs = &windows.SysProcAttr{
-	CreationFlags: windows.CREATE_UNICODE_ENVIRONMENT | windows.CREATE_NEW_PROCESS_GROUP,
-}
+import (
+	"golang.org/x/sys/unix"
+)
+
+var adbExecFile = "adb"
+var cmdStart = []string{"/bin/sh", "-c"}
+var procAttrs = &unix.SysProcAttr{Setpgid: true}
