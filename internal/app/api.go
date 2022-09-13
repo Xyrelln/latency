@@ -26,13 +26,11 @@ var autorun = true
 
 // Api struct
 type Api struct {
-	ctx       context.Context
-	Cmd       *cmd.Cmd
-	VideoDir  string
-	ImagesDir string
-	// FFmpegFile fs.FS
-	// ScrcpyDir  fs.FS
-	AppData string
+	ctx       context.Context `json:"ctx,omitempty"`
+	Cmd       *cmd.Cmd        `json:"cmd,omitempty"`
+	VideoDir  string          `json:"video_dir,omitempty"`
+	ImagesDir string          `json:"images_dir,omitempty"`
+	AppData   string          `json:"app_data,omitempty"`
 }
 
 // NewApp creates a new Api application struct

@@ -93,6 +93,7 @@ type Cmd struct {
 // stdout and stderr, and exits with a zero exit status.
 func (c *Cmd) Run() error {
 	args := []string{}
+	args = append(args, adb)
 	if c.Device != nil {
 		args = append(args, "-s", c.Device.Serial)
 	}
@@ -100,11 +101,11 @@ func (c *Cmd) Run() error {
 		args = append(args, "shell", c.Path)
 	}
 	args = append(args, c.Args...)
-	log.Infof("adb: %s", adb)
-	log.Infof("args: %v", args)
-	cs := append(cmdStart, adb)
-	cs = append(cmdStart, args...)
+
+	cs := append(cmdStart, strings.Join(args, " "))
+	//cs = append(cs, args...)
 	cmd := exec.Command(cs[0], cs[1:]...)
+	log.Infof("args: %v", cs)
 	//cmd := exec.Command(adb, args...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
@@ -113,6 +114,7 @@ func (c *Cmd) Run() error {
 
 func (c *Cmd) BackendRun() error {
 	args := []string{}
+	args = append(args, adb)
 	if c.Device != nil {
 		args = append(args, "-s", c.Device.Serial)
 	}
@@ -120,9 +122,8 @@ func (c *Cmd) BackendRun() error {
 		args = append(args, "shell", c.Path)
 	}
 	args = append(args, c.Args...)
-	log.Infof("adb: %s", adb)
-	log.Infof("args: %v", args)
-	cmd := exec.Command(adb, args...)
+	cs := append(cmdStart, strings.Join(args, " "))
+	cmd := exec.Command(cs[0], cs[1:]...)
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	return cmd.Start()

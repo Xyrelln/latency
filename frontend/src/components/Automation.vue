@@ -7,8 +7,6 @@ import {
   ListDevices,
   Start,
   StartRecord,
-  // StopRecord,
-  // StopProcessing,
   StartTransform,
   StartAnalyse,
   SetPointerLocationOff,

@@ -158,9 +158,7 @@ function checkGreaterEqualZero (rule: any, value: any, callback: any)  {
  */
 function getDeviceList (value: any) {
   ListDevices().then(result => {
-    if (result != null) {
-      data.devices = result
-    }
+    data.devices = result
   }).catch(err => {
     ElMessage({
       type: 'error',
@@ -236,7 +234,7 @@ async function handleStartRecord() {
 
   setTimeout(() => {
     handleInputSwipe()
-  }, 1200);
+  }, 1500);
 }
 
 function handleStart() {

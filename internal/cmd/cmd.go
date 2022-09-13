@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
+	"strings"
 )
 
 
@@ -21,7 +22,7 @@ type Cmd struct {
 // The returned error is nil if the command runs, has no problems copying
 // stdout and stderr, and exits with a zero exit status.
 func (c *Cmd) Run() error {
-	cs := append(cmdStart, c.Args...)
+	cs := append(cmdStart, strings.Join(c.Args, " "))
 	cmd := exec.Command(cs[0], cs[1:]...)
 	cmd.SysProcAttr = procAttrs
 	cmd.Stdout = c.Stdout
@@ -33,8 +34,9 @@ func (c *Cmd) Run() error {
 
 // BackendRun Start without wait
 func (c *Cmd) BackendRun() error {
-	cs := append(cmdStart, c.Args...)
+	cs := append(cmdStart, strings.Join(c.Args, " "))
 	cmd := exec.Command(cs[0], cs[1:]...)
+	cmd.SysProcAttr = procAttrs
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	c.execCmd = cmd
