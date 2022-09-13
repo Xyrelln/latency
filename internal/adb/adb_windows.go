@@ -17,6 +17,10 @@
 // Package adb provides an interface to the Android Debug Bridge.
 package adb
 
+import (
+	"golang.org/x/sys/windows"
+)
+
 var adbExecFile = "adb.exe"
 var cmdStart = []string{"cmd", "/c"}
 var procAttrs = &windows.SysProcAttr{
