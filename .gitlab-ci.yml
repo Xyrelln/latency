@@ -62,9 +62,10 @@ CompileWinAmd64:
   stage: build
   tags:
     - pc-windows
+  before_script:
+    - '[System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8'
   script:
     - go install github.com/wailsapp/wails/v2/cmd/wails@latest
-    - echo $env:$PATH
     - wails build -platform windows/amd64 -o latency-mobile.exe -webview2 embed
   artifacts:
     paths:
