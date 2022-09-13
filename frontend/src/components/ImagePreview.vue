@@ -226,6 +226,14 @@ function addEventLister() {
       })
       NProgress.done()
       calcButtonDisable.value = false
+      if (delayTimes.value <= 16.66 || delayTimes.value >= 1000 ) {
+        ElNotification({
+          title: '数值异常',
+          type: 'error',
+          message: "当前数值不在正常值范围内，建议重试",
+          duration: 0,
+        })
+      }
     } else {
       ElNotification({
         title: '进度提示: 3/3',

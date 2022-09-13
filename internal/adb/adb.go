@@ -17,12 +17,13 @@ package adb
 import (
 	"bytes"
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // ErrADBNotFound is returned when the ADB executable is not found.
@@ -36,20 +37,19 @@ var ErrDeviceUnauthorized = errors.New("Device unauthorized")
 // not found.
 var adb string
 
-
 func init() {
 	// Search for ADB using ANDROID_HOME
 	if home := os.Getenv("ANDROID_HOME"); home != "" {
-		path, err := filepath.Abs(filepath.Join(home, "platform-tools", "adb"))
+		p, err := filepath.Abs(filepath.Join(home, "platform-tools", adbExecFile))
 		if err == nil {
-			if _, err := os.Stat(path); err == nil {
-				adb = path
+			if _, err := os.Stat(p); err == nil {
+				adb = p
 				return
 			}
 		}
 	}
 	// Fallback to searching on PATH.
-	if p, err := exec.LookPath("adb"); err == nil {
+	if p, err := exec.LookPath(adbExecFile); err == nil {
 		if p, err = filepath.Abs(p); err == nil {
 			adb = p
 			return
@@ -59,7 +59,7 @@ func init() {
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {
 		p := filepath.Join(filepath.Dir(execPath), "lib", "adb", adbExecFile)
-		if _, err := os.Stat(adb); os.IsNotExist(err) {
+		if _, err := os.Stat(adb); err == nil {
 			adb = p
 			return
 		}
@@ -154,6 +154,9 @@ func (c *Cmd) Call() (string, error) {
 	return stdout.String(), err
 }
 
-func IsAdbReady() bool {
-	return adb != ""
+func IsAdbReady() error {
+	if adb == "" {
+		return ErrADBNotFound
+	}
+	return nil
 }

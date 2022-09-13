@@ -23,7 +23,7 @@ func init() {
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {
 		p := filepath.Join(filepath.Dir(execPath), "lib", "scrcpy", scrcpyExecFile)
-		if _, err := os.Stat(p); os.IsNotExist(err) {
+		if _, err := os.Stat(p); err == nil {
 			scrcpy = p
 			return
 		}
@@ -38,7 +38,7 @@ func StartScrcpy(serial, recFile string) (*Cmd, error) {
 			"-s", serial,
 			"--max-fps", "60",
 			// "-n", // no-control
-			// "-w", // stay awake
+			"-w", // stay awake
 			"-Nr", recFile,
 		},
 	}

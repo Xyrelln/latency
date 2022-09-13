@@ -56,13 +56,13 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 
 // 检查 app 环境信息
 func (a *Api) IsAppReady() error {
-	ok := adb.IsAdbReady()
-	if !ok {
+	err := adb.IsAdbReady()
+	if err != nil {
 		log.Error("adb path wrong")
-		return errors.New("adb path wrong")
+		return err
 	}
 
-	err := cmd.IsFFmpegReady()
+	err = cmd.IsFFmpegReady()
 	if err != nil {
 		log.Error("ffmpeg path wrong")
 		return err

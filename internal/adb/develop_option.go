@@ -1,7 +1,6 @@
 package adb
 
 import (
-	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -21,12 +20,10 @@ func (d *Device) SetPointerLocationOff() error {
 func (d *Device) IsPointerLocationOn() (bool, error) {
 	//cmd := strings.Split("get system pointer_location", " ")
 	out, err := d.Command("settings get system pointer_location").Call()
-	log.Infof("IsPointerLocationOn out : %s", out)
-	log.Infof("IsPointerLocationOn out len : %d", len(out))
 	if err != nil {
 		return false, err
 	}
-	
+
 	if strings.TrimSpace(out) == "1" {
 		return true, nil
 	}
