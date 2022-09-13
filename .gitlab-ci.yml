@@ -4,7 +4,7 @@ variables:
 stages:
   # - test
   - build
-  # - delivery
+  - delivery
 
 # Test:
 #   stage: test
@@ -70,27 +70,30 @@ CompileWinAmd64:
     paths:
       - build/bin/latency-mobile.exe
     expire_in: 24 hrs
-# PubBin:
-#   stage: delivery
-#   tags:
-#     - pc-windows
-#   before_script:
-#     - '[System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8'
-#   dependencies:
-#     - CompileWin
-#   # when: manual
-#   script:
-#     - '$PERFTOOL_PKG = "perftool-win-$env:CI_COMMIT_TAG"'
-#     - 'mkdir $PERFTOOL_PKG'
-#     - 'cp .\build\bin\perftool.exe $PERFTOOL_PKG\'
-#     - 'mkdir $PERFTOOL_PKG\adb'
-#     - 'cp .\adb\win\* $PERFTOOL_PKG\adb\'
-#     - 'mkdir $PERFTOOL_PKG\bin'
-#     - 'cp .\bin\* $PERFTOOL_PKG\bin\'
-#     - Compress-Archive -Path .\$PERFTOOL_PKG -DestinationPath .\$PERFTOOL_PKG.zip
-#     - 'curl.exe -k --header "JOB-TOKEN: $env:CI_JOB_TOKEN" --upload-file .\$PERFTOOL_PKG.zip "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/packages/generic/perftool-$env:CI_COMMIT_TAG/$env:CI_COMMIT_TAG/$PERFTOOL_PKG.zip"'
-#   only:
-#     - tags
+
+PubBin:
+  stage: delivery
+  tags:
+    - pc-windows
+  before_script:
+    - '[System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8'
+  dependencies:
+    - CompileWinAmd64
+  variables:
+    SCRCPY_PATH: D:\github\scrcpy
+    FFMPEG_PATH: D:\github\ffmpeg\bin
+  script:
+    - '$LATENCY_PKG = "latency-mobile-win-$env:CI_COMMIT_TAG"'
+    - 'mkdir $LATENCY_PKG'
+    - 'cp .\build\bin\latency-mobile.exe $LATENCY_PKG\'
+    - 'mkdir $LATENCY_PKG\lib\scrcpy'
+    - 'cp $env:SCRCPY_PATH\* $LATENCY_PKG\lib\scrcpy\'
+    - 'mkdir $LATENCY_PKG\lib\ffmpeg'
+    - 'cp $env:FFMPEG_PATH\ffmpeg.exe $LATENCY_PKG\ffmpeg\ffmpeg.exe'
+    - Compress-Archive -Path .\$LATENCY_PKG -DestinationPath .\$LATENCY_PKG.zip
+    - 'curl.exe -k --header "JOB-TOKEN: $env:CI_JOB_TOKEN" --upload-file .\$LATENCY_PKG.zip "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/packages/generic/latenct-mobile-$env:CI_COMMIT_TAG/$env:CI_COMMIT_TAG/$LATENCY_PKG.zip"'
+  only:
+    - tags
 
 # PubMacArm:
 #   stage: delivery
