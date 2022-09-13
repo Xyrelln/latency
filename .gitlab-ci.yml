@@ -61,7 +61,7 @@ CompileMacAmd64:
 CompileWinAmd64:
   stage: build
   tags:
-    - mac
+    - pc-windows
   script:
     - go install github.com/wailsapp/wails/v2/cmd/wails@latest
     - echo $env:$PATH
