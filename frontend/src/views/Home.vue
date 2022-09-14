@@ -616,7 +616,7 @@ function handleGetImage() {
   border: solid 1px #e6e6e6;
   padding: 0.5rem;
   border-radius: 4px;
-  height: 86vh;
+  height: 80vh;
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 

@@ -15,6 +15,8 @@ package adb
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"testing"
@@ -195,4 +197,11 @@ func TestRegexp(t *testing.T) {
 	re2 := regexp.MustCompile(`displayHeight=[0-9]+`)
 	fmt.Printf("%s \n", re.Find([]byte(`{displayWidth=1080 displayHeight=2400 density={3.0} cuto`)))
 	fmt.Printf("%q\n", re2.FindAll([]byte(`{displayWidth=1080 displayHeight=2400 density={3.0} cuto`), -1))
+}
+
+func TestEnv(t *testing.T) {
+	fmt.Println(os.Environ())
+	fmt.Println(os.Getenv("ANDROID_HOME"))
+	fmt.Println(exec.LookPath("adb"))
+
 }

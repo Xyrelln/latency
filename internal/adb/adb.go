@@ -59,9 +59,11 @@ func init() {
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {
 		p := filepath.Join(filepath.Dir(execPath), "lib", "adb", adbExecFile)
-		if _, err := os.Stat(adb); err == nil {
+		if _, err := os.Stat(p); !os.IsNotExist(err) {
 			adb = p
 			return
+		} else {
+			log.Errorf("adb path check failed: %s, reason: %v ", p, err)
 		}
 	}
 }
@@ -105,6 +107,7 @@ func (c *Cmd) Run() error {
 	cs := append(cmdStart, strings.Join(args, " "))
 	//cs = append(cs, args...)
 	cmd := exec.Command(cs[0], cs[1:]...)
+	cmd.SysProcAttr = procAttrs
 	log.Infof("args: %v", cs)
 	//cmd := exec.Command(adb, args...)
 	cmd.Stdout = c.Stdout
@@ -124,6 +127,7 @@ func (c *Cmd) BackendRun() error {
 	args = append(args, c.Args...)
 	cs := append(cmdStart, strings.Join(args, " "))
 	cmd := exec.Command(cs[0], cs[1:]...)
+	cmd.SysProcAttr = procAttrs
 	cmd.Stdout = c.Stdout
 	cmd.Stderr = c.Stderr
 	return cmd.Start()

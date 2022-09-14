@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	"op-latency-mobile/internal/logger"
 	"op-latency-mobile/internal/utils"
 
 	"github.com/wailsapp/wails/v2"
@@ -64,10 +65,15 @@ func Run(assets embed.FS) int {
 	app.AppData = appData
 
 	ops := &options.App{
-		Title:  "op-latency-mobile",
-		Width:  1024,
-		Height: 768,
-		Assets: assets,
+		Title:     "latency-mobile",
+		Width:     820,
+		Height:    620,
+		MinWidth:  820,
+		MinHeight: 620,
+		MaxWidth:  1920,
+		MaxHeight: 1080,
+		Assets:    assets,
+		Logger:    logger.WailsLogger{},
 		// BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:     app.startup,
 		AssetsHandler: NewFileLoader(),

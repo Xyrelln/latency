@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,9 +23,12 @@ func init() {
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {
 		p := filepath.Join(filepath.Dir(execPath), "lib", "ffmpeg", ffmpegExecFile)
-		if _, err := os.Stat(p); err == nil {
+		if _, err := os.Stat(p); !os.IsNotExist(err) {
 			ffmpeg = p
 			return
+		} else {
+			fmt.Errorf("ffmpeg path check failed: %s, reason: %v ", p, err)
+			// log.Errorf("ffmpeg path check failed: %s, reason: v%", p, err)
 		}
 	}
 }
