@@ -1,15 +1,18 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/corona10/goimagehash"
 )
 
 func TestCropCurserArea(t *testing.T) {
 	var imageRect ImageRectInfo
-	fd, err := os.Open("/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/2022-09-01T15:33:13+08:00/images/0002.png")
+	fd, err := os.Open("/Users/jason/Downloads/mov/imgs/0066.png")
 	defer fd.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -29,7 +32,10 @@ func TestCropCurserArea(t *testing.T) {
 
 	rect, _ := GetCropRect(imageRect)
 	log.Print(rect)
-	cropImg, _ := CropImage(img, rect)
+
+	// touchArea := image.Rect(0, 0, 100, 35)
+	touchArea := image.Rect(0, 0, 50, 50)
+	cropImg, _ := CropImage(img, touchArea)
 
 	// cropImage, err := CropCurserArea("/Users/jason/Developer/epc/op-latency-mobile/out/image/4/0001.png")
 	// if err != nil {
@@ -42,7 +48,7 @@ func TestCropCurserArea(t *testing.T) {
 	// 	}
 	// }
 
-	err = SaveImage("/Users/jason/Developer/epc/op-latency-mobile/out/image/crop/1537-0001.png", cropImg)
+	err = SaveImage("/Users/jason/Downloads/mov/crop/0002.png", cropImg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,8 +59,35 @@ func TestLoadImage(t *testing.T) {
 
 }
 
+func TestAvageHash(t *testing.T) {
+	fd, err := os.Open("/Users/jason/Downloads/mov/imgs/0064.png")
+	if err != nil {
+		log.Fatal(err)
+		// return nil, err
+	}
+	defer fd.Close()
+	img, _, _ := image.Decode(fd)
+	touchArea := image.Rect(0, 0, 1920, 35)
+	cropImg, _ := CropImage(img, touchArea)
+	extImgHashT1, _ := goimagehash.ExtDifferenceHash(cropImg, 16, 16)
+
+	fd2, err := os.Open("/Users/jason/Downloads/mov/imgs/0065.png")
+	if err != nil {
+		log.Fatal(err)
+		// return nil, err
+	}
+	defer fd2.Close()
+	img2, _, _ := image.Decode(fd2)
+	cropImg2, _ := CropImage(img2, touchArea)
+	extImgHashT2, _ := goimagehash.ExtDifferenceHash(cropImg2, 16, 16)
+	score, _ := extImgHashT1.Distance(extImgHashT2)
+	fmt.Printf("current score: %d", score)
+	log.Printf("current score: %d", score)
+
+}
+
 func TestCalcTime(t *testing.T) {
-	imagePath := "/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/20220911175724.387/images"
+	imagePath := "/Users/jason/Downloads/mov/imgs"
 	imgRect := ImageRectInfo{
 		X:             20,
 		Y:             26,

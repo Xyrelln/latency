@@ -605,7 +605,7 @@ function handleGetImage() {
                 版本号
               </el-col>
               <el-col :span="4">
-                0.0.5
+                0.0.6
               </el-col>
             </el-row>
           </div>
