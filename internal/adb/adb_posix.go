@@ -22,5 +22,7 @@ import (
 )
 
 var adbExecFile = "adb"
-var cmdStart = []string{"/bin/sh", "-c"}
+
+// var cmdStart = []string{"/bin/sh", "-c"}
+var cmdStart = []string{}
 var procAttrs = &unix.SysProcAttr{Setpgid: true}

@@ -104,7 +104,7 @@ func (c *Cmd) Run() error {
 	}
 	args = append(args, c.Args...)
 
-	cs := append(cmdStart, strings.Join(args, " "))
+	cs := append(cmdStart, args...)
 	//cs = append(cs, args...)
 	cmd := exec.Command(cs[0], cs[1:]...)
 	cmd.SysProcAttr = procAttrs
@@ -125,7 +125,8 @@ func (c *Cmd) BackendRun() error {
 		args = append(args, "shell", c.Path)
 	}
 	args = append(args, c.Args...)
-	cs := append(cmdStart, strings.Join(args, " "))
+	// cs := append(cmdStart, strings.Join(args, " "))
+	cs := append(cmdStart, args...)
 	cmd := exec.Command(cs[0], cs[1:]...)
 	cmd.SysProcAttr = procAttrs
 	cmd.Stdout = c.Stdout

@@ -358,7 +358,7 @@ async function addEventLister() {
   EventsOn("latency:record_start", ()=>{
     console.log("record_start")
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 1/3',
       type: 'info',
       message: "开始录制",
     })
@@ -374,7 +374,7 @@ async function addEventLister() {
   })
   EventsOn("latency:transform_start", ()=>{
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 2/3',
       type: 'success',
       message: "数据预处理中，请稍后...",
       duration: 6000,
@@ -383,7 +383,7 @@ async function addEventLister() {
   })
   EventsOn("latency:transform_start_error", ()=>{
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 2/3',
       type: 'error',
       message: "数据预处理失败，请重试",
       duration: 0,
@@ -392,7 +392,7 @@ async function addEventLister() {
   })
   EventsOn("latency:record_start_error", ()=>{
     ElNotification({
-      title: '进度提示',
+      title: '进度提示: 2/3',
       type: 'error',
       message: "录制失败，请重试",
       duration: 0,
