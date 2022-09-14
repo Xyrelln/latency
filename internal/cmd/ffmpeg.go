@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -13,12 +12,12 @@ var ErrFFmpegNotFound = errors.New("ffmpeg command not found on PATH")
 
 func init() {
 	// Fallback to searching on PATH.
-	if p, err := exec.LookPath(ffmpegExecFile); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			ffmpeg = p
-			return
-		}
-	}
+	// if p, err := exec.LookPath(ffmpegExecFile); err == nil {
+	// 	if p, err = filepath.Abs(p); err == nil {
+	// 		ffmpeg = p
+	// 		return
+	// 	}
+	// }
 
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {

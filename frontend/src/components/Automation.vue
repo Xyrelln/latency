@@ -229,6 +229,10 @@ async function handleStartRun() {
   status.value = 1
 }
 
+function handleSubmit() {
+  
+}
+
 
 async function handleStopRun() {
   SetAutoSwipeOff()
@@ -260,6 +264,7 @@ function handleDeviceChange(value: string) {
 </script>
 
 <template>
+  <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
   <div>
     <el-form
       ref="formRef"
@@ -352,8 +357,9 @@ function handleDeviceChange(value: string) {
         </el-col>
       </el-form-item>
       <el-form-item>
-          <el-button type="primary" v-if="status===0" @click="handleStartRun">开始</el-button>
-          <el-button type="danger" v-if="status===1" @click="handleStopRun">停止</el-button>
+        <el-button type="primary" @click="handleSubmit">保存</el-button>
+          <!-- <el-button type="primary" v-if="status===0" @click="handleStartRun">开始</el-button>
+          <el-button type="danger" v-if="status===1" @click="handleStopRun">停止</el-button> -->
       </el-form-item>
       </el-form>
 
@@ -400,6 +406,7 @@ function handleDeviceChange(value: string) {
     <!-- </el-form> -->
 
     </div>
+  </el-scrollbar>
 </template>
 
 <style>

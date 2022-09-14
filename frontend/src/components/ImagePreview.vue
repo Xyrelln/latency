@@ -72,8 +72,8 @@ function handleImageAnalyse() {
 
 const scene_dwrg_crop = reactive({
   top: 26,
-  left: 20,
-  width: 446,
+  left: 0,
+  width: 466,
   height: 90
 })
 

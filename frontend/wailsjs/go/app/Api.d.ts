@@ -3,7 +3,7 @@
 import {adb} from '../models';
 import {core} from '../models';
 
-export function ClearCacheData():void;
+export function ClearCacheData():Promise<void>;
 
 export function GetDisplay(arg1:string):Promise<adb.Display>;
 

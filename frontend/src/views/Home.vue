@@ -538,9 +538,6 @@ function handleGetImage() {
                           <el-form-item label="录制时长(秒)" prop="timeout">
                             <el-input v-model.number="settingForm.timeout"/>
                           </el-form-item>
-                          <!-- <el-form-item label="准备时长(秒)" prop="prepareTimeout">
-                            <el-input v-model.number="settingForm.prepareTimeout"/>
-                          </el-form-item> -->
                           <el-form-item label="调试开关">
                             <el-switch v-model="settingForm.develop" />
                           </el-form-item>
@@ -589,9 +586,9 @@ function handleGetImage() {
           </el-container>
         </el-scrollbar>
       </el-tab-pane>
-      <!-- <el-tab-pane label="滑动工具" name="automation" disabled>
-          <Automation/>
-      </el-tab-pane> -->
+      <el-tab-pane label="自动场景配置" name="automation">
+        <Automation/>
+      </el-tab-pane>
       <el-tab-pane label="关于" name="about">
         <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
           <div class="describe">

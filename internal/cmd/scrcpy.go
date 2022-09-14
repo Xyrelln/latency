@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -14,12 +13,12 @@ var scrcpy string
 
 func init() {
 	// Fallback to searching on PATH
-	if p, err := exec.LookPath(scrcpyExecFile); err == nil {
-		if p, err = filepath.Abs(p); err == nil {
-			scrcpy = p
-			return
-		}
-	}
+	// if p, err := exec.LookPath(scrcpyExecFile); err == nil {
+	// 	if p, err = filepath.Abs(p); err == nil {
+	// 		scrcpy = p
+	// 		return
+	// 	}
+	// }
 
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {
@@ -37,6 +36,7 @@ func StartScrcpy(serial, recFile string) (*Cmd, error) {
 	cmd := Cmd{
 		Args: []string{
 			scrcpy,
+			"--codec-options", "bitrate-mode=2", // https://developer.android.com/reference/android/media/MediaCodecInfo.EncoderCapabilities#BITRATE_MODE_CBR
 			"--no-cleanup",
 			"-s", serial,
 			"--max-fps", "60",
