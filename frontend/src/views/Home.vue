@@ -548,7 +548,7 @@ function handleGetImage() {
                             <el-button @click="handleClearCache">清理缓存数据</el-button>
                           </el-form-item>
                           <el-form-item label="其他">
-                            <el-button @click="handleReload">reload</el-button>
+                            <el-button @click="handleReload">重新加载</el-button>
                           </el-form-item>
                         </el-form>
                       </el-row>
@@ -577,9 +577,7 @@ function handleGetImage() {
                       </div>
                     <!-- </el-scrollbar> -->
                   </el-tab-pane>
-                  <el-tab-pane label="关于" name="about" disabled>
-                    <span>www.vrviu.com</span>
-                  </el-tab-pane>
+                 
                 </el-tabs>
             </el-aside>
             <el-main class="main-content">
@@ -591,10 +589,30 @@ function handleGetImage() {
           </el-container>
         </el-scrollbar>
       </el-tab-pane>
-      <el-tab-pane label="滑动工具" name="automation" disabled>
-        <!-- <el-scrollbar style="height:calc(100vh - 120px);width: calc(100vw - 60px)"> -->
+      <!-- <el-tab-pane label="滑动工具" name="automation" disabled>
           <Automation/>
-        <!-- </el-scrollbar> -->
+      </el-tab-pane> -->
+      <el-tab-pane label="关于" name="about">
+        <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
+          <div class="describe">
+            <el-row>
+              <el-col :span="4">
+                版权所有
+              </el-col>
+              <el-col :span="8">
+                云天畅享 http://www.ivcloud.net/
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="4">
+                版本号
+              </el-col>
+              <el-col :span="4">
+                0.0.5
+              </el-col>
+            </el-row>
+          </div>
+        </el-scrollbar>
       </el-tab-pane>
     </el-tabs>
    
@@ -627,5 +645,9 @@ function handleGetImage() {
   margin-left: 1rem;
   width: calc(100vw - 320px);
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
+}
+
+.describe {
+  opacity: 0.75;
 }
 </style>
