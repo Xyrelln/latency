@@ -33,4 +33,8 @@ export function StartRecord(arg1:string):Promise<Error>;
 
 export function StartTransform():Promise<Error>;
 
+export function StartWithVideo(arg1:string):Promise<Error>;
+
 export function StopScrcpyServer(arg1:string):Promise<Error>;
+
+export function Transform(arg1:string):Promise<Error>;

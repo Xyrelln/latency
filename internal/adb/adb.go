@@ -39,22 +39,22 @@ var adb string
 
 func init() {
 	// Search for ADB using ANDROID_HOME
-	// if home := os.Getenv("ANDROID_HOME"); home != "" {
-	// 	p, err := filepath.Abs(filepath.Join(home, "platform-tools", adbExecFile))
-	// 	if err == nil {
-	// 		if _, err := os.Stat(p); err == nil {
-	// 			adb = p
-	// 			return
-	// 		}
-	// 	}
-	// }
-	// // Fallback to searching on PATH.
-	// if p, err := exec.LookPath(adbExecFile); err == nil {
-	// 	if p, err = filepath.Abs(p); err == nil {
-	// 		adb = p
-	// 		return
-	// 	}
-	// }
+	//if home := os.Getenv("ANDROID_HOME"); home != "" {
+	//	p, err := filepath.Abs(filepath.Join(home, "platform-tools", adbExecFile))
+	//	if err == nil {
+	//		if _, err := os.Stat(p); err == nil {
+	//			adb = p
+	//			return
+	//		}
+	//	}
+	//}
+	//// // Fallback to searching on PATH.
+	//if p, err := exec.LookPath(adbExecFile); err == nil {
+	//	if p, err = filepath.Abs(p); err == nil {
+	//		adb = p
+	//		return
+	//	}
+	//}
 
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {

@@ -62,6 +62,14 @@ export function StartTransform() {
   return window['go']['app']['Api']['StartTransform']();
 }
 
+export function StartWithVideo(arg1) {
+  return window['go']['app']['Api']['StartWithVideo'](arg1);
+}
+
 export function StopScrcpyServer(arg1) {
   return window['go']['app']['Api']['StopScrcpyServer'](arg1);
+}
+
+export function Transform(arg1) {
+  return window['go']['app']['Api']['Transform'](arg1);
 }

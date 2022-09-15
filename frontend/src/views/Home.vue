@@ -26,6 +26,7 @@ import {
   GetImageFiles,
   InputSwipe,
   IsAppReady,
+  StartWithVideo,
   // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
@@ -68,6 +69,7 @@ const imagePreviewRef = ref()
 
 const topTabName = ref('latency')
 // const topTabName = ref('automation')
+const externalVideoPath = ref('')
 
 const tabName = ref('setting')
 const deviceInfo = reactive({
@@ -167,6 +169,9 @@ function getDeviceList (value: any) {
   })
 }
 
+function handleLoadExtVideo() {
+  StartWithVideo(externalVideoPath.value)
+}
 
 
 // async function handleStartRun() {
@@ -547,6 +552,10 @@ function handleGetImage() {
                           <el-form-item label="其他">
                             <el-button @click="handleReload">重新加载</el-button>
                           </el-form-item>
+                          <el-form-item label="视频地址">
+                            <el-input v-model="externalVideoPath"></el-input>
+                            <el-button @click="handleLoadExtVideo">加载</el-button>
+                          </el-form-item>
                         </el-form>
                       </el-row>
                     <!-- </el-scrollbar> -->
@@ -605,7 +614,7 @@ function handleGetImage() {
                 版本号
               </el-col>
               <el-col :span="4">
-                0.0.6
+                0.0.7
               </el-col>
             </el-row>
           </div>

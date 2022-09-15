@@ -13,12 +13,12 @@ var scrcpy string
 
 func init() {
 	// Fallback to searching on PATH
-	// if p, err := exec.LookPath(scrcpyExecFile); err == nil {
-	// 	if p, err = filepath.Abs(p); err == nil {
-	// 		scrcpy = p
-	// 		return
-	// 	}
-	// }
+	//if p, err := exec.LookPath(scrcpyExecFile); err == nil {
+	//	if p, err = filepath.Abs(p); err == nil {
+	//		scrcpy = p
+	//		return
+	//	}
+	//}
 
 	// Fallback to searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {

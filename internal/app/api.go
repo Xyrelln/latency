@@ -179,6 +179,17 @@ func (a *Api) Start(serial string, recordSecond int64) error {
 	return nil
 }
 
+// 启动延迟测试
+func (a *Api) StartWithVideo(videoPath string) error {
+	err := a.Transform(videoPath)
+	if err != nil {
+		a.emitInfo(eventTransformStartError)
+		return err
+	}
+	return nil
+}
+
+
 // 停止 scrcpy server
 func (a *Api) StopScrcpyServer(serial string) error {
 	device := adb.GetDevice(serial)
@@ -204,6 +215,22 @@ func (a *Api) StopScrcpyServer(serial string) error {
 //
 //	return a.Cmd.Kill()
 //}
+func (a *Api) Transform(videoPath string) error {
+	//srcVideoPath := filepath.Join(a.VideoDir, recordFile)
+	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
+	destImagePath := filepath.Join(a.ImagesDir, "%4d.png")
+	a.emitInfo(eventTransformStart)
+	cmd, err := cmd.StartFFmpeg(videoPath, destImagePath)
+	if err != nil {
+		log.Error(err)
+		a.emitInfo(eventTransformStartError)
+		return err
+	}
+
+	a.emitInfo(eventTransformFilish)
+	a.Cmd = cmd
+	return nil
+}
 
 func (a *Api) StartTransform() error {
 	log.Infof("prepare data")
