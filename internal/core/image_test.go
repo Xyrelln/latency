@@ -2,7 +2,6 @@ package core
 
 import (
 	"image"
-	"image/color"
 	"image/png"
 	"log"
 	"os"
@@ -13,7 +12,7 @@ import (
 
 func TestCropCurserArea(t *testing.T) {
 	var imageRect ImageRectInfo
-	fd, err := os.Open("/Users/jason/Downloads/mov/imgs/0066.png")
+	fd, err := os.Open("/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0008.png")
 	defer fd.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +34,7 @@ func TestCropCurserArea(t *testing.T) {
 	log.Print(rect)
 
 	// touchArea := image.Rect(0, 0, 100, 35)
-	touchArea := image.Rect(0, 0, 50, 50)
+	touchArea := image.Rect(0, 0, 100, 35)
 	cropImg, _ := CropImage(img, touchArea)
 
 	// cropImage, err := CropCurserArea("/Users/jason/Developer/epc/op-latency-mobile/out/image/4/0001.png")
@@ -49,14 +48,14 @@ func TestCropCurserArea(t *testing.T) {
 	// 	}
 	// }
 
-	err = SaveImage("/Users/jason/Downloads/mov/crop/0002.png", cropImg)
+	err = SaveImage("/Users/jason/Downloads/mov/crop/0008.png", cropImg)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func TestGrayImage(t *testing.T) {
-	filename := "/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0002.png"
+	filename := "/Users/jason/Downloads/mov/crop/0008.png"
 	infile, err := os.Open(filename)
 
 	if err != nil {
@@ -70,51 +69,10 @@ func TestGrayImage(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	// Create a new grayscale image
-	const whiteThreshold = uint8(256 / 2) // 128
-	bounds := imgSrc.Bounds()
-	w, h := bounds.Max.X, bounds.Max.Y
-	grayScale := image.NewGray(image.Rectangle{image.Point{0, 0}, image.Point{w, h}})
-	for x := 0; x < w; x++ {
-		for y := 0; y < h; y++ {
-			//imageColor := imgSrc.At(x, y)
-			//rr, gg, bb, _ := imageColor.RGBA()
-			//r := math.Pow(float64(rr), 2.2)
-			//g := math.Pow(float64(gg), 2.2)
-			//b := math.Pow(float64(bb), 2.2)
-			//m := math.Pow(0.2125*r+0.7154*g+0.0721*b, 1/2.2)
-			//Y := uint16(m + 0.5)
-			//grayColor := color.Gray{uint8(Y >> 8)}
-
-			pixel := imgSrc.At(x, y)
-			originalColor := color.RGBAModel.Convert(pixel).(color.RGBA)
-			modifiedColorValue := originalColor.R
-			if modifiedColorValue >= whiteThreshold {
-				modifiedColorValue = 255
-			} else {
-				modifiedColorValue = 0
-			}
-
-			modifiedColor := color.RGBA{
-				R: modifiedColorValue,
-				G: modifiedColorValue,
-				B: modifiedColorValue,
-				A: originalColor.A,
-			}
-
-			grayScale.Set(x, y, modifiedColor)
-
-			//oldPixel := imgSrc.At(x, y)
-			//r, g, b, _ := oldPixel.RGBA()
-			//lum := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-			//grayColor := color.Gray{uint8(lum / 256)}
-			//
-			//grayScale.Set(x, y, grayColor)
-		}
-	}
+	bwImg := RGBtoBlackAndWhite(imgSrc,60)
 
 	// Encode the grayscale image to the new file
-	newFileName := "/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0001-gray4.png"
+	newFileName := "//Users/jason/Downloads/mov/crop/0008-gray.png"
 	newfile, err := os.Create(newFileName)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile.Name(), err)
@@ -123,7 +81,7 @@ func TestGrayImage(t *testing.T) {
 
 	}
 	defer newfile.Close()
-	png.Encode(newfile,grayScale)
+	png.Encode(newfile,bwImg)
 }
 
 //func TestLoadImage(t *testing.T) {
@@ -185,7 +143,7 @@ func TestAvageHash(t *testing.T) {
 }
 
 func TestCalcTime(t *testing.T) {
-	imagePath := "/Users/jason/Downloads/mov/5"
+	imagePath := "/Users/jason/Downloads/mov/6/images"
 	imgRect := ImageRectInfo{
 		X:             20,
 		Y:             26,

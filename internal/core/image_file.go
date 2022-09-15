@@ -16,7 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-const WhiteThreshold = uint8(256 / 2) // 128
+const WhiteThreshold = 60
 
 type ImageFile struct {
 	Path string
@@ -251,7 +251,7 @@ func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) (float64, 
 			} else {
 				//diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
 				_, diffTop, _ := CompareImages(imageFile.TouchAreaImg, previousImg.TouchAreaImg)
-				if diffTop >= 4 {
+				if diffTop >= 6 {
 					log.Printf("find diffTop: %f > threshold, index: %d", diffTop, index)
 					touched = true
 					touchedIndex = index
