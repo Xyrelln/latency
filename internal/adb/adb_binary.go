@@ -16,10 +16,10 @@ const _DeviceState_name = "offlinedeviceunauthorizedhost"
 var _DeviceState_map = map[DeviceState]string{}
 
 func init() {
-	_DeviceState_map[0] = _DeviceState_name[0:7]
-	_DeviceState_map[1] = _DeviceState_name[7:13]
-	_DeviceState_map[2] = _DeviceState_name[13:25]
-	_DeviceState_map[3] = _DeviceState_name[25:29]
+	_DeviceState_map[0] = "offline"
+	_DeviceState_map[1] = "device"
+	_DeviceState_map[2] = "unauthorized"
+	_DeviceState_map[3] = "host"
 	// ConstantValues = append(ConstantValues, schema.ConstantSet{
 	// 	Type: &schema.Primitive{Name: "DeviceState", Method: schema.Int32},
 	// 	Entries: []schema.Constant{
