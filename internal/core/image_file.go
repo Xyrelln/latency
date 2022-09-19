@@ -22,11 +22,11 @@ type ImageFile struct {
 	Path string
 	Img  image.Image
 	// ExtImgHash  *goimagehash.ExtImageHash
-	ExtImgHashT *goimagehash.ExtImageHash // touch area
-	ExtImgHashC *goimagehash.ExtImageHash // center area
+	ExtImgHashT  *goimagehash.ExtImageHash // touch area
+	ExtImgHashC  *goimagehash.ExtImageHash // center area
 	TouchAreaImg image.Image
-	ScoreT      int
-	ScoreC      int
+	ScoreT       int
+	ScoreC       int
 }
 
 type ImageRectInfo struct {
@@ -103,54 +103,6 @@ func GetCropRect(imageRect ImageRectInfo) (image.Rectangle, error) {
 	return cropRect, nil
 }
 
-//func ListImageFile(dirName string) ([]ImageFile, error) {
-//	// var images []image.Image
-//	var imgs []ImageFile
-//	var eg errgroup.Group
-//	touchArea := image.Rect(0, 0, 100, 35)
-//
-//	_ = filepath.Walk(
-//		dirName,
-//		func(path string, info os.FileInfo, e error) error {
-//			eg.Go(func() error {
-//				img, err := LoadImage(path, info, e)
-//				if img != nil {
-//					// log.Println(path)
-//					// images = append(images, img)
-//					cropImgT, _ := CropImage(img, touchArea)
-//					extImgHashT, _ := goimagehash.ExtAverageHash(cropImgT, 8, 8)
-//
-//					width := img.Bounds().Dx() // @todo get x,y by phone
-//					height := img.Bounds().Dy()
-//					centerArea := image.Rect(width/4, height/4, width/4*3, height/4*3)
-//					cropImgC, _ := CropImage(img, centerArea)
-//					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
-//					imgs = append(imgs, ImageFile{
-//						Path:        path,
-//						Img:         img,
-//						ExtImgHashC: extImgHashC,
-//						ExtImgHashT: extImgHashT,
-//					})
-//				}
-//				return err
-//			})
-//			return nil
-//		},
-//	)
-//	err := eg.Wait()
-//	if err != nil {
-//		log.Errorf("Specified directory with images inside does not exists or is corrupted: %v", err)
-//		return nil, err
-//	}
-//	// sorted
-//	sort.Slice(imgs, func(i, j int) bool {
-//		return imgs[i].Path < imgs[j].Path // filename as 0001   0002
-//	})
-//
-//	log.Printf("image count: %d", len(imgs))
-//	return imgs, nil
-//}
-
 func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, error) {
 	// var images []image.Image
 	var imgs []ImageFile
@@ -170,10 +122,10 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 					cropImgC, _ := CropImage(img, rect)
 					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
 					imgs = append(imgs, ImageFile{
-						Path:        path,
-						Img:         img,
+						Path:         path,
+						Img:          img,
 						TouchAreaImg: blackWhiteImg,
-						ExtImgHashC: extImgHashC,
+						ExtImgHashC:  extImgHashC,
 						//ExtImgHashT: extImgHashT,
 					})
 				}
