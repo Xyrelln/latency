@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -12,15 +13,7 @@ var ErrScrcpyNotFound = errors.New("scrcpy command not found on PATH")
 var scrcpy string
 
 func init() {
-	// Fallback to searching on PATH
-	//if p, err := exec.LookPath(scrcpyExecFile); err == nil {
-	//	if p, err = filepath.Abs(p); err == nil {
-	//		scrcpy = p
-	//		return
-	//	}
-	//}
-
-	// Fallback to searching on CurrentDirectory.
+	// searching on CurrentDirectory.
 	if execPath, err := os.Executable(); err == nil {
 		p := filepath.Join(filepath.Dir(execPath), "lib", "scrcpy", scrcpyExecFile)
 		if _, err := os.Stat(p); !os.IsNotExist(err) {
@@ -28,6 +21,14 @@ func init() {
 			return
 		} else {
 			fmt.Errorf("scrcpy path check failed: %s, reason: %v ", p, err)
+		}
+	}
+
+	// Fallback to searching on PATH
+	if p, err := exec.LookPath(scrcpyExecFile); err == nil {
+		if p, err = filepath.Abs(p); err == nil {
+			scrcpy = p
+			return
 		}
 	}
 }

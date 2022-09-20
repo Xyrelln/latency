@@ -205,3 +205,16 @@ func TestEnv(t *testing.T) {
 	fmt.Println(exec.LookPath("adb"))
 
 }
+
+func TestDisplaySize(t *testing.T) {
+	devices, _ := Devices()
+	size, _ := devices[0].DisplaySize()
+	fmt.Printf("DisplaySize: %v", size)
+}
+
+func TestPhysicalSize(t *testing.T) {
+	devices, _ := Devices()
+	size, _ := devices[0].PhysicalSize()
+	fmt.Printf("PhysicalSize: %v", size)
+
+}

@@ -66,8 +66,8 @@ func Run(assets embed.FS) int {
 
 	ops := &options.App{
 		Title:     "latency-mobile",
-		Width:     820,
-		Height:    620,
+		Width:     900,
+		Height:    720,
 		MinWidth:  820,
 		MinHeight: 620,
 		MaxWidth:  1920,

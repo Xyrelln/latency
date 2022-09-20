@@ -18,6 +18,10 @@ export function GetImageFiles() {
   return window['go']['app']['Api']['GetImageFiles']();
 }
 
+export function GetPhysicalSize(arg1) {
+  return window['go']['app']['Api']['GetPhysicalSize'](arg1);
+}
+
 export function InputSwipe(arg1, arg2) {
   return window['go']['app']['Api']['InputSwipe'](arg1, arg2);
 }

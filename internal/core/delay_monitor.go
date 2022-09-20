@@ -5,19 +5,23 @@ import (
 	"fmt"
 	"image"
 	"op-latency-mobile/internal/ffprobe"
-	"path"
+	"strconv"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	recordFile     = "rec.mp4"
-	firstImageFile = "0001.png"
+	recordFile      = "rec.mp4"
+	firstImageFile  = "0001.png"
+	defaultTimeBase = float64(1.0 / 90000.0)
 )
 
 type DelayMonitor struct {
 	VideoFolder         string          `json:"video_folder,omitempty"`
+	VideoPath           string          `json:"video_path,omitempty"`
+	VideoTimeBase       float64         `json:"video_time_base,omitempty"`
 	ImagesFolder        string          `json:"images_folder,omitempty"`
 	BlackWhiteThreshold int             `json:"black_white_threshold,omitempty"`
 	PointerRect         image.Rectangle `json:"pointer_rect,omitempty"`
@@ -30,8 +34,8 @@ func (dm *DelayMonitor) PTSPackets() (*ffprobe.PTSPackets, error) {
 	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFn()
 
-	videoPath := path.Join(dm.VideoFolder, recordFile)
-	data, err := ffprobe.ProbePTS(ctx, videoPath)
+	// videoPath := path.Join(dm.VideoFolder, recordFile)
+	data, err := ffprobe.ProbePTS(ctx, dm.VideoPath)
 	if err != nil {
 		log.Errorf("Error getting data: %v", err)
 		return nil, err
@@ -39,11 +43,11 @@ func (dm *DelayMonitor) PTSPackets() (*ffprobe.PTSPackets, error) {
 	return data, nil
 }
 
-func (dm *DelayMonitor) ProbeData(filePath string) (*ffprobe.ProbeData, error) {
+func (dm *DelayMonitor) ProbeData() (*ffprobe.ProbeData, error) {
 	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFn()
 
-	data, err := ffprobe.ProbeURL(ctx, filePath)
+	data, err := ffprobe.ProbeURL(ctx, dm.VideoPath)
 	if err != nil {
 		log.Errorf("Error getting data: %v", err)
 		return nil, err
@@ -122,7 +126,35 @@ func NewDelayMonitor() *DelayMonitor {
 func (dm *DelayMonitor) Run() (*float64, error) {
 	startFrame, endFrame, err := dm.FrameSpacing()
 	if err != nil {
-		return nil, fmt.Errorf("delay monitor run failed:%v", err)
+		return nil, fmt.Errorf("get frame spacing error:%v", err)
+	}
+
+	streamData, err := dm.ProbeData()
+	if err != nil {
+		log.Errorf("get probe stream infomation error:%v", err)
+		log.Infof("set default timebase %f", defaultTimeBase)
+		dm.VideoTimeBase = defaultTimeBase
+		// return nil, fmt.Errorf("get probe stream infomation error:%v", err)
+	} else {
+		timeBaseValue := streamData.FirstVideoStream().TimeBase
+		timeBase := strings.Split(timeBaseValue, "/")
+		if len(timeBase) != 2 {
+			log.Infof("timebase read err: %s", timeBaseValue)
+		}
+		d, err := strconv.ParseFloat(timeBase[0], 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse time_base failed:%v", err)
+		}
+		m, err := strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse time_base failed:%v", err)
+		}
+		// timeBase, err := strconv.ParseFloat(timeBase[0], 64) / strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("parse time_base failed:%v", err)
+		// }
+		log.Infof("set timebase %f", timeBase)
+		dm.VideoTimeBase = d / m
 	}
 
 	ptsPackets, err := dm.PTSPackets()

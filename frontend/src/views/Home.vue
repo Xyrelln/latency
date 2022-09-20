@@ -27,6 +27,7 @@ import {
   InputSwipe,
   IsAppReady,
   StartWithVideo,
+  GetPhysicalSize,
   // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
@@ -35,6 +36,7 @@ import {
   EventsOff,
   WindowReload,
 } from '../../wailsjs/runtime/runtime'
+import { stat } from 'fs'
 
 const deviceSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
@@ -80,8 +82,8 @@ const deviceInfo = reactive({
   // mem_total: 0,
   // openGLES_version: '',
   // product_model: '',
-  width: 0,
-  height: 0,
+  width: 1080,
+  height: 1920,
 })
 
 const imageInfo = reactive({
@@ -226,7 +228,10 @@ async function handleStartRecord() {
   NProgress.start()
   const result = await setPointerLocationOn()
 
-  await handleGetDisplay()
+  const status = await handleGetDisplay()
+  if (!status) {
+    await handleGetPhysicalSize()
+  }
 
   Start(deviceSelected.value, settingForm.timeout)
 
@@ -425,14 +430,41 @@ function getFirstImage(){
   })
 }
 
-async function handleGetDisplay() {
-  await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
+async function handleGetPhysicalSize() {
+  let status = false
+  // await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
+  //     deviceInfo.width = res.width
+  //     deviceInfo.height = res.height
+  // }).catch(err => {
+  //   // deviceInfo.width = 1080
+  //   // deviceInfo.height = 1920
+  //   console.log(err)
+  // })
+
+  await GetPhysicalSize(deviceSelected.value).then((res: adb.Display) => {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
   }).catch(err => {
-    deviceInfo.width = 720
-    deviceInfo.height = 1080
+    // deviceInfo.width = 1080
+    // deviceInfo.height = 1920
+    console.log(err)
   })
+  return status
+}
+
+
+async function handleGetDisplay() {
+  let status = false
+  await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
+      deviceInfo.width = res.width
+      deviceInfo.height = res.height
+      status = true
+  }).catch(err => {
+    // deviceInfo.width = 1080
+    // deviceInfo.height = 1920
+    console.log(err)
+  })
+  return status
 }
 
 async function removeEventLister() {
@@ -614,7 +646,7 @@ function handleGetImage() {
                 版本号
               </el-col>
               <el-col :span="4">
-                0.0.7
+                0.0.8
               </el-col>
             </el-row>
           </div>

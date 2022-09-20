@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image"
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
+	"op-latency-mobile/internal/ffprobe"
 	"op-latency-mobile/internal/utils"
 	"path/filepath"
 	"strings"
@@ -68,6 +70,12 @@ func (a *Api) IsAppReady() error {
 		return err
 	}
 
+	err = ffprobe.IsFFprobeReady()
+	if err != nil {
+		log.Error("ffprobe path wrong")
+		return err
+	}
+
 	err = cmd.IsScrcpyReady()
 	if err != nil {
 		log.Error("scrcpy path wrong")
@@ -80,6 +88,15 @@ func (a *Api) IsAppReady() error {
 func (a *Api) GetDisplay(serial string) (*adb.Display, error) {
 	device := adb.GetDevice(serial)
 	display, err := device.DisplaySize()
+	if err != nil {
+		return nil, err
+	}
+	return display, nil
+}
+
+func (a *Api) GetPhysicalSize(serial string) (*adb.Display, error) {
+	device := adb.GetDevice(serial)
+	display, err := device.PhysicalSize()
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +206,6 @@ func (a *Api) StartWithVideo(videoPath string) error {
 	return nil
 }
 
-
 // 停止 scrcpy server
 func (a *Api) StopScrcpyServer(serial string) error {
 	device := adb.GetDevice(serial)
@@ -264,11 +280,21 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 }
 
 func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, diffScore int) error {
-	log.Infof("current rect: %v", imageRect)
-	log.Infof("workdir: %s", a.ImagesDir)
-	a.emitInfo(eventAnalyseStart)
-	responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect, diffScore)
-	a.emitData(eventAnalyseFilish, responseTimes)
+	// log.Infof("current rect: %v", imageRect)
+	// log.Infof("workdir: %s", a.ImagesDir)
+	// a.emitInfo(eventAnalyseStart)
+	// responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect, diffScore)
+
+	dm := core.NewDelayMonitor()
+	dm.VideoPath = filepath.Join(a.VideoDir, recordFile)
+	dm.ImagesFolder = a.ImagesDir
+	dm.PointerRect = image.Rect(0, 0, 100, 35)
+	dm.SceneRect = imageRect
+	costTime, err := dm.Run()
+	if err != nil {
+		fmt.Printf("delay monitor run failed:%v", err)
+	}
+	a.emitData(eventAnalyseFilish, costTime)
 	return nil
 }
 
