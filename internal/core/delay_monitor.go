@@ -60,9 +60,14 @@ func (dm *DelayMonitor) FrameSpacingTime(ptsPackets *ffprobe.PTSPackets, startFr
 		return nil, fmt.Errorf("end frame must greater than start frame")
 	}
 
+	if len(ptsPackets.Packets) < endFrame {
+		return nil, fmt.Errorf("wrong pts packets data")
+	}
 	ptsSpaceing := ptsPackets.Packets[endFrame].PTS - ptsPackets.Packets[startFrame].PTS
 	// timeBase := 1/90000
-	t := float64(ptsSpaceing) * 1000.0 / 90000.0
+	// t := float64(ptsSpaceing) * 1000.0 / 90000.0
+	// change seconds to milesecond
+	t := float64(ptsSpaceing) * 1000.0 * dm.VideoTimeBase
 	return &t, nil
 
 }
@@ -139,33 +144,40 @@ func (dm *DelayMonitor) Run() (*float64, error) {
 		timeBaseValue := streamData.FirstVideoStream().TimeBase
 		timeBase := strings.Split(timeBaseValue, "/")
 		if len(timeBase) != 2 {
-			log.Infof("timebase read err: %s", timeBaseValue)
+			log.Errorf("timebase read err: %s", timeBaseValue)
+			return nil, fmt.Errorf("timebase read failed:%v", err)
 		}
 		d, err := strconv.ParseFloat(timeBase[0], 64)
 		if err != nil {
+			log.Errorf("parse time_base d error:%v", err)
 			return nil, fmt.Errorf("parse time_base failed:%v", err)
 		}
 		m, err := strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
 		if err != nil {
+			log.Errorf("parse time_base m failed:%v", err)
 			return nil, fmt.Errorf("parse time_base failed:%v", err)
 		}
 		// timeBase, err := strconv.ParseFloat(timeBase[0], 64) / strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
 		// if err != nil {
 		// 	return nil, fmt.Errorf("parse time_base failed:%v", err)
 		// }
-		log.Infof("set timebase %f", timeBase)
+		log.Infof("set timebase %f / %f", d, m)
 		dm.VideoTimeBase = d / m
 	}
 
 	ptsPackets, err := dm.PTSPackets()
 	if err != nil {
+		log.Errorf("get pts packets failed:%v", err)
 		return nil, fmt.Errorf("delay monitor run failed:%v", err)
 	}
+	log.Infof("get pts packets sucess, packets: %v", ptsPackets.Packets)
+	log.Infof("get pts packets sucess, total packets: %d", len(ptsPackets.Packets))
 
 	spacingTime, err := dm.FrameSpacingTime(ptsPackets, startFrame, endFrame)
 	if err != nil {
+		log.Errorf("get frame spacing time failed:%v", err)
 		return nil, fmt.Errorf("delay monitor run failed:%v", err)
 	}
-
+	log.Infof("get frame spacing time sucess, time: %f", *spacingTime)
 	return spacingTime, nil
 }

@@ -104,7 +104,7 @@ type PTS struct {
 }
 
 type PTSPackets struct {
-	Packets []*PTS `json:"packets,omitempty"`
+	Packets []PTS `json:"packets,omitempty"`
 }
 
 // StartTime returns the start time of the media file as a time.Duration

@@ -14,6 +14,7 @@ import (
 	"op-latency-mobile/internal/logger"
 	"op-latency-mobile/internal/utils"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
@@ -83,11 +84,12 @@ func Run(assets embed.FS) int {
 	}
 
 	// Create application with options
-	err = wails.Run(ops)
+	// err = wails.Run(ops)
+	log.Error(wails.Run(ops))
 
-	if err != nil {
-		println("Error:", err.Error())
-	}
+	// if err != nil {
+	// 	println("Error:", err.Error())
+	// }
 
 	return 0
 }

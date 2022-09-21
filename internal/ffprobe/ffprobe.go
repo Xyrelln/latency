@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	// "log"
-	"op-latency-mobile/internal/cmd"
+	// "op-latency-mobile/internal/cmd"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -132,80 +132,89 @@ func runProbe(cmd *exec.Cmd) (data *ProbeData, err error) {
 }
 
 // runProbe takes the fully configured ffprobe command and executes it, returning the ffprobe data if everything went fine.
-// func runProbe2(cmd *exec.Cmd) (data *PTSPackets, err error) {
-// 	var outputBuf bytes.Buffer
-// 	var stdErr bytes.Buffer
+func runProbe2(cmd *exec.Cmd) (data *PTSPackets, err error) {
+	var outputBuf bytes.Buffer
+	var stdErr bytes.Buffer
 
-// 	cmd.Stdout = &outputBuf
-// 	cmd.Stderr = &stdErr
+	cmd.Stdout = &outputBuf
+	cmd.Stderr = &stdErr
 
-// 	err = cmd.Run()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error running %s [%s] %w", ffprobe, stdErr.String(), err)
-// 	}
+	err = cmd.Run()
 
-// 	if stdErr.Len() > 0 {
-// 		return nil, fmt.Errorf("ffprobe error: %s", stdErr.String())
-// 	}
-
-// 	data = &PTSPackets{}
-// 	err = json.Unmarshal(outputBuf.Bytes(), data)
-// 	if err != nil {
-// 		// fmt.Print(outputBuf.Bytes())
-// 		log.Printf("Error getting data stdErr: %v", stdErr.Bytes())
-// 		log.Printf("Error getting data outputBuf: %v", outputBuf.Bytes())
-// 		return data, fmt.Errorf("error parsing ffprobe output: %w", err)
-// 	}
-
-// 	return data, nil
-// }
-
-func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string) (data *PTSPackets, err error) {
-	// ffprobe -v 0 -show_entries packet=pts,duration -of compact=p=0:nk=1 -read_intervals 999999 -select_streams v rec.mp4
-	// args := append([]string{
-	// 	"-loglevel", "fatal",
-	// 	"-print_format", "json",
-	// 	"-v", "0",
-	// 	"-show_entries", "packet=pts,duration",
-	// 	"-of", "compact=p=0:nk=1",
-	// 	"-read_intervals", "999999",
-	// 	"-select_streams", "v",
-	// }, extraFFProbeOptions...)
-
-	// // Add the file argument
-	// args = append(args, fileURL)
-
-	// cmd := exec.CommandContext(ctx, ffprobe, args...)
-	// cmd.SysProcAttr = procAttributes()
-
-	cmd := cmd.Cmd{
-		Args: []string{
-			ffprobe,
-			"-loglevel", "fatal",
-			// "-print_format", "json",
-			"-v", "0",
-			"-show_entries", "packet=pts,duration",
-			"-of", "compact=p=0:nk=1",
-			"-read_intervals", "999999",
-			"-select_streams", "v",
-			fileURL,
-			"-print_format", "json",
-		},
-	}
-	out, err := cmd.Call()
 	if err != nil {
-		fmt.Printf("cmd run error:%v", err)
+		return nil, fmt.Errorf("error running %s [%s] %v", ffprobe, stdErr.String(), err)
 	}
 
+	if stdErr.Len() > 0 {
+		return nil, fmt.Errorf("ffprobe error: %s", stdErr.String())
+	}
+
+	// log.Info("pts packets data: %s", outputBuf.String())
 	data = &PTSPackets{}
-	err = json.Unmarshal([]byte(out), data)
+
+	err = json.Unmarshal(outputBuf.Bytes(), data)
 	if err != nil {
-		log.Printf("getting probe data error: %s", out)
+		// fmt.Print(outputBuf.Bytes())
+		log.Printf("Error getting data stdErr: %v", stdErr.Bytes())
+		log.Printf("Error getting data outputBuf: %v", outputBuf.Bytes())
 		return data, fmt.Errorf("error parsing ffprobe output: %w", err)
 	}
 
 	return data, nil
-	// return runProbe2(cmd)
+}
+
+func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string) (data *PTSPackets, err error) {
+	// ffprobe -v 0 -show_entries packet=pts,duration -of compact=p=0:nk=1 -read_intervals 999999 -select_streams v rec.mp4
+	args := append([]string{
+		"-loglevel", "fatal",
+		// "-print_format", "json",
+		"-v", "0",
+		"-show_entries", "packet=pts,duration",
+		"-of", "compact=p=0:nk=1",
+		"-read_intervals", "999999",
+		"-select_streams", "v",
+		// fileURL,
+		"-print_format", "json",
+	}, extraFFProbeOptions...)
+
+	// // Add the file argument
+	args = append(args, fileURL)
+
+	cmd := exec.CommandContext(ctx, ffprobe, args...)
+	cmd.SysProcAttr = procAttributes()
+
+	// cmd := cmd.Cmd{
+	// 	Args: []string{
+	// 		ffprobe,
+	// 		"-loglevel", "fatal",
+	// 		// "-print_format", "json",
+	// 		"-v", "0",
+	// 		"-show_entries", "packet=pts,duration",
+	// 		"-of", "compact=p=0:nk=1",
+	// 		"-read_intervals", "999999",
+	// 		"-select_streams", "v",
+	// 		fileURL,
+	// 		"-print_format", "json",
+	// 	},
+	// }
+	// out, err := cmd.Call()
+	// if err != nil {
+	// 	log.Errorf("getting probe data error: %s", out)
+	// 	return nil, fmt.Errorf("getting probe data error: %s", err)
+	// 	// fmt.Printf("cmd run error:%v", err)
+	// }
+
+	// data = &PTSPackets{}
+	// log.Info("pts packets data: %s", out)
+	// err = json.Unmarshal([]byte(out), data)
+	// if err != nil {
+	// 	log.Info("getting probe data out: %s", out)
+	// 	log.Errorf("getting probe data error: %v", err)
+	// 	return nil, fmt.Errorf("error parsing ffprobe output: %w", err)
+	// }
+
+	// return data, nil
+	return runProbe2(cmd)
 }
 
 func IsFFprobeReady() error {
