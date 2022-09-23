@@ -6,7 +6,6 @@ import (
 	"image"
 	"op-latency-mobile/internal/ffprobe"
 	"strconv"
-	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -30,7 +29,7 @@ type DelayMonitor struct {
 	SceneThreshold      int             `json:"scene_threshold,omitempty"`
 }
 
-func (dm *DelayMonitor) PTSPackets() (*ffprobe.PTSPackets, error) {
+func (dm *DelayMonitor) PTSPackets() (*ffprobe.Packets, error) {
 	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFn()
 
@@ -55,20 +54,23 @@ func (dm *DelayMonitor) ProbeData() (*ffprobe.ProbeData, error) {
 	return data, nil
 }
 
-func (dm *DelayMonitor) FrameSpacingTime(ptsPackets *ffprobe.PTSPackets, startFrame, endFrame int) (*float64, error) {
+func (dm *DelayMonitor) FrameSpacingTime(packets *ffprobe.Packets, startFrame, endFrame int) (*float64, error) {
 	if endFrame < startFrame {
 		return nil, fmt.Errorf("end frame must greater than start frame")
 	}
 
-	if len(ptsPackets.Packets) < endFrame {
+	if len(packets.Packets) < endFrame {
 		return nil, fmt.Errorf("wrong pts packets data")
 	}
-	ptsSpaceing := ptsPackets.Packets[endFrame].PTS - ptsPackets.Packets[startFrame].PTS
+	// ptsSpaceing := ptsPackets.Packets[endFrame].Pts - ptsPackets.Packets[startFrame].PTS
+	endFramePtsTime, _ := strconv.ParseFloat(packets.Packets[endFrame].PtsTime, 64)
+	startFramePtsTime, _ := strconv.ParseFloat(packets.Packets[startFrame].PtsTime, 64)
 	// timeBase := 1/90000
 	// t := float64(ptsSpaceing) * 1000.0 / 90000.0
 	// change seconds to milesecond
-	t := float64(ptsSpaceing) * 1000.0 * dm.VideoTimeBase
-	return &t, nil
+	// t := float64(ptsSpaceing) * 1000.0 * dm.VideoTimeBase
+	spacingTime := (endFramePtsTime - startFramePtsTime) * 1000.0
+	return &spacingTime, nil
 
 }
 
@@ -98,10 +100,10 @@ func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
 			if touched {
 				diffCenter, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
 				if diffCenter >= dm.SceneThreshold {
-					log.Printf("find diffCenter: %d > threshold, index: %d", diffCenter, index)
+					log.Infof("find diffCenter: %d > threshold, index: %d", diffCenter, index)
 					costTime := (float64(index - startFrame)) * (1000.0 / 60.0)
 					// spacing = index - touchedIndex
-					log.Printf("old cost time: %f", costTime)
+					log.Infof("old cost time: %f", costTime)
 					return startFrame, index, nil
 					// return spacing, nil
 				}
@@ -109,7 +111,7 @@ func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
 				//diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
 				_, diffTop, _ := CompareImages(imageFile.TouchAreaImg, previousImg.TouchAreaImg)
 				if diffTop >= dm.PointerThreshold {
-					log.Printf("find diffTop: %f > threshold, index: %d", diffTop, index)
+					log.Infof("find diffTop: %f > threshold, index: %d", diffTop, index)
 					touched = true
 					startFrame = index
 				}
@@ -117,6 +119,7 @@ func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
 		}
 		previousImg = imageFile
 	}
+	log.Warn("failed to find start or end frame")
 	return startFrame, endFrame, fmt.Errorf("failed to find start or end frame")
 }
 
@@ -134,43 +137,46 @@ func (dm *DelayMonitor) Run() (*float64, error) {
 		return nil, fmt.Errorf("get frame spacing error:%v", err)
 	}
 
-	streamData, err := dm.ProbeData()
-	if err != nil {
-		log.Errorf("get probe stream infomation error:%v", err)
-		log.Infof("set default timebase %f", defaultTimeBase)
-		dm.VideoTimeBase = defaultTimeBase
-		// return nil, fmt.Errorf("get probe stream infomation error:%v", err)
-	} else {
-		timeBaseValue := streamData.FirstVideoStream().TimeBase
-		timeBase := strings.Split(timeBaseValue, "/")
-		if len(timeBase) != 2 {
-			log.Errorf("timebase read err: %s", timeBaseValue)
-			return nil, fmt.Errorf("timebase read failed:%v", err)
-		}
-		d, err := strconv.ParseFloat(timeBase[0], 64)
-		if err != nil {
-			log.Errorf("parse time_base d error:%v", err)
-			return nil, fmt.Errorf("parse time_base failed:%v", err)
-		}
-		m, err := strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
-		if err != nil {
-			log.Errorf("parse time_base m failed:%v", err)
-			return nil, fmt.Errorf("parse time_base failed:%v", err)
-		}
-		// timeBase, err := strconv.ParseFloat(timeBase[0], 64) / strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
-		// if err != nil {
-		// 	return nil, fmt.Errorf("parse time_base failed:%v", err)
-		// }
-		log.Infof("set timebase %f / %f", d, m)
-		dm.VideoTimeBase = d / m
-	}
+	// streamData, err := dm.ProbeData()
+	// if err != nil {
+	// 	log.Errorf("get probe stream infomation error:%v", err)
+	// 	log.Infof("set default timebase %f", defaultTimeBase)
+	// 	dm.VideoTimeBase = defaultTimeBase
+	// 	// return nil, fmt.Errorf("get probe stream infomation error:%v", err)
+	// } else {
+	// 	timeBaseValue := streamData.FirstVideoStream().TimeBase
+	// 	timeBase := strings.Split(timeBaseValue, "/")
+	// 	if len(timeBase) != 2 {
+	// 		log.Errorf("timebase read err: %s", timeBaseValue)
+	// 		return nil, fmt.Errorf("timebase read failed:%v", err)
+	// 	}
+	// 	d, err := strconv.ParseFloat(timeBase[0], 64)
+	// 	if err != nil {
+	// 		log.Errorf("parse time_base d error:%v", err)
+	// 		return nil, fmt.Errorf("parse time_base failed:%v", err)
+	// 	}
+	// 	m, err := strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
+	// 	if err != nil {
+	// 		log.Errorf("parse time_base m failed:%v", err)
+	// 		return nil, fmt.Errorf("parse time_base failed:%v", err)
+	// 	}
+	// 	// timeBase, err := strconv.ParseFloat(timeBase[0], 64) / strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
+	// 	// if err != nil {
+	// 	// 	return nil, fmt.Errorf("parse time_base failed:%v", err)
+	// 	// }
+	// 	log.Infof("set timebase %f / %f", d, m)
+	// 	dm.VideoTimeBase = d / m
+	// }
 
 	ptsPackets, err := dm.PTSPackets()
 	if err != nil {
 		log.Errorf("get pts packets failed:%v", err)
 		return nil, fmt.Errorf("delay monitor run failed:%v", err)
 	}
-	log.Infof("get pts packets sucess, packets: %v", ptsPackets.Packets)
+	if len(ptsPackets.Packets) <= 1 {
+		return nil, fmt.Errorf("strem packet read failed:%v", err)
+	}
+	// log.Infof("get pts packets sucess, packets: %v", ptsPackets.Packets)
 	log.Infof("get pts packets sucess, total packets: %d", len(ptsPackets.Packets))
 
 	spacingTime, err := dm.FrameSpacingTime(ptsPackets, startFrame, endFrame)

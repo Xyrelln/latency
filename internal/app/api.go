@@ -234,6 +234,10 @@ func (a *Api) StopScrcpyServer(serial string) error {
 func (a *Api) Transform(videoPath string) error {
 	//srcVideoPath := filepath.Join(a.VideoDir, recordFile)
 	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
+	_, err := utils.Copy(videoPath, filepath.Join(a.VideoDir, "rec.mp4"))
+	if err != nil {
+		log.Error(err)
+	}
 	destImagePath := filepath.Join(a.ImagesDir, "%4d.png")
 	a.emitInfo(eventTransformStart)
 	cmd, err := cmd.StartFFmpeg(videoPath, destImagePath)

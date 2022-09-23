@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -169,48 +168,48 @@ func GetImageInfo(imagePath string) (ImageInfo, error) {
 }
 
 // CalcTime ...
-func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) (float64, error) {
-	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
-	rect, err := GetCropRect(imageRect)
-	if err != nil {
-		log.Error("image with wrong scaling")
-	}
-	log.Printf("rect: %v", rect)
-	imgs, err := ListImageFileWithCrop(imgPath, rect)
-	if err != nil {
-		log.Error("Specified directory with images inside does not exists or is corrupted")
-	}
+// func CalcTime(imgPath string, imageRect ImageRectInfo, threshold int) (float64, error) {
+// 	// dir := "/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/"
+// 	rect, err := GetCropRect(imageRect)
+// 	if err != nil {
+// 		log.Error("image with wrong scaling")
+// 	}
+// 	log.Printf("rect: %v", rect)
+// 	imgs, err := ListImageFileWithCrop(imgPath, rect)
+// 	if err != nil {
+// 		log.Error("Specified directory with images inside does not exists or is corrupted")
+// 	}
 
-	var previousImg ImageFile
-	var touched = false
-	var touchedIndex = 0
-	// var touchIndex = 0
-	// 1. 从 touch 展示区域评分判断触控操作
-	/**
-	1. 从 scoreT 评分判断触控操作
-	2. 触控开始后检测中心内容区域评分
-	3. 计算中间时间差
-	**/
-	for index, imageFile := range imgs {
-		if index > 0 {
-			if touched {
-				diffCenter, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
-				if diffCenter >= threshold {
-					log.Printf("find diffCenter: %d > threshold, index: %d", diffCenter, index)
-					costTime := (float64(index - touchedIndex)) * (1000.0 / 60.0)
-					return costTime, nil
-				}
-			} else {
-				//diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
-				_, diffTop, _ := CompareImages(imageFile.TouchAreaImg, previousImg.TouchAreaImg)
-				if diffTop >= 6 {
-					log.Printf("find diffTop: %f > threshold, index: %d", diffTop, index)
-					touched = true
-					touchedIndex = index
-				}
-			}
-		}
-		previousImg = imageFile
-	}
-	return 0.0, fmt.Errorf("failed to find response")
-}
+// 	var previousImg ImageFile
+// 	var touched = false
+// 	var touchedIndex = 0
+// 	// var touchIndex = 0
+// 	// 1. 从 touch 展示区域评分判断触控操作
+// 	/**
+// 	1. 从 scoreT 评分判断触控操作
+// 	2. 触控开始后检测中心内容区域评分
+// 	3. 计算中间时间差
+// 	**/
+// 	for index, imageFile := range imgs {
+// 		if index > 0 {
+// 			if touched {
+// 				diffCenter, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
+// 				if diffCenter >= threshold {
+// 					log.Printf("find diffCenter: %d > threshold, index: %d", diffCenter, index)
+// 					costTime := (float64(index - touchedIndex)) * (1000.0 / 60.0)
+// 					return costTime, nil
+// 				}
+// 			} else {
+// 				//diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
+// 				_, diffTop, _ := CompareImages(imageFile.TouchAreaImg, previousImg.TouchAreaImg)
+// 				if diffTop >= 6 {
+// 					log.Printf("find diffTop: %f > threshold, index: %d", diffTop, index)
+// 					touched = true
+// 					touchedIndex = index
+// 				}
+// 			}
+// 		}
+// 		previousImg = imageFile
+// 	}
+// 	return 0.0, fmt.Errorf("failed to find response")
+// }

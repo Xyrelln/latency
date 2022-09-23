@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	// "log"
 	// "op-latency-mobile/internal/cmd"
@@ -132,7 +133,7 @@ func runProbe(cmd *exec.Cmd) (data *ProbeData, err error) {
 }
 
 // runProbe takes the fully configured ffprobe command and executes it, returning the ffprobe data if everything went fine.
-func runProbe2(cmd *exec.Cmd) (data *PTSPackets, err error) {
+func runProbe2(cmd *exec.Cmd) (data *Packets, err error) {
 	var outputBuf bytes.Buffer
 	var stdErr bytes.Buffer
 
@@ -150,7 +151,7 @@ func runProbe2(cmd *exec.Cmd) (data *PTSPackets, err error) {
 	}
 
 	// log.Info("pts packets data: %s", outputBuf.String())
-	data = &PTSPackets{}
+	data = &Packets{}
 
 	err = json.Unmarshal(outputBuf.Bytes(), data)
 	if err != nil {
@@ -163,23 +164,35 @@ func runProbe2(cmd *exec.Cmd) (data *PTSPackets, err error) {
 	return data, nil
 }
 
-func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string) (data *PTSPackets, err error) {
+func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string) (data *Packets, err error) {
 	// ffprobe -v 0 -show_entries packet=pts,duration -of compact=p=0:nk=1 -read_intervals 999999 -select_streams v rec.mp4
+	// args := append([]string{
+	// 	"-loglevel", "fatal",
+	// 	// "-print_format", "json",
+	// 	"-v", "0",
+	// 	"-show_entries", "packet=pts,duration",
+	// 	"-of", "compact=p=0:nk=1",
+	// 	"-read_intervals", "999999",
+	// 	"-select_streams", "v",
+	// 	// fileURL,
+	// 	"-print_format", "json",
+	// }, extraFFProbeOptions...)
+
 	args := append([]string{
-		"-loglevel", "fatal",
+		// "-loglevel", "fatal",
 		// "-print_format", "json",
 		"-v", "0",
-		"-show_entries", "packet=pts,duration",
-		"-of", "compact=p=0:nk=1",
-		"-read_intervals", "999999",
-		"-select_streams", "v",
-		// fileURL,
+		// "-show_entries", "packet=pts,duration",
+		// "-of", "compact=p=0:nk=1",
+		// "-read_intervals", "999999",
+		"-show_packets",
+		fileURL,
 		"-print_format", "json",
 	}, extraFFProbeOptions...)
 
 	// // Add the file argument
-	args = append(args, fileURL)
-
+	// args = append(args, fileURL)
+	log.Infof("cmd: %s args: %s", ffprobe, strings.Join(args, " "))
 	cmd := exec.CommandContext(ctx, ffprobe, args...)
 	cmd.SysProcAttr = procAttributes()
 

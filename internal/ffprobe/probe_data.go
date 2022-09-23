@@ -107,6 +107,23 @@ type PTSPackets struct {
 	Packets []PTS `json:"packets,omitempty"`
 }
 
+type Packet struct {
+	CodecType     string `json:"codec_type,omitempty"`
+	StreamIndex   int    `json:"stream_index,omitempty"`
+	Pts           int    `json:"pts,omitempty"`
+	PtsTime       string `json:"pts_time,omitempty"`
+	Dts           int    `json:"dts,omitempty"`
+	Dts_time      string `json:"dts_time,omitempty"`
+	Duration      int    `json:"duration,omitempty"`
+	Duration_time string `json:"duration_time,omitempty"`
+	Size          string `json:"size,omitempty"`
+	Pos           string `json:"pos,omitempty"`
+	Flags         string `json:"flags,omitempty"`
+}
+type Packets struct {
+	Packets []Packet `json:"packets,omitempty"`
+}
+
 // StartTime returns the start time of the media file as a time.Duration
 func (f *Format) StartTime() (duration time.Duration) {
 	return time.Duration(f.StartTimeSeconds * float64(time.Second))

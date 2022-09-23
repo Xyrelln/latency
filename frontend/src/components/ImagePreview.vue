@@ -238,7 +238,7 @@ function addEventLister() {
       ElNotification({
         title: '进度提示: 3/3',
         type: 'error',
-        message: "数据处理失败， 请重试",
+        message: "数据分析异常，请确认是否在指定业务场景下操作，建议重试",
       })
       NProgress.done()
       calcButtonDisable.value = false

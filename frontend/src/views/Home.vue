@@ -172,6 +172,8 @@ function getDeviceList (value: any) {
 }
 
 function handleLoadExtVideo() {
+  handleResetStatus()
+  NProgress.start()
   StartWithVideo(externalVideoPath.value)
 }
 
@@ -646,7 +648,7 @@ function handleGetImage() {
                 版本号
               </el-col>
               <el-col :span="4">
-                0.0.8
+                0.1.0
               </el-col>
             </el-row>
           </div>
