@@ -99,6 +99,7 @@ func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
 		if index > 0 {
 			if touched {
 				diffCenter, _ := imageFile.ExtImgHashC.Distance(previousImg.ExtImgHashC)
+				log.Infof("diff center file: %s  score %d", imageFile.Path, diffCenter)
 				if diffCenter >= dm.SceneThreshold {
 					log.Infof("find diffCenter: %d > threshold, index: %d", diffCenter, index)
 					costTime := (float64(index - startFrame)) * (1000.0 / 60.0)
@@ -110,6 +111,7 @@ func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
 			} else {
 				//diffTop, _ := imageFile.ExtImgHashT.Distance(previousImg.ExtImgHashT)
 				_, diffTop, _ := CompareImages(imageFile.TouchAreaImg, previousImg.TouchAreaImg)
+				log.Infof("diff top file: %s score: %f", imageFile.Path, diffTop)
 				if diffTop >= dm.PointerThreshold {
 					log.Infof("find diffTop: %f > threshold, index: %d", diffTop, index)
 					touched = true
@@ -119,14 +121,14 @@ func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
 		}
 		previousImg = imageFile
 	}
-	log.Warn("failed to find start or end frame")
+	log.Warnf("failed to find start or end frame: start: %d, end: %d", startFrame, endFrame)
 	return startFrame, endFrame, fmt.Errorf("failed to find start or end frame")
 }
 
 func NewDelayMonitor() *DelayMonitor {
 	dm := DelayMonitor{}
 	dm.BlackWhiteThreshold = 60
-	dm.PointerThreshold = 6
+	dm.PointerThreshold = 4
 	dm.SceneThreshold = 20
 	return &dm
 }
@@ -136,37 +138,6 @@ func (dm *DelayMonitor) Run() (*float64, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get frame spacing error:%v", err)
 	}
-
-	// streamData, err := dm.ProbeData()
-	// if err != nil {
-	// 	log.Errorf("get probe stream infomation error:%v", err)
-	// 	log.Infof("set default timebase %f", defaultTimeBase)
-	// 	dm.VideoTimeBase = defaultTimeBase
-	// 	// return nil, fmt.Errorf("get probe stream infomation error:%v", err)
-	// } else {
-	// 	timeBaseValue := streamData.FirstVideoStream().TimeBase
-	// 	timeBase := strings.Split(timeBaseValue, "/")
-	// 	if len(timeBase) != 2 {
-	// 		log.Errorf("timebase read err: %s", timeBaseValue)
-	// 		return nil, fmt.Errorf("timebase read failed:%v", err)
-	// 	}
-	// 	d, err := strconv.ParseFloat(timeBase[0], 64)
-	// 	if err != nil {
-	// 		log.Errorf("parse time_base d error:%v", err)
-	// 		return nil, fmt.Errorf("parse time_base failed:%v", err)
-	// 	}
-	// 	m, err := strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
-	// 	if err != nil {
-	// 		log.Errorf("parse time_base m failed:%v", err)
-	// 		return nil, fmt.Errorf("parse time_base failed:%v", err)
-	// 	}
-	// 	// timeBase, err := strconv.ParseFloat(timeBase[0], 64) / strconv.ParseFloat(timeBase[len(timeBase)-1], 64)
-	// 	// if err != nil {
-	// 	// 	return nil, fmt.Errorf("parse time_base failed:%v", err)
-	// 	// }
-	// 	log.Infof("set timebase %f / %f", d, m)
-	// 	dm.VideoTimeBase = d / m
-	// }
 
 	ptsPackets, err := dm.PTSPackets()
 	if err != nil {

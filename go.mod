@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/corona10/goimagehash v1.1.0
+	github.com/otiai10/gosseract/v2 v2.4.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -17,7 +18,6 @@ require (
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
-	github.com/edgeware/mp4ff v0.29.0
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"image/png"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/corona10/goimagehash"
+	"github.com/otiai10/gosseract/v2"
 )
 
 func TestCropCurserArea(t *testing.T) {
@@ -55,24 +57,24 @@ func TestCropCurserArea(t *testing.T) {
 }
 
 func TestGrayImage(t *testing.T) {
-	filename := "/Users/jason/Downloads/mov/crop/0008.png"
+	filename := "/Users/jason/Downloads/mov/0033.png"
 	infile, err := os.Open(filename)
-
+	defer infile.Close()
 	if err != nil {
 		log.Printf("failed opening %s: %s", filename, err)
 		log.Fatal(err)
 	}
-	defer infile.Close()
-
-	imgSrc, _, err := image.Decode(infile)
+	img, _, _ := image.Decode(infile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bwImg := RGBtoBlackAndWhite(imgSrc,60)
+	touchArea := image.Rect(0, 0, 100, 35)
+	cropImg, _ := CropImage(img, touchArea)
+	bwImg := RGBtoBlackAndWhite(cropImg,60)
 
 	// Encode the grayscale image to the new file
-	newFileName := "//Users/jason/Downloads/mov/crop/0008-gray.png"
+	newFileName := "//Users/jason/Downloads/mov/0033-bw.png"
 	newfile, err := os.Create(newFileName)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile.Name(), err)
@@ -89,11 +91,11 @@ func TestGrayImage(t *testing.T) {
 //
 //}
 func TestWhiteAndBlackDiff(t *testing.T){
-	f1 := "/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0001-gray3.png"
-	f2 := "/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0001-gray4.png"
+	f1 := "/Users/jason/Downloads/mov/0033-bw.png"
+	f2 := "/Users/jason/Downloads/mov/0034-bw.png"
 	img, percept, _ := CompareFiles(f1, f2)
 
-	newFileName := "/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/diff-gray3-4.png"
+	newFileName := "/Users/jason/Downloads/mov/diff-gray33-34.png"
 	newfile, err := os.Create(newFileName)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile.Name(), err)
@@ -105,7 +107,7 @@ func TestWhiteAndBlackDiff(t *testing.T){
 }
 
 func TestAvageHash(t *testing.T) {
-	fd, err := os.Open("/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0001-gray3.png")
+	fd, err := os.Open("/Users/jason/Downloads/mov/0033.png")
 	if err != nil {
 		log.Fatal(err)
 		// return nil, err
@@ -117,7 +119,7 @@ func TestAvageHash(t *testing.T) {
 	cropImg := img
 	extImgHashT1, _ := goimagehash.ExtDifferenceHash(cropImg, 16, 16)
 
-	fd2, err := os.Open("/Users/jason/Developer/epc/op-latency-mobile/test_resource/touch_diff/0001-gray4.png")
+	fd2, err := os.Open("/Users/jason/Downloads/mov/0034.png")
 	if err != nil {
 		log.Fatal(err)
 		// return nil, err
@@ -142,18 +144,28 @@ func TestAvageHash(t *testing.T) {
 
 }
 
-func TestCalcTime(t *testing.T) {
-	imagePath := "/Users/jason/Downloads/mov/6/images"
-	imgRect := ImageRectInfo{
-		X:             20,
-		Y:             26,
-		W:             446,
-		H:             70,
-		PreviewWidth:  500,
-		PreviewHeight: 281,
-		SourceWidth:   1920,
-		SourceHeight:  1080,
-	}
-
-	CalcTime(imagePath, imgRect, 20)
+func TestOcr(t *testing.T)  {
+	client := gosseract.NewClient()
+	defer client.Close()
+	client.SetImage("/Users/jason/Downloads/mov/0034-bw.png")
+	text, _ := client.Text()
+	fmt.Println(text)
 }
+
+
+
+//func TestCalcTime(t *testing.T) {
+//	imagePath := "/Users/jason/Downloads/mov/6/images"
+//	imgRect := ImageRectInfo{
+//		X:             20,
+//		Y:             26,
+//		W:             446,
+//		H:             70,
+//		PreviewWidth:  500,
+//		PreviewHeight: 281,
+//		SourceWidth:   1920,
+//		SourceHeight:  1080,
+//	}
+//
+//	CalcTime(imagePath, imgRect, 20)
+//}
