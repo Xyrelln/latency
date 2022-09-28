@@ -70,8 +70,16 @@ export function StartWithVideo(arg1) {
   return window['go']['app']['Api']['StartWithVideo'](arg1);
 }
 
+export function StopRecord() {
+  return window['go']['app']['Api']['StopRecord']();
+}
+
 export function StopScrcpyServer(arg1) {
   return window['go']['app']['Api']['StopScrcpyServer'](arg1);
+}
+
+export function StopTransform() {
+  return window['go']['app']['Api']['StopTransform']();
 }
 
 export function Transform(arg1) {

@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AboutPage: typeof import('./src/components/AboutPage.vue')['default']
     Automation: typeof import('./src/components/Automation.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -25,6 +26,12 @@ declare module '@vue/runtime-core' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    FileRecord: typeof import('./src/components/FileRecord.vue')['default']
+    HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     ImagePreview: typeof import('./src/components/ImagePreview.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
   }
 }

@@ -248,14 +248,14 @@ function addEventLister() {
 }
 
 onMounted(()=>{
-  addEventLister()
+  // addEventLister()
   
 })
 
-onUnmounted(()=>{
-  EventsOff("latency:analyse_start")
-  EventsOff("latency:analyse_filish")
-})
+// onUnmounted(()=>{
+//   EventsOff("latency:analyse_start")
+//   EventsOff("latency:analyse_filish")
+// })
 
 /**
  * 判断是否竖屏
@@ -342,7 +342,6 @@ defineExpose({
 
 <template>
   <div>
-    <!-- <el-scrollbar height="95vh" style="width:calc(100vw - 320px); height: 82vh;"> -->
     <el-row justify="center" class="preview-content">
       <el-col :span="24">
         <!-- <span>标识检测区域</span> -->
@@ -356,7 +355,6 @@ defineExpose({
             <div ref="resizeBottomRef" class="resizer resizer-b"></div>
             <div ref="resizeLeftRef" class="resizer resizer-l"></div>
           </div>
-        <!-- </div> -->
       </el-col>
     </el-row>
     <el-row v-if="isImgLoaded" justify="center">
@@ -374,20 +372,6 @@ defineExpose({
         />
       </el-col>
     </el-row>
-    <!-- <el-row >
-      <el-col :span="4">
-        <el-input></el-input>
-      </el-col>
-      <el-col :span="4">
-        <el-input></el-input>
-      </el-col>
-      <el-col :span="4">
-        <el-input></el-input>
-      </el-col>
-      <el-col :span="4">
-        <el-input></el-input>
-      </el-col>
-    </el-row> -->
     <el-row justify="space-between" class="item-result">
       <el-col :span="4">
         <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable">计算延迟</el-button>

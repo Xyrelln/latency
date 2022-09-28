@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"op-latency-mobile/internal/logger"
-	"op-latency-mobile/internal/utils"
+    "op-latency-mobile/internal/fs"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
@@ -39,7 +39,7 @@ func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	requestedFilename := req.URL.Path
 	// requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
 	println("Requesting file:", requestedFilename)
-	if utils.IsWindowsDrivePathURI(requestedFilename) {
+	if fs.IsWindowsDrivePathURI(requestedFilename) {
 		requestedFilename = strings.Replace(requestedFilename, "/", "", 1)
 		requestedFilename = strings.ReplaceAll(requestedFilename, "/", "\\")
 	}

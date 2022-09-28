@@ -7,7 +7,11 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
 import ImagePreview from '../components/ImagePreview.vue';
+import FileRecord from '../components/FileRecord.vue';
 import Automation from '../components/Automation.vue';
+import AboutPage from '../components/AboutPage.vue';
+import HelpPage from '../components/HelpPage.vue';
+
 import { 
   ListDevices,
   Start,
@@ -36,19 +40,16 @@ import {
   EventsOff,
   WindowReload,
 } from '../../wailsjs/runtime/runtime'
-import { stat } from 'fs'
 
 const deviceSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
 
-
-// const isAuth = ref(false)
+const topTabName = ref('latency')
+const latencyTabName = ref('list')
 const placeholder = "./src/assets/images/placeholder.png"
 
-// const rightContentRef = ref()
-// const startButtonText = ref("开始")
 const status = ref(false)
 const form = reactive({
   device: '',
@@ -64,24 +65,10 @@ const form = reactive({
 
 const interval = ref()
 const processStatus = ref(0)
-// const developMode = ref(true)
 const countDownSecond = ref(0)
-// const imageSrc = ref()
 const imagePreviewRef = ref()
-
-const topTabName = ref('latency')
-// const topTabName = ref('automation')
 const externalVideoPath = ref('')
-
-const tabName = ref('setting')
 const deviceInfo = reactive({
-  // android_version: null,
-  // cpu_arch: '',
-  // cpu_core_count: null,
-  // hardware: '',
-  // mem_total: 0,
-  // openGLES_version: '',
-  // product_model: '',
   width: 1080,
   height: 1920,
 })
@@ -98,8 +85,8 @@ const settingForm = reactive({
   timeout: 3,
   prepareTimeout: 3,
   develop: false,
+  autoUpload: false
 })
-
 
 provide('threshold', settingForm.diffScore)
 
@@ -126,30 +113,35 @@ const rules =  {
       trigger: 'blur',
     }
   ],
-  // prepareTimeout: [
-  //   {
-  //     required: true,
-  //     message: '准备时长',
-  //     trigger: 'blur',
-  //   },
-  //   {
-  //     validator: checkGreaterEqualZero,
-  //     trigger: 'blur',
-  //   }
-  // ]
 }
+
+const scenes = ref([
+  {
+    name: "第五人格-视角移动",
+    value: "1",
+    behavior: {
+      type: 'swipe',
+      location: {
+        sx: deviceInfo.height/2,
+        sy:  deviceInfo.width/2,
+        dx: deviceInfo.height/2 + deviceInfo.height/2/2,
+        dy: deviceInfo.width/2,
+        speed: form.speed
+      }
+    },
+    monitor_rect: {
+      top: 26,
+      left: 0,
+      width: 466,
+      height: 90
+    },
+  }
+])
+
 
 function checkGreaterThanZero (rule: any, value: any, callback: any)  {
   if (value <= 0) {
     callback(new Error('数值必须大于0'))
-  } else {
-    callback()
-  }
-}
-
-function checkGreaterEqualZero (rule: any, value: any, callback: any)  {
-  if (value < 0) {
-    callback(new Error('数值必须大于等于0'))
   } else {
     callback()
   }
@@ -160,13 +152,13 @@ function checkGreaterEqualZero (rule: any, value: any, callback: any)  {
  * 获取设备列表
  * @param value 设备序列号
  */
-function getDeviceList (value: any) {
+function getDeviceList (value: any) {``
   ListDevices().then(result => {
     data.devices = result
   }).catch(err => {
     ElMessage({
       type: 'error',
-      message: '设备获取失败'
+      message: '设备获取失败, error: ' + err
     })
   })
 }
@@ -176,31 +168,6 @@ function handleLoadExtVideo() {
   NProgress.start()
   StartWithVideo(externalVideoPath.value)
 }
-
-
-// async function handleStartRun() {
-//   // await handleGetDisplay()
-//   if (form.location) {
-//     setPointerLocationOn()
-//     // if (!res) {
-//     //   return
-//     // }
-//   }
-
-//   const swipeEvent = adb.SwipeEvent.createFrom(
-//     { 
-//       sx: form.sx,
-//       sy: form.sy,
-//       dx: form.dx,
-//       dy: form.dy,
-//       speed: form.speed
-//     }
-//   )
-//   // const interval = 2
-//   console.log(swipeEvent)
-//   SetAutoSwipeOn(swipeEvent, form.interval)
-//   status.value = 1
-// }
 
 /**
  * 发送拖动事件
@@ -226,6 +193,7 @@ function handleInputSwipe() {
 async function handleStartRecord() {
   // clear first
   // clearCurrentInterval()
+  addEventLister()
   handleResetStatus()
   NProgress.start()
   const result = await setPointerLocationOn()
@@ -253,17 +221,8 @@ function handleStart() {
   StartRecord(deviceSelected.value)
 }
 
-// function handleStopRecord() {
-//   // clear first
-//   clearCurrentInterval()
-//
-//   StopRecord(deviceSelected.value)
-//   processStatus.value = 0
-//   SetPointerLocationOff(deviceSelected.value)
-// }
 
-
-function handleStopProcessing() {
+function handleStopRecord() {
 }
 
 function handleToImage() {
@@ -303,27 +262,6 @@ function handleResetStatus() {
   imagePreviewRef.value.setDefaultTime()
 }
 
-// async function handlePrepare(){
-//   if (deviceSelected.value === "") {
-//     ElMessage({
-//       type: 'error',
-//       message: '请选择设备'
-//     })
-//     return
-//   }
-//   handleResetStatus()
-//   NProgress.start()
-//   const result = await setPointerLocationOn()
-//   if (result) {
-//     if (settingForm.prepareTimeout === 0) {
-//       processStatus.value = 2
-//       handleStartRecord()
-//     } else {
-//       processStatus.value = 1
-//       runUntilCountDown(settingForm.prepareTimeout, handleStartRecord)
-//     }
-//   }
-// }
 
 /**
  * 开启指针显示
@@ -434,15 +372,6 @@ function getFirstImage(){
 
 async function handleGetPhysicalSize() {
   let status = false
-  // await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
-  //     deviceInfo.width = res.width
-  //     deviceInfo.height = res.height
-  // }).catch(err => {
-  //   // deviceInfo.width = 1080
-  //   // deviceInfo.height = 1920
-  //   console.log(err)
-  // })
-
   await GetPhysicalSize(deviceSelected.value).then((res: adb.Display) => {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
@@ -493,10 +422,19 @@ async function initCheck() {
   })
 }
 
+/**
+ * 是否运行在 wails 环境
+ */
+function isWailsRun(){
+  const tag = 'wails.io'
+  return navigator.userAgent.indexOf(tag) != -1
+}
+
 onMounted(()=> {
-  initCheck()
-  addEventLister()
-  
+  if (isWailsRun()) {
+    initCheck()
+    addEventLister()
+  }
 })
 
 function handleClearCache() {
@@ -507,13 +445,20 @@ function handleReload() {
   WindowReload();
 }
 
+function handleStopProcessing() {}
+
 onUnmounted(()=>{
-  removeEventLister()
+  // removeEventLister()
+  if (isWailsRun()) {
+    removeEventLister()
+  }
 })
 
 function handleGetImage() {
   imagePreviewRef.value.handleGetImage()
 }
+
+
 
 </script>
 
@@ -523,56 +468,98 @@ function handleGetImage() {
       <el-tab-pane label="延迟测试" name="latency">
         <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
           <el-container>
-            <el-aside class="aside-content" width="220px">
-              <!-- <el-row class="row-item" v-if="isAuth">
-                <el-avatar :icon="UserFilled" />
-              </el-row> -->
+            <el-aside class="aside-content" width="240px">
               <el-row class="row-item">
-                <el-select
+                <el-col :span="20">
+                  <el-select
                     v-model="deviceSelected"
-                    @visible-change="getDeviceList"
+                    @focus="getDeviceList"
                     filterable
                     placeholder="请选择设备"
                     style="width:100%">
-                  <el-option
-                    v-for="item in data.devices"
-                    :key="item.Serial"
-                    :label="item.Serial"
-                    :value="item.Serial"
+                    <el-option
+                      v-for="item in data.devices"
+                      :key="item.Serial"
+                      :label="item.Serial"
+                      :value="item.Serial"
+                    >
+                    </el-option>
+                  </el-select>
+
+                </el-col>
+                <el-col :span="4">
+                  <el-tooltip
+                    class="device-question"
+                    effect="dark"
+                    content="如列表为空，请检查设备是否正常连接"
+                    placement="right"
                   >
-                  </el-option>
-                </el-select>
+                    <i class="el-icon button-icon" style="float: right;">
+                      <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                    </i>
+                  </el-tooltip>
+                </el-col>
+              </el-row>
+              <el-row class="row-item">
+                <el-col :span="20">
+                  <el-select
+                    v-model="deviceSelected"
+                    filterable
+                    placeholder="请选择场景"
+                    style="width:100%">
+                    <el-option
+                      v-for="item in scenes"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </el-col>
+                <el-col :span="4">
+                  <el-tooltip
+                    class="device-question"
+                    effect="dark"
+                    content="选择自动运行场景"
+                    placement="right"
+                  >
+                    <i class="el-icon button-icon" style="float: right;">
+                      <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                    </i>
+                  </el-tooltip>
+                </el-col>
               </el-row>
               <el-row class="row-item">
                 <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStartRecord" >开始</el-button>
-                <!-- <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handlePrepare" >准备</el-button> -->
-                <!-- <el-button class="operation-button" v-if="processStatus===1" type="success" @click="handleStartRecord" >开始 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button> -->
                 <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
               </el-row>
-              <el-row class="row-item" v-if="settingForm.develop">
+              <!-- <el-row class="row-item" v-if="settingForm.develop">
                 <el-button-group>
                   <el-button @click="handleStart">rec</el-button>
-                  <el-button @click="handleStopProcessing">stop</el-button>
                   <el-button @click="handleToImage">to_img</el-button>
                   <el-button @click="setPointerLocationOn">pl_on</el-button>
                   <el-button @click="setPointerLocationOff">pl_off</el-button>
-                  <!-- <el-button @click="setAutoOn">auto_on</el-button>
-                  <el-button @click="setAutoOff">auto_off</el-button> -->
                   <el-button @click="handleGetImage">get_imgs</el-button>
                 </el-button-group>
-              </el-row>
+              </el-row> -->
 
               <el-tabs 
-                  v-model="tabName" 
+                  v-model="latencyTabName" 
                   class="platform-tabs">
+                  <el-tab-pane label="记录" name="list">
+                    <FileRecord></FileRecord>
+
+                  </el-tab-pane>
                 
                   <el-tab-pane label="设置" name="setting">
                     <!-- <el-scrollbar style="height:60vh"> -->
                       <el-row>
                         <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
-                          <el-form-item label="图片比对阈值" prop="diffScore">
+                          <el-form-item label="Touch比对阈值" prop="diffScore">
                             <el-input v-model.number="settingForm.diffScore"/>
-                            <!-- <el-input-numbe v-model="settingForm.diffScore" :min="1" :max="100" ></el-input-numbe> -->
+                          </el-form-item>
+                          <el-form-item label="比对阈值" prop="diffScore">
+                            <el-input v-model.number="settingForm.diffScore"/>
                           </el-form-item>
                           <el-form-item label="录制时长(秒)" prop="timeout">
                             <el-input v-model.number="settingForm.timeout"/>
@@ -586,6 +573,9 @@ function handleGetImage() {
                           <el-form-item label="其他">
                             <el-button @click="handleReload">重新加载</el-button>
                           </el-form-item>
+                          <el-form-item label="自动上传">
+                            <el-switch v-model="settingForm.autoUpload" />
+                          </el-form-item>
                           <el-form-item label="视频地址">
                             <el-input v-model="externalVideoPath"></el-input>
                             <el-button @click="handleLoadExtVideo">加载</el-button>
@@ -595,64 +585,25 @@ function handleGetImage() {
                     <!-- </el-scrollbar> -->
                   </el-tab-pane>
                   <el-tab-pane label="帮助" name="detail" disabled>
-                    <!-- <el-scrollbar style="height:60vh"> -->
-                      <div>
-                        <!-- <el-row class="info-list">
-                          <el-col :span="12" class="info-line">
-                            <span class="info-key">名称</span>
-                          </el-col >
-                          <el-col :span="12" class="info-line">
-                            <span class="info-value">数值</span>
-                          </el-col>
-                          <el-row class="info-list">
-                          <el-col :span="12" class="info-line">
-                            <span class="info-key">Version</span>
-                          </el-col >
-                          <el-col :span="12" class="info-line">
-                            <span class="info-value">{{ deviceInfo.android_version }}</span>
-                          </el-col>
-                        </el-row>
-                        </el-row> -->
-                        
-                      </div>
-                    <!-- </el-scrollbar> -->
+                      <HelpPage></HelpPage>
                   </el-tab-pane>
                  
                 </el-tabs>
             </el-aside>
             <el-main class="main-content">
-              <ImagePreview 
+              <ImagePreview
                 ref="imagePreviewRef"
                 :data="imageInfo"
-                />
+              />
             </el-main>
           </el-container>
         </el-scrollbar>
       </el-tab-pane>
-      <el-tab-pane label="自动场景配置" name="automation">
+      <el-tab-pane label="场景配置" name="automation">
         <Automation/>
       </el-tab-pane>
       <el-tab-pane label="关于" name="about">
-        <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
-          <div class="describe">
-            <el-row>
-              <el-col :span="4">
-                版权所有
-              </el-col>
-              <el-col :span="8">
-                云天畅享 http://www.ivcloud.net/
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="4">
-                版本号
-              </el-col>
-              <el-col :span="4">
-                0.1.0
-              </el-col>
-            </el-row>
-          </div>
-        </el-scrollbar>
+        <AboutPage></AboutPage>
       </el-tab-pane>
     </el-tabs>
    
@@ -667,7 +618,7 @@ function handleGetImage() {
 }
 
 .row-item {
-  margin-bottom: 1rem;
+  margin-bottom: 7px;
 }
 
 .aside-content {
@@ -687,7 +638,19 @@ function handleGetImage() {
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 
+.record-list {
+  border: solid 1px #e6e6e6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  /* height: 80vh; */
+}
 .describe {
   opacity: 0.75;
+}
+
+.button-icon {
+  width: 24px;
+  height: 24px;
+  margin: 2px;
 }
 </style>

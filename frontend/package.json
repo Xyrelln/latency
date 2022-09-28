@@ -12,7 +12,8 @@
     "echarts": "^5.3.3",
     "element-plus": "^2.2.14",
     "nprogress": "^0.2.0",
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/types": "^7.17.10",

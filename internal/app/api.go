@@ -9,7 +9,7 @@ import (
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/ffprobe"
-	"op-latency-mobile/internal/utils"
+    "op-latency-mobile/internal/fs"
 	"path/filepath"
 	"strings"
 	"time"
@@ -162,7 +162,7 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 func (a *Api) StartRecord(serial string) error {
 	log.Info("start monitor")
 	log.Infof("workdir: %s", a.VideoDir)
-	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
+	a.VideoDir, a.ImagesDir = fs.CreateWorkDir()
 	recFile := filepath.Join(a.VideoDir, recordFile)
 	cmd, err := cmd.StartScrcpy(serial, recFile)
 	if err != nil {
@@ -174,7 +174,7 @@ func (a *Api) StartRecord(serial string) error {
 	return nil
 }
 
-// 启动延迟测试
+// Start 启动延迟测试
 func (a *Api) Start(serial string, recordSecond int64) error {
 	err := a.StartRecord(serial)
 	if err != nil {
@@ -196,7 +196,16 @@ func (a *Api) Start(serial string, recordSecond int64) error {
 	return nil
 }
 
-// 启动延迟测试
+func (a *Api) StopRecord() error {
+	return nil
+}
+
+func (a *Api) StopTransform() error {
+	return nil
+}
+
+
+// StartWithVideo 启动延迟测试
 func (a *Api) StartWithVideo(videoPath string) error {
 	err := a.Transform(videoPath)
 	if err != nil {
@@ -233,8 +242,8 @@ func (a *Api) StopScrcpyServer(serial string) error {
 //}
 func (a *Api) Transform(videoPath string) error {
 	//srcVideoPath := filepath.Join(a.VideoDir, recordFile)
-	a.VideoDir, a.ImagesDir = utils.CreateWorkDir()
-	_, err := utils.Copy(videoPath, filepath.Join(a.VideoDir, "rec.mp4"))
+	a.VideoDir, a.ImagesDir = fs.CreateWorkDir()
+	_, err := fs.Copy(videoPath, filepath.Join(a.VideoDir, "rec.mp4"))
 	if err != nil {
 		log.Error(err)
 	}
@@ -277,7 +286,7 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 		return mInfo, err
 	}
 	// path to uri format for FileLoader on win
-	if utils.IsWindowsDrivePath(mInfo.Path) {
+	if fs.IsWindowsDrivePath(mInfo.Path) {
 		mInfo.Path = "/" + strings.ReplaceAll(mInfo.Path, "\\", "/")
 	}
 	return mInfo, nil
@@ -316,7 +325,7 @@ func (a *Api) emitData(eventName string, data interface{}) {
 
 func (a *Api) GetImageFiles() ([]string, error) {
 	var imgs []string
-	imgs, err := utils.GetImageFiles(a.ImagesDir, imgs)
+	imgs, err := fs.GetImageFiles(a.ImagesDir, imgs)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -325,5 +334,5 @@ func (a *Api) GetImageFiles() ([]string, error) {
 }
 
 func (a *Api) ClearCacheData() {
-	utils.ClearCacheDir()
+	fs.ClearCacheDir()
 }
