@@ -32,6 +32,7 @@ import {
   IsAppReady,
   StartWithVideo,
   GetPhysicalSize,
+  ListRecords,
   // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
@@ -49,6 +50,8 @@ const data: {devices: Array<adb.Device>} = reactive({
 const topTabName = ref('latency')
 const latencyTabName = ref('list')
 const placeholder = "./src/assets/images/placeholder.png"
+
+const fileRecordRef = ref()
 
 const status = ref(false)
 const form = reactive({
@@ -81,8 +84,10 @@ const imageInfo = reactive({
 })
 
 const settingForm = reactive({
+  touchScore: 4,
   diffScore: 20,
   timeout: 3,
+  sceneStart: 1500,
   prepareTimeout: 3,
   develop: false,
   autoUpload: false
@@ -90,11 +95,23 @@ const settingForm = reactive({
 
 provide('threshold', settingForm.diffScore)
 
+
 const rules =  {
+  touchScore: [
+    {
+      required: true,
+      message: '触控比对阈值',
+      trigger: 'blur',
+    },
+    {
+      validator: checkGreaterThanZero,
+      trigger: 'blur',
+    }
+  ],
   diffScore: [
     {
       required: true,
-      message: '图片比对阈值',
+      message: '选中区域比对阈值',
       trigger: 'blur',
     },
     {
@@ -106,6 +123,17 @@ const rules =  {
     {
       required: true,
       message: '录制时长',
+      trigger: 'blur',
+    },
+    {
+      validator: checkGreaterThanZero,
+      trigger: 'blur',
+    }
+  ],
+  sceneStart: [
+    {
+      required: true,
+      message: '场景相对录制开始时间',
       trigger: 'blur',
     },
     {
@@ -463,6 +491,7 @@ onMounted(()=> {
   if (isWailsRun()) {
     initCheck()
     addEventLister()
+    fileRecordRef.value.handleLoadCacheFiles()
   }
 })
 
@@ -576,22 +605,25 @@ function handleGetImage() {
                   v-model="latencyTabName" 
                   class="platform-tabs">
                   <el-tab-pane label="记录" name="list">
-                    <FileRecord></FileRecord>
+                    <FileRecord ref="fileRecordRef"/>
 
                   </el-tab-pane>
                 
                   <el-tab-pane label="设置" name="setting">
                     <!-- <el-scrollbar style="height:60vh"> -->
                       <el-row>
-                        <el-form :model="settingForm" ref="settingFormRef" :rules="rules">
-                          <el-form-item label="Touch比对阈值" prop="diffScore">
+                        <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
+                          <el-form-item label="触控阈值" prop="touchScore">
+                            <el-input v-model.number="settingForm.touchScore"/>
+                          </el-form-item>
+                          <el-form-item label="区域阈值" prop="diffScore">
                             <el-input v-model.number="settingForm.diffScore"/>
                           </el-form-item>
-                          <el-form-item label="比对阈值" prop="diffScore">
-                            <el-input v-model.number="settingForm.diffScore"/>
-                          </el-form-item>
-                          <el-form-item label="录制时长(秒)" prop="timeout">
+                          <el-form-item label="录制时长" prop="timeout">
                             <el-input v-model.number="settingForm.timeout"/>
+                          </el-form-item>
+                          <el-form-item label="场景时间" prop="sceneStart">
+                            <el-input v-model.number="settingForm.sceneStart"/>
                           </el-form-item>
                           <el-form-item label="调试开关">
                             <el-switch v-model="settingForm.develop" />
@@ -599,8 +631,8 @@ function handleGetImage() {
                           <el-form-item label="数据清理">
                             <el-button @click="handleClearCache">清理缓存数据</el-button>
                           </el-form-item>
-                          <el-form-item label="其他">
-                            <el-button @click="handleReload">重新加载</el-button>
+                          <el-form-item label="调式">
+                            <el-button @click="handleReload">重载页面</el-button>
                           </el-form-item>
                           <el-form-item label="自动上传">
                             <el-switch v-model="settingForm.autoUpload" />
@@ -650,6 +682,9 @@ function handleGetImage() {
   margin-bottom: 7px;
 }
 
+.el-form-item {
+  margin-bottom: 7px;
+}
 .aside-content {
   border: solid 1px #e6e6e6;
   padding: 0.5rem;

@@ -196,35 +196,6 @@ func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string
 	cmd := exec.CommandContext(ctx, ffprobe, args...)
 	cmd.SysProcAttr = procAttributes()
 
-	// cmd := cmd.Cmd{
-	// 	Args: []string{
-	// 		ffprobe,
-	// 		"-loglevel", "fatal",
-	// 		// "-print_format", "json",
-	// 		"-v", "0",
-	// 		"-show_entries", "packet=pts,duration",
-	// 		"-of", "compact=p=0:nk=1",
-	// 		"-read_intervals", "999999",
-	// 		"-select_streams", "v",
-	// 		fileURL,
-	// 		"-print_format", "json",
-	// 	},
-	// }
-	// out, err := cmd.Call()
-	// if err != nil {
-	// 	log.Errorf("getting probe data error: %s", out)
-	// 	return nil, fmt.Errorf("getting probe data error: %s", err)
-	// 	// fmt.Printf("cmd run error:%v", err)
-	// }
-
-	// data = &PTSPackets{}
-	// log.Info("pts packets data: %s", out)
-	// err = json.Unmarshal([]byte(out), data)
-	// if err != nil {
-	// 	log.Info("getting probe data out: %s", out)
-	// 	log.Errorf("getting probe data error: %v", err)
-	// 	return nil, fmt.Errorf("error parsing ffprobe output: %w", err)
-	// }
 
 	// return data, nil
 	return runProbe2(cmd)

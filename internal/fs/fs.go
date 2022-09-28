@@ -4,9 +4,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"github.com/leaanthony/slicer"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,20 +12,21 @@ import (
 	"strings"
 	"time"
 	"unicode"
-	"unsafe"
 
+	"github.com/leaanthony/slicer"
 	log "github.com/sirupsen/logrus"
 )
 
 // GetTimeStamp return timestamp string
 func GetTimeStamp() string {
-	return time.Now().Format("20060102150405.000")
+	// return time.Now().Format("20060102150405.000")
+	return time.Now().Format("20060102150405")
 }
 
 func GetExecuteRoot() (string, error) {
 	p, err := os.Executable()
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 		return "", err
 	}
 	return filepath.Dir(p), nil
@@ -43,14 +42,14 @@ func CreateWorkDir() (string, string) {
 	if _, err := os.Stat(videoDir); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(videoDir, os.ModePerm)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 	}
 
 	if _, err := os.Stat(imagesDir); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(imagesDir, os.ModePerm)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 	}
 
@@ -126,7 +125,6 @@ func Copy(src, dst string) (int64, error) {
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
 }
-
 
 // RelativeToCwd returns an absolute path based on the cwd
 // and the given relative path
@@ -231,17 +229,6 @@ func RelativePath(relativepath string, optionalpaths ...string) string {
 	return result
 }
 
-// MustLoadString attempts to load a string and will abort with a fatal message if
-// something goes wrong
-func MustLoadString(filename string) string {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		fmt.Printf("FATAL: Unable to load file '%s': %s\n", filename, err.Error())
-		os.Exit(1)
-	}
-	return *(*string)(unsafe.Pointer(&data))
-}
-
 // MD5File returns the md5sum of the given file
 func MD5File(filename string) (string, error) {
 	f, err := os.Open(filename)
@@ -256,18 +243,6 @@ func MD5File(filename string) (string, error) {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
-}
-
-
-// fatal will print the optional messages and die
-func fatal(message ...string) {
-	if len(message) > 0 {
-		print("FATAL:")
-		for text := range message {
-			print(text)
-		}
-	}
-	os.Exit(1)
 }
 
 // GetSubdirectories returns a list of subdirectories for the given root directory
@@ -304,172 +279,33 @@ func DirIsEmpty(dir string) (bool, error) {
 	return false, err // Either not empty or error, suits both cases
 }
 
-// CopyDir recursively copies a directory tree, attempting to preserve permissions.
-// Source directory must exist, destination directory must *not* exist.
-// Symlinks are ignored and skipped.
-// Credit: https://gist.github.com/r0l1/92462b38df26839a3ca324697c8cba04
-func CopyDir(src string, dst string) (err error) {
-	src = filepath.Clean(src)
-	dst = filepath.Clean(dst)
-
-	si, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-	if !si.IsDir() {
-		return fmt.Errorf("source is not a directory")
-	}
-
-	_, err = os.Stat(dst)
-	if err != nil && !os.IsNotExist(err) {
-		return
-	}
-	if err == nil {
-		return fmt.Errorf("destination already exists")
-	}
-
-	err = MkDirs(dst)
-	if err != nil {
-		return
-	}
-
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return
-	}
-
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
-
-		if entry.IsDir() {
-			err = CopyDir(srcPath, dstPath)
-			if err != nil {
-				return
-			}
-		} else {
-			// Skip symlinks.
-			if entry.Type()&os.ModeSymlink != 0 {
-				continue
-			}
-
-			err = CopyFile(srcPath, dstPath)
-			if err != nil {
-				return
-			}
-		}
-	}
-
-	return
+type RecordFile struct {
+	DirName  string `json:"dir_name,omitempty"`
+	FilePath string `json:"file_path,omitempty"`
+	Size     int64  `json:"size,omitempty"`
 }
 
-// SetPermissions recursively sets file permissions on a directory
-func SetPermissions(dir string, perm os.FileMode) error {
-	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		return os.Chmod(path, perm)
-	})
-}
-
-// CopyDirExtended recursively copies a directory tree, attempting to preserve permissions.
-// Source directory must exist, destination directory must *not* exist. It ignores any files or
-// directories that are given through the ignore parameter.
-// Symlinks are ignored and skipped.
-// Credit: https://gist.github.com/r0l1/92462b38df26839a3ca324697c8cba04
-func CopyDirExtended(src string, dst string, ignore []string) (err error) {
-
-	ignoreList := slicer.String(ignore)
-	src = filepath.Clean(src)
-	dst = filepath.Clean(dst)
-
-	si, err := os.Stat(src)
+// GetRecordFiles Get record files
+func GetRecordFiles(parentPath string) ([]RecordFile, error) {
+	files, err := os.ReadDir(parentPath)
 	if err != nil {
-		return err
+		log.Errorf("GetRecordFile err: %v", err)
+		return []RecordFile{}, nil
 	}
-	if !si.IsDir() {
-		return fmt.Errorf("source is not a directory")
-	}
-
-	_, err = os.Stat(dst)
-	if err != nil && !os.IsNotExist(err) {
-		return
-	}
-	if err == nil {
-		return fmt.Errorf("destination already exists")
-	}
-
-	err = MkDirs(dst)
-	if err != nil {
-		return
-	}
-
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return
-	}
-
-	for _, entry := range entries {
-		if ignoreList.Contains(entry.Name()) {
-			continue
-		}
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
-
-		if entry.IsDir() {
-			err = CopyDir(srcPath, dstPath)
+	var recordFiles []RecordFile
+	for _, f := range files {
+		if f.IsDir() {
+			mp4File := filepath.Join(parentPath, f.Name(), "video", "rec.mp4")
+			fi, err := os.Lstat(mp4File)
 			if err != nil {
-				return
+				log.Warnf("mp4 file not exits: %s", mp4File)
 			}
-		} else {
-			// Skip symlinks.
-			if entry.Type()&os.ModeSymlink != 0 {
-				continue
-			}
-
-			err = CopyFile(srcPath, dstPath)
-			if err != nil {
-				return
-			}
+			recordFiles = append(recordFiles, RecordFile{
+				DirName:  f.Name(),
+				FilePath: mp4File,
+				Size:     fi.Size(),
+			})
 		}
 	}
-
-	return
-}
-
-func FindPathToFile(fsys fs.FS, file string) (string, error) {
-	stat, _ := fs.Stat(fsys, file)
-	if stat != nil {
-		return ".", nil
-	}
-	var indexFiles slicer.StringSlicer
-	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if strings.HasSuffix(path, file) {
-			indexFiles.Add(path)
-		}
-		return nil
-	})
-	if err != nil {
-		return "", err
-	}
-
-	if indexFiles.Length() > 1 {
-		selected := indexFiles.AsSlice()[0]
-		for _, f := range indexFiles.AsSlice() {
-			if len(f) < len(selected) {
-				selected = f
-			}
-		}
-		path, _ := filepath.Split(selected)
-		return path, nil
-	}
-	if indexFiles.Length() > 0 {
-		path, _ := filepath.Split(indexFiles.AsSlice()[0])
-		return path, nil
-	}
-	return "", fmt.Errorf("no index.html found")
+	return recordFiles, nil
 }

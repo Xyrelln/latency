@@ -34,6 +34,10 @@ export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
 }
 
+export function ListRecords() {
+  return window['go']['app']['Api']['ListRecords']();
+}
+
 export function SetAutoSwipeOff() {
   return window['go']['app']['Api']['SetAutoSwipeOff']();
 }

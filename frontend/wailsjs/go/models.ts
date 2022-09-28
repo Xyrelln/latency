@@ -1,19 +1,5 @@
 export namespace adb {
 	
-	export class Display {
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Display(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
 	export class SwipeEvent {
 	    sx: number;
 	    sy: number;
@@ -50,11 +36,43 @@ export namespace adb {
 	        this.abi = source["abi"];
 	    }
 	}
+	export class Display {
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Display(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
 
 }
 
 export namespace core {
 	
+	export class ImageInfo {
+	    path: string;
+	    width: number;
+	    height: number;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	        this.size = source["size"];
+	    }
+	}
 	export class ImageRectInfo {
 	    x: number;
 	    y: number;
@@ -81,21 +99,24 @@ export namespace core {
 	        this.source_height = source["source_height"];
 	    }
 	}
-	export class ImageInfo {
-	    path: string;
-	    width: number;
-	    height: number;
-	    size: number;
+
+}
+
+export namespace fs {
+	
+	export class RecordFile {
+	    dir_name?: string;
+	    file_path?: string;
+	    size?: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new ImageInfo(source);
+	        return new RecordFile(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source["path"];
-	        this.width = source["width"];
-	        this.height = source["height"];
+	        this.dir_name = source["dir_name"];
+	        this.file_path = source["file_path"];
 	        this.size = source["size"];
 	    }
 	}

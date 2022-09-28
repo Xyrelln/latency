@@ -9,7 +9,7 @@ import (
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/ffprobe"
-    "op-latency-mobile/internal/fs"
+	"op-latency-mobile/internal/fs"
 	"path/filepath"
 	"strings"
 	"time"
@@ -33,6 +33,11 @@ type Api struct {
 	VideoDir  string          `json:"video_dir,omitempty"`
 	ImagesDir string          `json:"images_dir,omitempty"`
 	AppData   string          `json:"app_data,omitempty"`
+}
+
+type Record struct {
+	VideoDir  string `json:"video_dir,omitempty"`
+	ImagesDir string `json:"images_dir,omitempty"`
 }
 
 // NewApp creates a new Api application struct
@@ -160,8 +165,7 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 }
 
 func (a *Api) StartRecord(serial string) error {
-	log.Info("start monitor")
-	log.Infof("workdir: %s", a.VideoDir)
+	log.Infof("starting record, workdir: %s", a.VideoDir)
 	a.VideoDir, a.ImagesDir = fs.CreateWorkDir()
 	recFile := filepath.Join(a.VideoDir, recordFile)
 	cmd, err := cmd.StartScrcpy(serial, recFile)
@@ -170,6 +174,10 @@ func (a *Api) StartRecord(serial string) error {
 		return err
 	}
 	a.Cmd = cmd
+	//isExists := fs.FileExists(recFile)
+	//if isExists {
+	//	a.emitInfo(eventRecordStart)
+	//}
 	a.emitInfo(eventRecordStart)
 	return nil
 }
@@ -204,6 +212,16 @@ func (a *Api) StopTransform() error {
 	return nil
 }
 
+func (a *Api) ListRecords() ([]fs.RecordFile, error) {
+	root, _ := fs.GetExecuteRoot()
+	workDir := filepath.Join(root, "cache")
+	files, err := fs.GetRecordFiles(workDir)
+	if err != nil {
+		log.Errorf("ListRecords error: %v", err)
+		return []fs.RecordFile{}, nil
+	}
+	return files, nil
+}
 
 // StartWithVideo 启动延迟测试
 func (a *Api) StartWithVideo(videoPath string) error {
@@ -234,12 +252,12 @@ func (a *Api) StopScrcpyServer(serial string) error {
 //
 //}
 
-//func (a *Api) StopProcessing() error {
-//	log.Printf("stop monitor")
-//	a.emitInfo(eventRecordFilish)
+//	func (a *Api) StopProcessing() error {
+//		log.Printf("stop monitor")
+//		a.emitInfo(eventRecordFilish)
 //
-//	return a.Cmd.Kill()
-//}
+//		return a.Cmd.Kill()
+//	}
 func (a *Api) Transform(videoPath string) error {
 	//srcVideoPath := filepath.Join(a.VideoDir, recordFile)
 	a.VideoDir, a.ImagesDir = fs.CreateWorkDir()

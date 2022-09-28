@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} from 'vue'
 import { ElMessage } from 'element-plus'
+import { ElNotification } from 'element-plus'
 import { 
   ListDevices,
   Start,
@@ -21,14 +22,18 @@ import {
   IsAppReady,
   StartWithVideo,
   GetPhysicalSize,
+  ListRecords,
   // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
+import {adb, core, fs} from '../../wailsjs/go/models'
 
-const files = reactive({value: []})
-const count = ref(0)
-const load = () => {
-  count.value += 2
-}
+// const files = reactive({value: []})
+// const count = ref(0)
+// const load = () => {
+//   count.value += 2
+// }
+
+const data = ref<Array<fs.RecordFile>>([])
 
 /**
  * 清理所有缓存数据
@@ -61,45 +66,67 @@ const handleUploadVideo = () => {
 
 }
 
+const handleLoadCacheFiles = async() => {
+  ListRecords().then(res => {
+    data.value = res
+  }).catch(err => {
+    data.value = []
+    ElNotification({
+      title: '数据加载失败',
+      type: 'error',
+      message: '缓存数据预加载失败, error: ' + err,
+    })
+  })
+}
+
+defineExpose({
+  handleLoadCacheFiles,
+})
+
 </script>
 
 <template>
-  <el-row justify="center">
-    <el-button-group>
-      <el-tooltip
-        effect="dark"
-        content="加载外部视频"
-        placement="bottom-start"
-      >
-        <el-button>加载</el-button>
-      </el-tooltip>
+  <div>
+    <el-row justify="center">
+      <el-button-group>
+        <el-tooltip
+          effect="dark"
+          content="加载外部视频"
+          placement="bottom-start"
+        >
+          <el-button>加载</el-button>
+        </el-tooltip>
 
-      <el-tooltip
-        effect="dark"
-        content="加载外部视频"
-        placement="bottom-start"
-      >
-        <el-button>上传</el-button>
-      </el-tooltip>
+        <el-tooltip
+          effect="dark"
+          content="加载外部视频"
+          placement="bottom-start"
+        >
+          <el-button>上传</el-button>
+        </el-tooltip>
 
-      <el-tooltip
-        effect="dark"
-        content="清理所有数据"
-        placement="bottom-start"
-      >
-      <el-button @click="handleClearCacheData">清理</el-button>
-      </el-tooltip>
-    </el-button-group>
-  </el-row>
+        <el-tooltip
+          effect="dark"
+          content="清理所有数据"
+          placement="bottom-start"
+        >
+        <el-button @click="handleClearCacheData">清理</el-button>
+        </el-tooltip>
+      </el-button-group>
+    </el-row>
 
     <el-scrollbar style="height: 52vh;">
-      <div v-infinite-scroll="load" class="infinite-list">
-        <div v-for="i in count" :key="i" class="infinite-list-item">
+      <div class="infinite-list">
+        <!-- <div v-for="i in count" :key="i" class="infinite-list-item">
           202209271606{{ i }}  200 待上传
+        </div> -->
+        <div v-for="item in data" :key="item.dir_name" class="infinite-list-item">
+          {{ item.dir_name }}/{{ Math.floor(item.size/1000/1000) }} mb
         </div>
       </div>
 
     </el-scrollbar>
+  </div>
 </template>
 
 <style>
@@ -114,12 +141,18 @@ const handleUploadVideo = () => {
   align-items: center;
   justify-content: center;
   height: 32px;
-  background: var(--el-color-primary-light-9);
+  opacity: 0.6;
+  /* background: var(--el-color-primary-light-9); */
   margin: 10px 0;
-  color: var(--el-color-primary);
+  /* color: var(--el-color-primary); */
 }
 .infinite-list .infinite-list-item + .list-item {
   margin-top: 10px;
+}
+
+.infinite-list-item:hover {
+  background: var(--el-color-primary-light-9);
+  opacity: 0.8;
 }
 
 </style>
