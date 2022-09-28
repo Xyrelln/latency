@@ -280,9 +280,9 @@ func DirIsEmpty(dir string) (bool, error) {
 }
 
 type RecordFile struct {
-	DirName  string `json:"dir_name,omitempty"`
-	FilePath string `json:"file_path,omitempty"`
-	Size     int64  `json:"size,omitempty"`
+	DirName  string `json:"dir_name"`
+	FilePath string `json:"file_path"`
+	Size     int64  `json:"size"`
 }
 
 // GetRecordFiles Get record files
