@@ -163,6 +163,17 @@ function getDeviceList (value: any) {``
   })
 }
 
+/**
+ * 获取选中设备状态
+ */
+function getSelectDeviceState(){
+  for(let d of data.devices) {
+    if (d.Serial == deviceSelected.value) {
+      return d.State
+    }
+  }
+}
+
 function handleLoadExtVideo() {
   handleResetStatus()
   NProgress.start()
@@ -191,9 +202,23 @@ function handleInputSwipe() {
  * 启动录制
  */
 async function handleStartRecord() {
-  // clear first
-  // clearCurrentInterval()
-  addEventLister()
+  // 设备状态检查
+  const state = getSelectDeviceState()
+  if (state == 0) {
+    ElMessage({
+      type: 'error',
+      message: '设备已离线，请检查设备'
+    })
+    return
+  }
+  else if (state == 2) {
+    ElMessage({
+      type: 'error',
+      message: '设备未授权，请检查设备'
+    })
+    return
+  }
+
   handleResetStatus()
   NProgress.start()
   const result = await setPointerLocationOn()
@@ -253,6 +278,9 @@ function runUntilCountDown(second: number, callback?: Function){
   interval.value = setInterval(countDown, 1000)
 }
 
+/**
+ * 配置默认状态
+ */
 function handleResetStatus() {
   if (NProgress.isStarted()) {
     NProgress.done()
@@ -431,6 +459,7 @@ function isWailsRun(){
 }
 
 onMounted(()=> {
+  // 如果是在 wails 运行环境则运行环境检查及事件监听
   if (isWailsRun()) {
     initCheck()
     addEventLister()
