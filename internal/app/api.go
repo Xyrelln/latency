@@ -10,6 +10,7 @@ import (
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/ffprobe"
 	"op-latency-mobile/internal/fs"
+	"op-latency-mobile/internal/upload"
 	"path/filepath"
 	"strings"
 	"time"
@@ -349,6 +350,16 @@ func (a *Api) GetImageFiles() ([]string, error) {
 		return nil, err
 	}
 	return imgs, nil
+}
+
+// UploadFile 文件上传
+func (a *Api) UploadFile(filePath string) error {
+	err := upload.UploadFile(filePath)
+	if err != nil {
+		log.Errorf("upload file failed: %s", err)
+		return err
+	}
+	return nil
 }
 
 func (a *Api) ClearCacheData() {

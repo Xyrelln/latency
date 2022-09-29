@@ -89,3 +89,7 @@ export function StopTransform() {
 export function Transform(arg1) {
   return window['go']['app']['Api']['Transform'](arg1);
 }
+
+export function UploadFile(arg1) {
+  return window['go']['app']['Api']['UploadFile'](arg1);
+}

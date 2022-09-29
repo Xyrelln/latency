@@ -1,64 +1,34 @@
-// resource update
-
 package upload
 
 import (
-    "bytes"
-    "io"
-    "mime/multipart"
-    "net/http"
-    "path/filepath"
+	"os"
+	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
+	"gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
+	"gitlab.vrviu.com/epc/lighttest-lib/token"
 )
 
-type content struct {
-    fname string
-    ftype string
-    fdata []byte
-}
+func UploadFile(filePath string) error {
+	f, err := os.Open(filePath)
+	if err != nil {
+		log.Errorf("open file failed, err: %v", err)
+		return err
+	}
+	defer f.Close()
 
-func SendPostRequest(url string, files ...content) ([]byte, error) {
-    var (
-        buf = new(bytes.Buffer)
-        w = multipart.NewWriter(buf)
-    )
-    for _, f := range files {
-        part, err := w.CreateFormFile(f.ftype, filepath.Base(f.fname))
-        if err != nil {
-            return []byte{}, err
-        }
-        part.Write(f.fdata)
-    }
-
-    w.Close()
-
-    req, err := http.NewRequest("POST", url, buf)
-    if err != nil {
-        return []byte{}, err
-    }
-    req.Header.Add("Content-Type", w.FormDataContentType())
-
-    client := &http.Client{}
-    res, err := client.Do(req)
-    if err != nil {
-        return []byte{}, err
-    }
-    defer res.Body.Close()
-
-    cnt, err := io.ReadAll(res.Body)
-    if err != nil {
-        return []byte{}, err
-    }
-    return cnt, nil
-}
-
-func UploadVideo()  {
-
-}
-
-func UploadLog()  {
-
-}
-
-func UploadResult()  {
-
+	svc := lighttestservice.LightTestService{Endpoint: "http://10.86.3.236:8088"}
+	client := token.ClientInfo{
+		Name:     "perftool",
+		Version:  "0.0.1",
+		Username: "NarakaPlayer",
+	}
+	log.Infof("prepare upload file: %s, base name: %s", filePath, filepath.Base(filePath))
+	uploadPath, err := svc.UploadFile(client, filepath.Base(filePath), f)
+	if err != nil {
+		log.Errorf("upload file failed, err: %v", err)
+		return err
+	}
+	log.Infof("upload success, path: %s", uploadPath)
+	return nil
 }

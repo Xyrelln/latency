@@ -2,6 +2,7 @@
 import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} from 'vue'
 import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
+import { UploadFilled } from '@element-plus/icons-vue'
 import { 
   ListDevices,
   Start,
@@ -23,6 +24,7 @@ import {
   StartWithVideo,
   GetPhysicalSize,
   ListRecords,
+  UploadFile,
   // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
 import {adb, core, fs} from '../../wailsjs/go/models'
@@ -79,6 +81,23 @@ const handleLoadCacheFiles = async() => {
   })
 }
 
+const hanleUploadFile = async(filePath: string) => {
+  UploadFile(filePath).then(res => {
+    ElNotification({
+      title: '操作成功',
+      type: 'success',
+      message: '文件上传成功',
+    })
+  }).catch(err => {
+    ElNotification({
+      title: '操作失败',
+      type: 'error',
+      message: '文件上传失败, error: ' + err,
+    })
+  })
+}
+
+
 defineExpose({
   handleLoadCacheFiles,
 })
@@ -99,7 +118,7 @@ defineExpose({
 
         <el-tooltip
           effect="dark"
-          content="加载外部视频"
+          content="上传所有数据"
           placement="bottom-start"
         >
           <el-button>上传</el-button>
@@ -121,7 +140,7 @@ defineExpose({
           202209271606{{ i }}  200 待上传
         </div> -->
         <div v-for="item in data" :key="item.dir_name" class="infinite-list-item">
-          {{ item.dir_name }}/{{ Math.floor(item.size/1000/1000) }} mb
+          {{ item.dir_name }}({{ Math.floor(item.size/1000/1000) }}MB) <el-icon @click="hanleUploadFile(item.file_path)"><UploadFilled /></el-icon>
         </div>
       </div>
 
@@ -153,6 +172,10 @@ defineExpose({
 .infinite-list-item:hover {
   background: var(--el-color-primary-light-9);
   opacity: 0.8;
+}
+
+.el-tabs__header {
+  margin: 0 0 7px !important;
 }
 
 </style>

@@ -43,6 +43,7 @@ import {
 } from '../../wailsjs/runtime/runtime'
 
 const deviceSelected = ref("")
+const sceneSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
@@ -561,7 +562,7 @@ function handleGetImage() {
               <el-row class="row-item">
                 <el-col :span="20">
                   <el-select
-                    v-model="deviceSelected"
+                    v-model="sceneSelected"
                     filterable
                     placeholder="请选择场景"
                     style="width:100%">

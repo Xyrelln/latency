@@ -16,6 +16,7 @@ declare module '@vue/runtime-core' {
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElMain: typeof import('element-plus/es')['ElMain']
     ElOption: typeof import('element-plus/es')['ElOption']
@@ -30,5 +31,8 @@ declare module '@vue/runtime-core' {
     FileRecord: typeof import('./src/components/FileRecord.vue')['default']
     HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     ImagePreview: typeof import('./src/components/ImagePreview.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
   }
 }

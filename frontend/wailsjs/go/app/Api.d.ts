@@ -47,3 +47,5 @@ export function StopScrcpyServer(arg1:string):Promise<Error>;
 export function StopTransform():Promise<Error>;
 
 export function Transform(arg1:string):Promise<Error>;
+
+export function UploadFile(arg1:string):Promise<Error>;
