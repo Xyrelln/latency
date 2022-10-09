@@ -1,3 +1,24 @@
+export namespace fs {
+	
+	export class RecordFile {
+	    dir_name: string;
+	    file_path: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RecordFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir_name = source["dir_name"];
+	        this.file_path = source["file_path"];
+	        this.size = source["size"];
+	    }
+	}
+
+}
+
 export namespace adb {
 	
 	export class Display {
@@ -97,27 +118,6 @@ export namespace core {
 	        this.preview_height = source["preview_height"];
 	        this.source_width = source["source_width"];
 	        this.source_height = source["source_height"];
-	    }
-	}
-
-}
-
-export namespace fs {
-	
-	export class RecordFile {
-	    dir_name: string;
-	    file_path: string;
-	    size: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new RecordFile(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.dir_name = source["dir_name"];
-	        this.file_path = source["file_path"];
-	        this.size = source["size"];
 	    }
 	}
 

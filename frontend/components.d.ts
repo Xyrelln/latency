@@ -32,7 +32,4 @@ declare module '@vue/runtime-core' {
     HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     ImagePreview: typeof import('./src/components/ImagePreview.vue')['default']
   }
-  export interface ComponentCustomProperties {
-    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
-  }
 }

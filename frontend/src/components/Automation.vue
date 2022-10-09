@@ -29,8 +29,18 @@ const form = reactive({
   speed: 500,
   interval: 2000,
   scene_id: '',
-  location: true
+  location: true,
+  method: 'click',
 })
+
+
+
+const operateMethods = reactive({value:[
+  {id: 1, name: '点击', type: 'click'},
+  {id: 2, name: '拖动', type: 'swipe'},
+]})
+
+const operateMethod = ref("click")
 
 const rules = reactive<FormRules>({
   devices: [
@@ -293,18 +303,18 @@ function handleDeviceChange(value: string) {
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="场景" prop="scene">
+      <el-form-item label="操作方式" prop="method">
         <el-select
-            v-model="form.scene_id"
+            v-model="form.method"
             filterable
-            placeholder="请选择场景"
+            placeholder="请选择操作"
             @change="handleSceneChange"
             style="width:100%">
           <el-option
-            v-for="item in scenes"
+            v-for="item of operateMethods.value"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.type"
           >
           </el-option>
         </el-select>
@@ -344,18 +354,16 @@ function handleDeviceChange(value: string) {
           <el-input v-model.number="form.speed" placeholder="速率（毫秒）"></el-input>
         </el-col>
       </el-form-item>
-      <el-form-item label="间隔时间(ms)" prop="interval">
+      <!-- <el-form-item label="间隔时间(ms)" prop="interval">
         <el-col :span="8">
           <el-input v-model.number="form.interval" placeholder="间隔时间(毫秒)"></el-input>
         </el-col>
-      </el-form-item>
-      <el-form-item label="开启指针位置" prop="location">
+      </el-form-item> -->
+      <!-- <el-form-item label="开启指针位置" prop="location">
         <el-col :span="8">
-          <!-- <el-input v-model.number="form.interval" placeholder="间隔时间(毫秒)"></el-input> -->
-          <!-- <el-checkbox label="开启指针位置" name="location" /> -->
           <el-switch v-model="form.location" />
         </el-col>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" @click="handleSubmit">保存</el-button>
           <!-- <el-button type="primary" v-if="status===0" @click="handleStartRun">开始</el-button>

@@ -17,7 +17,7 @@ func UploadFile(filePath string) error {
 	}
 	defer f.Close()
 
-	svc := lighttestservice.LightTestService{Endpoint: "http://10.86.3.236:8088"}
+	svc := lighttestservice.LightTestService{Endpoint: "https://lighttest.vrviu.com"}
 	client := token.ClientInfo{
 		Name:     "perftool",
 		Version:  "0.0.1",
@@ -30,5 +30,24 @@ func UploadFile(filePath string) error {
 		return err
 	}
 	log.Infof("upload success, path: %s", uploadPath)
+	return nil
+}
+
+type Result struct {
+	CostTime float64 `json:"cost_time"`
+}
+
+func UploadResult(costTime float64) error {
+	svc := lighttestservice.LightTestService{Endpoint: "http://10.86.3.236:8088"}
+	client := token.ClientInfo{
+		Name:     "perftool",
+		Version:  "0.0.1",
+		Username: "NarakaPlayer",
+	}
+	err := svc.UploadJSONData(client, Result{CostTime: costTime})
+	if err != nil {
+		log.Errorf("upload result failed, err: %v", err)
+	}
+
 	return nil
 }

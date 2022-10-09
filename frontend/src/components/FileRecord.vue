@@ -162,11 +162,11 @@ defineExpose({
   height: 32px;
   opacity: 0.6;
   /* background: var(--el-color-primary-light-9); */
-  margin: 10px 0;
+  margin: 7px 0;
   /* color: var(--el-color-primary); */
 }
 .infinite-list .infinite-list-item + .list-item {
-  margin-top: 10px;
+  /* margin-top: 10px; */
 }
 
 .infinite-list-item:hover {
