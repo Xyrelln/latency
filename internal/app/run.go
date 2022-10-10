@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"strings"
 
+	"op-latency-mobile/internal/fs"
 	"op-latency-mobile/internal/logger"
-    "op-latency-mobile/internal/fs"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
@@ -77,6 +77,8 @@ func Run(assets embed.FS) int {
 		Logger:    logger.WailsLogger{},
 		// BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:     app.startup,
+		OnShutdown:    app.shutdown,
+		OnDomReady:    app.domready,
 		AssetsHandler: NewFileLoader(),
 		Bind: []interface{}{
 			app,

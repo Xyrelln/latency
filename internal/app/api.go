@@ -1,7 +1,9 @@
 package app
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"image"
@@ -17,12 +19,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 const (
-	recordFile     = "rec.mp4"
-	firstImageFile = "0001.png"
+	defaultStateKey     = "state_default"
+	defaultWorkspaceKey = "wksp_default"
+	recordFile          = "rec.mp4"
+	firstImageFile      = "0001.png"
 )
 
 var autorun = true
@@ -34,11 +39,22 @@ type Api struct {
 	VideoDir  string          `json:"video_dir,omitempty"`
 	ImagesDir string          `json:"images_dir,omitempty"`
 	AppData   string          `json:"app_data,omitempty"`
+	state     *workspaceState
+	logger    *logger.Logger
+	store     *store
 }
 
 type Record struct {
 	VideoDir  string `json:"video_dir,omitempty"`
 	ImagesDir string `json:"images_dir,omitempty"`
+}
+
+type storeLogger struct {
+	logger.Logger
+}
+
+func (s storeLogger) Warningf(message string, args ...interface{}) {
+	s.Warningf(message, args...)
 }
 
 // NewApp creates a new Api application struct
@@ -50,6 +66,40 @@ func NewApp() *Api {
 // so we can call the runtime methods
 func (a *Api) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	store, err := newStore(a.AppData)
+	a.store = store
+	if err != nil {
+		log.Errorf("app: failed to create database: %v", err)
+		// fmt.Errorf("app: failed to create database: %v", err)
+	}
+	a.state = a.getCurrentState()
+}
+
+func (a *Api) shutdown(ctx context.Context) {
+	a.store.close()
+}
+
+func (a *Api) domready(ctx context.Context) {
+
+}
+
+func (a *Api) getCurrentState() *workspaceState {
+	rtn := &workspaceState{
+		CurrentID: defaultWorkspaceKey,
+	}
+	val, err := a.store.get([]byte(defaultStateKey))
+	if err != nil && err != errKeyNotFound {
+		log.Errorf("failed to get current state from store: %v", err)
+	}
+	if len(val) == 0 {
+		return rtn
+	}
+	dec := gob.NewDecoder(bytes.NewBuffer(val))
+	if err := dec.Decode(rtn); err != nil {
+		log.Errorf("failed to decode state: %v", err)
+	}
+	return rtn
 }
 
 // 获取设备列表

@@ -50,15 +50,3 @@ func SendPostRequest(url string, files ...content) ([]byte, error) {
 	}
 	return cnt, nil
 }
-
-// func UploadVideo() {
-
-// }
-
-// func UploadLog() {
-
-// }
-
-// func UploadResult()  {
-
-// }
