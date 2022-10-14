@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"bytes"
-	log "github.com/sirupsen/logrus"
+	"context"
+	"fmt"
 	"io"
 	"os/exec"
 	"strings"
-)
 
+	log "github.com/sirupsen/logrus"
+)
 
 type Cmd struct {
 	Path    string
@@ -17,6 +19,12 @@ type Cmd struct {
 	Stderr  io.Writer
 }
 
+type CmdRunner struct {
+	Ctx        context.Context
+	CancelFunc context.CancelFunc
+}
+
+type CallbackFunc func() error
 
 // Run starts the specified command and waits for it to complete.
 // The returned error is nil if the command runs, has no problems copying
@@ -42,6 +50,33 @@ func (c *Cmd) BackendRun() error {
 	c.execCmd = cmd
 	log.Infof("args: %v", c.Args)
 	return cmd.Start()
+}
+
+func CmdRun(cmd *exec.Cmd) (data []byte, err error) {
+	var outputBuf bytes.Buffer
+	var stdErr bytes.Buffer
+
+	cmd.Stdout = &outputBuf
+	cmd.Stderr = &stdErr
+
+	// err = cmd.Run()
+	err = cmd.Start()
+	if err != nil {
+		log.Errorf("cmd start error: %v", err)
+		return nil, err
+	}
+	err = cmd.Wait()
+	if err != nil {
+		log.Errorf("cmd run error %s [%s] %v", strings.Join(cmd.Args, " "), stdErr.String(), err)
+		return nil, fmt.Errorf("cmd run error %s [%s] %v", strings.Join(cmd.Args, " "), stdErr.String(), err)
+	}
+
+	if stdErr.Len() > 0 {
+		log.Errorf("cmd run error output: %s", stdErr.String())
+		return nil, fmt.Errorf("cmd run error output: %s", stdErr.String())
+	}
+
+	return outputBuf.Bytes(), nil
 }
 
 // Call starts the specified command and waits for it to complete, returning the

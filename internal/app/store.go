@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	badger "github.com/dgraph-io/badger/v3"
+	log "github.com/sirupsen/logrus"
 )
 
 var errKeyNotFound = badger.ErrKeyNotFound
@@ -28,10 +29,10 @@ type store struct {
 
 func newStore(path string) (*store, error) {
 	dbPath := filepath.Join(path, "db")
-	opts := badger.DefaultOptions(dbPath)
-	// opts = opts.WithLogger(l)
-	db, err := badger.Open(opts)
+	// It will be created if it doesn't exist.
+	db, err := badger.Open(badger.DefaultOptions(dbPath))
 	if err != nil {
+		log.Errorf("db open failed: %v", err)
 		return nil, err
 	}
 

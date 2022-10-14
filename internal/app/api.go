@@ -42,6 +42,7 @@ type Api struct {
 	state     *workspaceState
 	logger    *logger.Logger
 	store     *store
+	cmdRunner *cmd.CmdRunner
 }
 
 type Record struct {
@@ -72,8 +73,10 @@ func (a *Api) startup(ctx context.Context) {
 	if err != nil {
 		log.Errorf("app: failed to create database: %v", err)
 		// fmt.Errorf("app: failed to create database: %v", err)
+	} else {
+		a.state = a.getCurrentState()
 	}
-	a.state = a.getCurrentState()
+
 }
 
 func (a *Api) shutdown(ctx context.Context) {
@@ -215,21 +218,37 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 	return device.SetPointerLocationOff()
 }
 
-func (a *Api) StartRecord(serial string) error {
-	log.Infof("starting record, workdir: %s", a.VideoDir)
+func (a *Api) StartRecord(serial string) (rerr error) {
+	defer func() {
+		if rerr != nil {
+			log.Error(rerr)
+			a.emitInfo(eventRecordStartError)
+		}
+	}()
+
 	a.VideoDir, a.ImagesDir = fs.CreateWorkDir()
 	recFile := filepath.Join(a.VideoDir, recordFile)
-	cmd, err := cmd.StartScrcpy(serial, recFile)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	a.Cmd = cmd
+	log.Infof("starting record, store path: %s", recFile)
+
+	runner, rerr := cmd.ScrcpyStart(serial, recFile)
+	a.cmdRunner = runner
+
+	// cmd, err := cmd.StartScrcpy(serial, recFile)
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return err
+	// }
+	// a.Cmd = cmd
 	//isExists := fs.FileExists(recFile)
 	//if isExists {
 	//	a.emitInfo(eventRecordStart)
 	//}
-	a.emitInfo(eventRecordStart)
+	// a.emitInfo(eventRecordStart)
+	return
+}
+
+func (a *Api) StopRunner() error {
+	a.cmdRunner.CancelFunc()
 	return nil
 }
 
@@ -252,10 +271,6 @@ func (a *Api) Start(serial string, recordSecond int64) error {
 		a.emitInfo(eventTransformStartError)
 		return err
 	}
-	return nil
-}
-
-func (a *Api) StopRecord() error {
 	return nil
 }
 
@@ -330,21 +345,25 @@ func (a *Api) Transform(videoPath string) error {
 	return nil
 }
 
-func (a *Api) StartTransform() error {
-	log.Infof("prepare data")
+func (a *Api) StartTransform() (rerr error) {
+	defer func() {
+		if rerr != nil {
+			log.Error(rerr)
+			a.emitInfo(eventTransformStartError)
+		}
+	}()
+
 	srcVideoPath := filepath.Join(a.VideoDir, recordFile)
 	destImagePath := filepath.Join(a.ImagesDir, "%4d.png")
 	a.emitInfo(eventTransformStart)
-	cmd, err := cmd.StartFFmpeg(srcVideoPath, destImagePath)
-	if err != nil {
-		log.Error(err)
-		a.emitInfo(eventTransformStartError)
-		return err
-	}
+	log.Infof("prepare data")
 
-	a.emitInfo(eventTransformFilish)
-	a.Cmd = cmd
-	return nil
+	runner, rerr := cmd.FFmpegStart(srcVideoPath, destImagePath, func() error {
+		a.emitInfo(eventTransformFilish)
+		return nil
+	})
+	a.cmdRunner = runner
+	return
 }
 
 func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {

@@ -3,7 +3,15 @@
 
 package cmd
 
-import "golang.org/x/sys/unix"
+import (
+	"syscall"
+
+	"golang.org/x/sys/unix"
+)
 
 var cmdStart = []string{"/bin/sh", "-c"}
 var procAttrs = &unix.SysProcAttr{Setpgid: true}
+
+func procAttributes() *syscall.SysProcAttr {
+	return nil
+}

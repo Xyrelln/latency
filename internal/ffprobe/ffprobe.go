@@ -28,9 +28,6 @@ func init() {
 		if _, err := os.Stat(p); !os.IsNotExist(err) {
 			ffprobe = p
 			return
-		} else {
-			log.Errorf("ffprobe path check failed: %s, reason: %v ", p, err)
-			// log.Errorf("ffmpeg path check failed: %s, reason: v%", p, err)
 		}
 	}
 
@@ -195,7 +192,6 @@ func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string
 	log.Infof("cmd: %s args: %s", ffprobe, strings.Join(args, " "))
 	cmd := exec.CommandContext(ctx, ffprobe, args...)
 	cmd.SysProcAttr = procAttributes()
-
 
 	// return data, nil
 	return runProbe2(cmd)

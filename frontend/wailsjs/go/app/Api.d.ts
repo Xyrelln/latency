@@ -40,7 +40,7 @@ export function StartTransform():Promise<Error>;
 
 export function StartWithVideo(arg1:string):Promise<Error>;
 
-export function StopRecord():Promise<Error>;
+export function StopRunner():Promise<Error>;
 
 export function StopScrcpyServer(arg1:string):Promise<Error>;
 

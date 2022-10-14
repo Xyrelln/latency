@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 var ErrScrcpyNotFound = errors.New("scrcpy command not found on PATH")
@@ -19,8 +20,6 @@ func init() {
 		if _, err := os.Stat(p); !os.IsNotExist(err) {
 			scrcpy = p
 			return
-		} else {
-			fmt.Errorf("scrcpy path check failed: %s, reason: %v ", p, err)
 		}
 	}
 
@@ -33,25 +32,51 @@ func init() {
 	}
 }
 
-func StartScrcpy(serial, recFile string) (*Cmd, error) {
-	cmd := Cmd{
-		Args: []string{
-			scrcpy,
-			"--codec-options", "bitrate-mode=2", // https://developer.android.com/reference/android/media/MediaCodecInfo.EncoderCapabilities#BITRATE_MODE_CBR
-			"--no-cleanup",
-			"-s", serial,
-			"--max-fps", "60",
-			// "-n", // no-control
-			"-w", // stay awake
-			"-Nr", recFile,
-		},
-	}
+// func StartScrcpy(serial, recFile string) (*Cmd, error) {
+// 	cmd := Cmd{
+// 		Args: []string{
+// 			scrcpy,
+// 			"--codec-options", "bitrate-mode=2", // https://developer.android.com/reference/android/media/MediaCodecInfo.EncoderCapabilities#BITRATE_MODE_CBR
+// 			"--no-cleanup",
+// 			"-s", serial,
+// 			"--max-fps", "60",
+// 			// "-n", // no-control
+// 			"-w", // stay awake
+// 			"-Nr", recFile,
+// 		},
+// 	}
 
-	if err := cmd.BackendRun(); err == nil {
-		return &cmd, nil
-	} else {
-		return nil, err
+// 	if err := cmd.BackendRun(); err == nil {
+// 		return &cmd, nil
+// 	} else {
+// 		return nil, err
+// 	}
+// }
+
+func RecordVideo(ctx context.Context, serial, recFile string) (data []byte, err error) {
+	args := []string{
+		"--codec-options", "bitrate-mode=2", // https://developer.android.com/reference/android/media/MediaCodecInfo.EncoderCapabilities#BITRATE_MODE_CBR
+		"--no-cleanup",
+		"-s", serial,
+		"--max-fps", "60",
+		// "-n", // no-control
+		"-w", // stay awake
+		"-Nr", recFile,
 	}
+	cmd := exec.CommandContext(ctx, scrcpy, args...)
+	cmd.SysProcAttr = procAttributes()
+
+	return CmdRun(cmd)
+}
+
+func ScrcpyStart(serial, recFile string) (*CmdRunner, error) {
+	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+
+	go func() {
+		RecordVideo(ctx, serial, recFile)
+	}()
+
+	return &CmdRunner{Ctx: ctx, CancelFunc: cancelFn}, nil
 }
 
 func IsScrcpyReady() error {
