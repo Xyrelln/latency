@@ -296,15 +296,18 @@ func GetRecordFiles(parentPath string) ([]RecordFile, error) {
 	for _, f := range files {
 		if f.IsDir() {
 			mp4File := filepath.Join(parentPath, f.Name(), "video", "rec.mp4")
-			fi, err := os.Lstat(mp4File)
-			if err != nil {
-				log.Warnf("mp4 file not exits: %s", mp4File)
+			if _, err := os.Stat(mp4File); !os.IsNotExist(err) {
+				fi, err := os.Lstat(mp4File)
+				if err != nil {
+					log.Warnf("mp4 file not exits: %s", mp4File)
+				}
+				recordFiles = append(recordFiles, RecordFile{
+					DirName:  f.Name(),
+					FilePath: mp4File,
+					Size:     fi.Size(),
+				})
 			}
-			recordFiles = append(recordFiles, RecordFile{
-				DirName:  f.Name(),
-				FilePath: mp4File,
-				Size:     fi.Size(),
-			})
+
 		}
 	}
 	return recordFiles, nil
