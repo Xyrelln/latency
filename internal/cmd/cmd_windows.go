@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"golang.org/x/sys/windows"
+	"syscall"
 )
 
 var cmdStart = []string{"cmd", "/c"}
