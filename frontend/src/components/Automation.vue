@@ -282,7 +282,6 @@ function handleDeviceChange(value: string) {
       :rules="rules"
       label-width="120px"
       class="demo-form"
-      :size="formSize"
       status-icon
       >
       <el-form-item label="设备" prop="devices">

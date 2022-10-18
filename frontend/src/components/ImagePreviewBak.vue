@@ -3,41 +3,21 @@ import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} fro
 import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
-import {adb, core} from '@/../wailsjs/go/models'
+import {adb, core} from '../../wailsjs/go/models'
 import { 
   StartAnalyse,
   GetImageFiles
-} from '@/../wailsjs/go/app/Api'
+} from '../../wailsjs/go/app/Api'
 import {
   EventsOn,
   EventsOff,
-} from '@/../wailsjs/runtime/runtime'
+} from '../../wailsjs/runtime/runtime'
 
 import { isWailsRun } from '@/utils/utils'
-
-// interface CropArea {
-//   top: number
-//   left: number
-//   width: number
-//   height: number
-// }
 
 interface Props {
   data: core.ImageInfo
 }
-
-interface Emits {
-  // (e: 'submit'): void
-  // (e: 'change'): void
-  // (e: 'tag-close', tag: any): void
-  (e: 'crop-change', val: CropArea): void
-  // (e: 'tag-submit', val: any): void
-}
-
-
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
 
 const imageInfo = reactive({
   path: '',
@@ -45,28 +25,13 @@ const imageInfo = reactive({
   height: 0,
   size: 0,
 })
-
-const defaultImageHolder = './assets/images/placeholder.png'
-
-// element refs
+const props = defineProps<Props>()
 const selectBoxRef = ref()
 const previewImgRef = ref()
 const resizeTopRef = ref()
 const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
-
-
-const threshold = inject('threshold') as number
-const currentPage = ref(1)
-const pageSize = ref(1)
-const small = ref(false)
-const background = ref(false)
-const disabled = ref(false)
-const total = ref(10)
-const imgs = ref<Array<string>>([])
-const isImgLoaded = ref(false)
-
 const selectBoxStyle = reactive({
   width: '446px', 
   height: '70px'
@@ -81,60 +46,38 @@ const location = reactive({
   h: 0,
 })
 
-const scene_dwrg_crop:CropArea = reactive({
+const selectArea = reactive({
+    ax: 0,
+    ay: 0,
+    mx: 0,
+    my: 0,
+    bx: 0,
+    by: 0,
+    width: 0,
+    height: 0,
+    paint: false
+})
+
+const imageInfos = ref([
+  { path: ''},
+])
+
+const threshold = inject('threshold') as number
+
+function handleImageAnalyse() {
+  const rectinfo = core.ImageRectInfo.createFrom({
+
+  })
+  StartAnalyse(rectinfo, threshold).then((res)=>{
+  })
+}
+
+const scene_dwrg_crop = reactive({
   top: 26,
   left: 0,
   width: 466,
   height: 90
 })
-
-/**
- * 鼠标点击事件处理
- * @param e 
- */
-const mouseDownHandler = function (e:any) {
-  e.stopPropagation()
-
-  // Get the current mouse position
-  location.x = e.clientX;
-  location.y = e.clientY;
-
-  // Calculate the dimension of element
-  const styles = window.getComputedStyle(selectBoxRef.value);
-  location.w = parseInt(styles.width, 10);
-  location.h = parseInt(styles.height, 10);
-
-  // Attach the listeners to `document`
-  document.addEventListener('mousemove', mouseMoveHandler);
-  document.addEventListener('mouseup', mouseUpHandler);
-};
-
-
-/**
- * 鼠标移动事件处理
- * @param e 
- */
-const mouseMoveHandler = function (e: any) {
-  // console.log("mouseMoveHandler")
-  // How far the mouse has been moved
-  const dx = e.clientX - location.x;
-  const dy = e.clientY - location.y;
-  // console.log(dx, dy)
-
-  // Adjust the dimension of element
-  selectBoxStyle.width = `${location.w + dx}px`;
-  selectBoxStyle.height = `${location.h + dy}px`;
-};
-
-/**
- * 鼠标松开事件处理
- */
-const mouseUpHandler = function () {
-  // Remove the handlers of `mousemove` and `mouseup`
-  document.removeEventListener('mousemove', mouseMoveHandler);
-  document.removeEventListener('mouseup', mouseUpHandler);
-};
-
 
 /**
  * 初始化选择区域
@@ -178,13 +121,6 @@ function selectBoxInit() {
       } else {
         selectBoxRef.value.style.top = ty + 'px'
       }
-
-      emit('crop-change', {
-        top: selectBoxRef.value.style.top, 
-        left: selectBoxRef.value.style.left, 
-        width: width, 
-        height: height, 
-      })
     }
 
     document.onmouseup = (ev:any) => {
@@ -193,14 +129,19 @@ function selectBoxInit() {
     return false;
   })
 
-  // add resize event listener
+}
+
+onMounted(()=>{
+  selectBoxInit()
   resizeTopRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeRightRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeBottomRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeLeftRef.value.addEventListener('mousedown', mouseDownHandler);
 
-}
-
+  if (isWailsRun()) {
+    addEventLister()
+  }
+})
 
 
 function handleCalcCostTime() {
@@ -224,6 +165,44 @@ function handleCalcCostTime() {
 function handleImageLoadSuccess() {
   console.log("handleImageLoadSuccess")
 }
+
+
+const mouseDownHandler = function (e:any) {
+    e.stopPropagation()
+    // Get the current mouse position
+    console.log("mouseDownHandler")
+    location.x = e.clientX;
+    location.y = e.clientY;
+
+    // Calculate the dimension of element
+    const styles = window.getComputedStyle(selectBoxRef.value);
+    location.w = parseInt(styles.width, 10);
+    location.h = parseInt(styles.height, 10);
+
+    // Attach the listeners to `document`
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+};
+
+const mouseMoveHandler = function (e: any) {
+  console.log("mouseMoveHandler")
+    // How far the mouse has been moved
+    const dx = e.clientX - location.x;
+    const dy = e.clientY - location.y;
+    console.log(dx, dy)
+    // Adjust the dimension of element
+    // selectBoxRef.value.style.width = `${location.w + dx}px`;
+    // selectBoxRef.value.style.height = `${location.h + dy}px`;
+    selectBoxStyle.width = `${location.w + dx}px`;
+    selectBoxStyle.height = `${location.h + dy}px`;
+};
+
+const mouseUpHandler = function () {
+    // Remove the handlers of `mousemove` and `mouseup`
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+};
+
 
 function addEventLister() {
   EventsOn("latency:analyse_start", ()=>{
@@ -264,6 +243,7 @@ function addEventLister() {
 
 }
 
+
 function enableCalcButton() {
   calcButtonDisable.value = false
 }
@@ -288,10 +268,18 @@ function loadNewImage(info: core.ImageInfo) {
   imageInfo.height = info.height
 }
 
+const currentPage = ref(1)
+const pageSize = ref(1)
+const small = ref(false)
+const background = ref(false)
+const disabled = ref(false)
+const total = ref(10)
+const imgs = ref<Array<string>>([])
+const isImgLoaded = ref(false)
+
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
-
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
   imageInfo.path = imgs.value[val -1]
@@ -308,15 +296,6 @@ function handleGetImage () {
   })
 }
 
-onMounted(()=>{
-  selectBoxInit()
-
-  if (isWailsRun()) {
-    addEventLister()
-  }
-})
-
-
 defineExpose({
   enableCalcButton,
   setCalcButtonDisable,
@@ -327,16 +306,17 @@ defineExpose({
 })
 
 
+
 </script>
 
 <template>
   <div>
     <el-row justify="center" class="preview-content">
-      <!-- <el-col> -->
+      <el-col>
         <!-- <span>标识检测区域</span> -->
         <!-- <div class="out-img-box"> -->
           <!-- <span class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
-          <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? defaultImageHolder : imageInfo.path" alt=""/>
+          <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? ' ./assets/images/placeholder.png' : imageInfo.path" alt=""/>
           <!-- <span class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
@@ -344,7 +324,7 @@ defineExpose({
             <div ref="resizeBottomRef" class="resizer resizer-b"></div>
             <div ref="resizeLeftRef" class="resizer resizer-l"></div>
           </div>
-      <!-- </el-col> -->
+      </el-col>
     </el-row>
     <el-row v-if="isImgLoaded" justify="center">
       <el-col :span="20">
@@ -366,12 +346,14 @@ defineExpose({
         <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable">计算延迟</el-button>
       </el-col>
       <el-col :span="12">
+        <!-- <span class="data-item">检测到操作总数: {{ delayTimes.length }}</span> -->
         <span class="data-item">结果（毫秒）: {{ delayTimes }}</span>
       </el-col>
     </el-row>
     <el-row>
      
     </el-row>
+  <!-- </el-scrollbar> -->
   </div>
 </template>
 
@@ -390,7 +372,6 @@ defineExpose({
     max-width: 500px;
     max-height: 500px;
     vertical-align: middle;
-    align-items: center;
 }
 
 #select-box {

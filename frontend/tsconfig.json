@@ -15,6 +15,14 @@
       "esnext",
       "dom"
     ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ],
+    "types": [
+      "node",
+      "./node_modules/element-plus/global"
+    ],
     "baseUrl": ".",
     "paths": {
       "@/*": [

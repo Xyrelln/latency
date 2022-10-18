@@ -116,13 +116,13 @@ defineExpose({
           <el-button>加载</el-button>
         </el-tooltip>
 
-        <el-tooltip
+        <!-- <el-tooltip
           effect="dark"
           content="上传所有数据"
           placement="bottom-start"
         >
           <el-button>上传</el-button>
-        </el-tooltip>
+        </el-tooltip> -->
 
         <el-tooltip
           effect="dark"
@@ -165,9 +165,9 @@ defineExpose({
   margin: 7px 0;
   /* color: var(--el-color-primary); */
 }
-.infinite-list .infinite-list-item + .list-item {
-  /* margin-top: 10px; */
-}
+/* .infinite-list .infinite-list-item + .list-item {
+  margin-top: 10px;
+} */
 
 .infinite-list-item:hover {
   background: var(--el-color-primary-light-9);

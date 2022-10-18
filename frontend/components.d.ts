@@ -31,5 +31,6 @@ declare module '@vue/runtime-core' {
     FileRecord: typeof import('./src/components/FileRecord.vue')['default']
     HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     ImagePreview: typeof import('./src/components/ImagePreview.vue')['default']
+    ImagePreviewBak: typeof import('./src/components/ImagePreviewBak.vue')['default']
   }
 }

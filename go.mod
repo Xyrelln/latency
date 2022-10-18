@@ -8,7 +8,7 @@ require (
 	github.com/otiai10/gosseract/v2 v2.4.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
-	gitlab.vrviu.com/epc/lighttest-lib v0.1.1-0.20220929031837-7842cd9be5f1
+	gitlab.vrviu.com/epc/lighttest-lib v0.2.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
@@ -24,6 +24,7 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
+	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	go.opencensus.io v0.22.5 // indirect

@@ -7,27 +7,35 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/cmd"
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/ffprobe"
 	"op-latency-mobile/internal/fs"
 	"op-latency-mobile/internal/upload"
-	"path/filepath"
-	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
-
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+
+	// lighttestServ "gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
+	// lighttestToken "gitlab.vrviu.com/epc/lighttest-lib/token"
+	lighttestUpdate "gitlab.vrviu.com/epc/lighttest-lib/update"
+	lighttestVer "gitlab.vrviu.com/epc/lighttest-lib/version"
 )
 
 const (
-	defaultStateKey     = "state_default"
-	defaultWorkspaceKey = "wksp_default"
-	recordFile          = "rec.mp4"
-	firstImageFile      = "0001.png"
+	appName                  = "latency-mobile"
+	localPassFile            = "latency-mobile-pass"
+	lighttestServiceEndpoint = "https://lighttest.vrviu.com"
+	defaultStateKey          = "state_default"
+	defaultWorkspaceKey      = "wksp_default"
+	recordFile               = "rec.mp4"
+	firstImageFile           = "0001.png"
 )
 
 var autorun = true
@@ -433,4 +441,54 @@ func (a *Api) UploadFile(filePath string) error {
 
 func (a *Api) ClearCacheData() {
 	fs.ClearCacheDir()
+}
+
+// VersionInfo ...
+type VersionInfo struct {
+	Version        string `json:"version"`
+	CommitShortSHA string `json:"commitShortSHA"`
+	BuildTimestamp string `json:"buildTimestamp"`
+}
+
+// GetVersionInfo ...
+func (b *Api) GetVersionInfo() VersionInfo {
+	return VersionInfo{
+		Version:        lighttestVer.Version,
+		CommitShortSHA: lighttestVer.CommitShortSHA,
+		BuildTimestamp: lighttestVer.BuildTimestamp,
+	}
+}
+
+// UpdateInfo ...
+type UpdateInfo struct {
+	LatestVersion string `json:"latestVersion"`
+	NeedUpdate    bool   `json:"needUpdate"`
+	Err           string `json:"err,omitempty"`
+}
+
+// CheckUpdate ...
+func (b *Api) CheckUpdate() UpdateInfo {
+	mgr := lighttestUpdate.LighttestServiceUpdateManager{Endpoint: lighttestServiceEndpoint}
+	latestVersion, needUpdate, err := mgr.NeedUpdate(appName, lighttestVer.Version)
+	if err != nil {
+		return UpdateInfo{Err: err.Error()}
+	}
+	return UpdateInfo{
+		LatestVersion: latestVersion,
+		NeedUpdate:    needUpdate,
+	}
+}
+
+// DoUpdate ...
+func (b *Api) DoUpdate(version string) {
+	mgr := lighttestUpdate.LighttestServiceUpdateManager{Endpoint: lighttestServiceEndpoint}
+	go func() {
+		err := mgr.DoUpdate(appName, version)
+		if err != nil {
+			log.Errorf("update error: %v", err)
+			runtime.EventsEmit(b.ctx, "update_error", err.Error())
+		} else {
+			runtime.EventsEmit(b.ctx, "update_success")
+		}
+	}()
 }
