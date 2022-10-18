@@ -451,7 +451,7 @@ type VersionInfo struct {
 }
 
 // GetVersionInfo ...
-func (b *Api) GetVersionInfo() VersionInfo {
+func (a *Api) GetVersionInfo() VersionInfo {
 	return VersionInfo{
 		Version:        lighttestVer.Version,
 		CommitShortSHA: lighttestVer.CommitShortSHA,
@@ -467,7 +467,7 @@ type UpdateInfo struct {
 }
 
 // CheckUpdate ...
-func (b *Api) CheckUpdate() UpdateInfo {
+func (a *Api) CheckUpdate() UpdateInfo {
 	mgr := lighttestUpdate.LighttestServiceUpdateManager{Endpoint: lighttestServiceEndpoint}
 	latestVersion, needUpdate, err := mgr.NeedUpdate(appName, lighttestVer.Version)
 	if err != nil {
@@ -480,15 +480,16 @@ func (b *Api) CheckUpdate() UpdateInfo {
 }
 
 // DoUpdate ...
-func (b *Api) DoUpdate(version string) {
+func (a *Api) DoUpdate(version string) {
 	mgr := lighttestUpdate.LighttestServiceUpdateManager{Endpoint: lighttestServiceEndpoint}
 	go func() {
 		err := mgr.DoUpdate(appName, version)
 		if err != nil {
 			log.Errorf("update error: %v", err)
-			runtime.EventsEmit(b.ctx, "update_error", err.Error())
+			a.emitData(eventUpdateError, err.Error())
 		} else {
-			runtime.EventsEmit(b.ctx, "update_success")
+			// runtime.EventsEmit(b.ctx, "update_success")
+			a.emitInfo(eventUpdateSuccess)
 		}
 	}()
 }

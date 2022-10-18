@@ -14,4 +14,6 @@ const (
 	eventSetPointerLocationOn  = "latency:set_pointer_location_on"
 	eventSetPointerLocationOff = "latency:set_pointer_location_off"
 	eventUpdateAvaiable        = "latency:update_available"
+	eventUpdateSuccess         = "latency:update_success"
+	eventUpdateError           = "latency:update_error"
 )
