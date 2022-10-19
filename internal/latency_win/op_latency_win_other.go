@@ -23,3 +23,7 @@ type Config struct {
 // OpLatencyWindowsManager ...
 type OpLatencyWindowsManager struct {
 }
+
+func NewOpLatencyWindowsManager() *OpLatencyWindowsManager {
+	return &OpLatencyWindowsManager{}
+}

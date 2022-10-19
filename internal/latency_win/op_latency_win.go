@@ -117,27 +117,43 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 
 // OpLatencyWindowsManager ...
 type OpLatencyWindowsManager struct {
-	Cfg               Config
-	InputTime         time.Time
-	ScreenshotSeq     capture.ScreenshotSeq
-	CurrentImageIndex int
+	Cfg Config
+
+	ch            chan struct{}
+	inputTime     time.Time
+	screenshotSeq capture.ScreenshotSeq
+}
+
+// NewOpLatencyWindowsManager ...
+func NewOpLatencyWindowsManager() *OpLatencyWindowsManager {
+	return &OpLatencyWindowsManager{
+		ch: make(chan struct{}, 1),
+	}
 }
 
 // Start ...
 func (owm *OpLatencyWindowsManager) Start(cfg Config) error {
+	select {
+	case owm.ch <- struct{}{}:
+		defer func() { <-owm.ch }()
+	default:
+		log.Warn("op-latency-windows is running")
+		return nil
+	}
+
 	owm.Cfg = cfg
 	exeDir, err := fs.GetExecuteRoot()
 	if err != nil {
 		return err
 	}
 
-	screenshots, inputTime, err := OpLatency(cfg, exeDir, func(s string) { fmt.Println(s) })
+	screenshots, inputTime, err := OpLatency(cfg, exeDir, func(s string) { log.Info(s) })
 	if err != nil {
 		return err
 	}
 
-	owm.InputTime = inputTime
-	owm.ScreenshotSeq = screenshots
+	owm.inputTime = inputTime
+	owm.screenshotSeq = screenshots
 	return nil
 }
 
@@ -151,20 +167,35 @@ func (owm *OpLatencyWindowsManager) CalculateLatencyByImageDiff(imageRect core.I
 	y1 := imageRect.H*imageRect.SourceHeight/imageRect.PreviewHeight + y0
 	selectedRect := image.Rect(x0, y0, x1, y1)
 
-	respIndex, err = owm.ScreenshotSeq.FindImageHashResponseTime(selectedRect, owm.Cfg.ImageDiffThreshold, owm.InputTime)
+	respIndex, err = owm.screenshotSeq.FindImageHashResponseTime(selectedRect, owm.Cfg.ImageDiffThreshold, owm.inputTime)
 	if err != nil {
 		log.Errorf("识别画面响应时间失败: %v\n", err)
 		return
 	}
-	responseTime = owm.ScreenshotSeq[respIndex].Time
-	latency = responseTime.Sub(owm.InputTime)
+	responseTime = owm.screenshotSeq[respIndex].Time
+	latency = responseTime.Sub(owm.inputTime)
 	return respIndex, responseTime, latency, nil
 }
 
 // CalculateLatencyByIndex ...
 func (owm *OpLatencyWindowsManager) CalculateLatencyByIndex(index int) (respIndex int, responseTime time.Time, latency time.Duration, err error) {
 
-	responseTime = owm.ScreenshotSeq[index].Time
-	latency = responseTime.Sub(owm.InputTime)
+	responseTime = owm.screenshotSeq[index].Time
+	latency = responseTime.Sub(owm.inputTime)
 	return index, responseTime, latency, nil
+}
+
+// GetScreenshotCount ...
+func (owm *OpLatencyWindowsManager) GetScreenshotCount() int {
+	return len(owm.screenshotSeq)
+}
+
+// GetScreenshotByIndex ...
+func (owm *OpLatencyWindowsManager) GetScreenshotByIndex(index int) capture.ScreenshotWithTs {
+	return owm.screenshotSeq[index]
+}
+
+// GetInputTime ...
+func (owm *OpLatencyWindowsManager) GetInputTime() time.Time {
+	return owm.inputTime
 }

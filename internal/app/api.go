@@ -90,6 +90,7 @@ func (a *Api) startup(ctx context.Context) {
 		a.state = a.getCurrentState()
 	}
 
+	a.latencyWinManager = latencywin.NewOpLatencyWindowsManager()
 }
 
 func (a *Api) shutdown(ctx context.Context) {
