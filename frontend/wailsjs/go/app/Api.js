@@ -6,10 +6,6 @@ export function CheckUpdate() {
   return window['go']['app']['Api']['CheckUpdate']();
 }
 
-export function ClearCacheData() {
-  return window['go']['app']['Api']['ClearCacheData']();
-}
-
 export function DoUpdate(arg1) {
   return window['go']['app']['Api']['DoUpdate'](arg1);
 }

@@ -18,7 +18,7 @@ import (
 	"op-latency-mobile/internal/fs"
 	"op-latency-mobile/internal/upload"
 
-	"op-latency-mobile/internal/latency_win"
+	// "op-latency-mobile/internal/latency_win"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/logger"
@@ -55,7 +55,7 @@ type Api struct {
 	cmdRunner *cmd.CmdRunner
 
 	// windows op latency
-	latencyWinManager *latencywin.OpLatencyWindowsManager
+	// latencyWinManager *latencywin.OpLatencyWindowsManager
 }
 
 type Record struct {

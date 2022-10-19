@@ -37,20 +37,6 @@ export namespace app {
 
 export namespace adb {
 	
-	export class Display {
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Display(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
 	export class SwipeEvent {
 	    sx: number;
 	    sy: number;
@@ -85,6 +71,20 @@ export namespace adb {
 	        this.Serial = source["Serial"];
 	        this.State = source["State"];
 	        this.abi = source["abi"];
+	    }
+	}
+	export class Display {
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Display(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
 	    }
 	}
 

@@ -1,9 +1,12 @@
+//go:build windows
+// +build windows
+
 package app
 
 import (
 	// "fmt"
 	"op-latency-mobile/internal/core"
-	"op-latency-mobile/internal/latency_win"
+	latencywin "op-latency-mobile/internal/latency_win"
 
 	log "github.com/sirupsen/logrus"
 )

@@ -1,3 +1,6 @@
+//go:build windows
+// +build windows
+
 package capture
 
 import (
@@ -7,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
 	// "runtime"
 	"sort"
 	"strconv"
