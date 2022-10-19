@@ -141,11 +141,6 @@ func (owm *OpLatencyWindowsManager) Start(cfg Config) error {
 	return nil
 }
 
-func calculateRectangle(guiWidth, guiHeight, x1, y1, x2, y2 int) image.Rectangle {
-	rect := image.Rectangle{}
-	return rect
-}
-
 // CalculateLatencyByImageDiff ...
 func (owm *OpLatencyWindowsManager) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo) (respIndex int, responseTime time.Time, latency time.Duration, err error) {
 	// selectedRect := rp.imgRegionSelect.SelectedRegion()
