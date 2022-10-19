@@ -197,9 +197,9 @@ func ProbePTS(ctx context.Context, fileURL string, extraFFProbeOptions ...string
 	return runProbe2(cmd)
 }
 
-func IsFFprobeReady() error {
+func IsFFprobeReady() (string, error) {
 	if ffprobe == "" {
-		return ErrFFprobeNotFound
+		return "", ErrFFprobeNotFound
 	}
-	return nil
+	return ffprobe, nil
 }

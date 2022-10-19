@@ -75,9 +75,9 @@ func FFmpegStart(srcVideoPath, destImagePath string, callback CallbackFunc) (*Cm
 	return &CmdRunner{Ctx: ctx, CancelFunc: cancelFn}, nil
 }
 
-func IsFFmpegReady() error {
+func IsFFmpegReady() (string, error) {
 	if ffmpeg == "" {
-		return ErrFFmpegNotFound
+		return "", ErrFFmpegNotFound
 	}
-	return nil
+	return ffmpeg, nil
 }

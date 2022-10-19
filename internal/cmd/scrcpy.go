@@ -79,9 +79,9 @@ func ScrcpyStart(serial, recFile string) (*CmdRunner, error) {
 	return &CmdRunner{Ctx: ctx, CancelFunc: cancelFn}, nil
 }
 
-func IsScrcpyReady() error {
+func IsScrcpyReady() (string, error) {
 	if scrcpy == "" {
-		return ErrScrcpyNotFound
+		return "", ErrScrcpyNotFound
 	}
-	return nil
+	return scrcpy, nil
 }

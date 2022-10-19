@@ -162,9 +162,9 @@ func (c *Cmd) Call() (string, error) {
 	return stdout.String(), err
 }
 
-func IsAdbReady() error {
+func IsAdbReady() (string, error) {
 	if adb == "" {
-		return ErrADBNotFound
+		return "", ErrADBNotFound
 	}
-	return nil
+	return adb, nil
 }

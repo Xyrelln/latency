@@ -97,7 +97,7 @@ func (a *Api) shutdown(ctx context.Context) {
 }
 
 func (a *Api) domready(ctx context.Context) {
-
+	a.IsAppReady()
 }
 
 func (a *Api) getCurrentState() *workspaceState {
@@ -128,31 +128,35 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 	return devices, nil
 }
 
-// 检查 app 环境信息
+// 检查 app 依赖包环境信息
 func (a *Api) IsAppReady() error {
-	err := adb.IsAdbReady()
+	p, err := adb.IsAdbReady()
 	if err != nil {
 		log.Error("adb path wrong")
 		return err
 	}
+	log.Infof("adb path: %s", p)
 
-	err = cmd.IsFFmpegReady()
+	p, err = cmd.IsFFmpegReady()
 	if err != nil {
 		log.Error("ffmpeg path wrong")
 		return err
 	}
+	log.Infof("ffmpeg path: %s", p)
 
-	err = ffprobe.IsFFprobeReady()
+	p, err = ffprobe.IsFFprobeReady()
 	if err != nil {
 		log.Error("ffprobe path wrong")
 		return err
 	}
+	log.Infof("ffprobe path: %s", p)
 
-	err = cmd.IsScrcpyReady()
+	p, err = cmd.IsScrcpyReady()
 	if err != nil {
 		log.Error("scrcpy path wrong")
 		return err
 	}
+	log.Infof("scrcpy path: %s", p)
 	return nil
 }
 
@@ -444,10 +448,6 @@ func (a *Api) UploadFile(filePath string) error {
 	return nil
 }
 
-func (a *Api) ClearCacheData() {
-	fs.ClearCacheDir()
-}
-
 // VersionInfo ...
 type VersionInfo struct {
 	Version        string `json:"version"`
@@ -478,6 +478,7 @@ func (a *Api) CheckUpdate() UpdateInfo {
 	if err != nil {
 		return UpdateInfo{Err: err.Error()}
 	}
+	log.Infof("check last version: %s need update: %t", latestVersion, needUpdate)
 	return UpdateInfo{
 		LatestVersion: latestVersion,
 		NeedUpdate:    needUpdate,
@@ -488,12 +489,12 @@ func (a *Api) CheckUpdate() UpdateInfo {
 func (a *Api) DoUpdate(version string) {
 	mgr := lighttestUpdate.LighttestServiceUpdateManager{Endpoint: lighttestServiceEndpoint}
 	go func() {
+		log.Infof("upgrade to last version: %s", version)
 		err := mgr.DoUpdate(appName, version)
 		if err != nil {
 			log.Errorf("update error: %v", err)
 			a.emitData(eventUpdateError, err.Error())
 		} else {
-			// runtime.EventsEmit(b.ctx, "update_success")
 			a.emitInfo(eventUpdateSuccess)
 		}
 	}()

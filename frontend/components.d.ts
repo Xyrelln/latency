@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AboutPage: typeof import('./src/components/AboutPage.vue')['default']
     Automation: typeof import('./src/components/Automation.vue')['default']
+    copy: typeof import('./src/components/ImagePreview copy.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
@@ -17,6 +18,7 @@ declare module '@vue/runtime-core' {
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElFrom: typeof import('element-plus/es')['ElFrom']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElMain: typeof import('element-plus/es')['ElMain']
@@ -33,5 +35,6 @@ declare module '@vue/runtime-core' {
     HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     ImagePreview: typeof import('./src/components/ImagePreview.vue')['default']
     ImagePreviewBak: typeof import('./src/components/ImagePreviewBak.vue')['default']
+    ScreenPreview: typeof import('./src/components/ScreenPreview.vue')['default']
   }
 }

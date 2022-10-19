@@ -9,6 +9,7 @@ import Automation from '../components/Automation.vue';
 import AboutPage from '../components/AboutPage.vue';
 
 import LatencyPage from './LatencyPage.vue';
+import PCLatencyPage from './PCLatencyPage.vue';
 
 import { EventsOn, EventsOff } from '@/../wailsjs/runtime/runtime'
 import { CheckUpdate, DoUpdate } from '@/../wailsjs/go/app/api'
@@ -105,8 +106,11 @@ onUnmounted(()=>{
 <template>
   <el-container>
     <el-tabs type="border-card" v-model="topTabName" >
-      <el-tab-pane label="延迟测试" name="latency">
+      <el-tab-pane label="延迟测试-Android" name="latency">
         <LatencyPage></LatencyPage>
+      </el-tab-pane>
+      <el-tab-pane label="延迟测试-PC" name="latency-pc">
+        <PCLatencyPage></PCLatencyPage>
       </el-tab-pane>
       <el-tab-pane label="场景配置" name="automation">
         <Automation/>
