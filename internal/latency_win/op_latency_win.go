@@ -132,7 +132,7 @@ func NewOpLatencyWindowsManager() *OpLatencyWindowsManager {
 }
 
 // Start ...
-func (owm *OpLatencyWindowsManager) Start(cfg Config) error {
+func (owm *OpLatencyWindowsManager) Start(cfg Config, printFunc func(string)) error {
 	select {
 	case owm.ch <- struct{}{}:
 		defer func() { <-owm.ch }()
@@ -147,7 +147,7 @@ func (owm *OpLatencyWindowsManager) Start(cfg Config) error {
 		return err
 	}
 
-	screenshots, inputTime, err := OpLatency(cfg, exeDir, func(s string) { log.Info(s) })
+	screenshots, inputTime, err := OpLatency(cfg, exeDir, printFunc)
 	if err != nil {
 		return err
 	}

@@ -13,21 +13,26 @@ import (
 )
 
 // LatencyWindowsCompleteEvent ...
-// LatencyWindowsCompleteEvent ...
 type LatencyWindowsCompleteEvent struct {
 	ImageCount int   `json:"imageCount"`
 	InputTime  int64 `json:"inputTime"`
 }
 
+// LatencyWindowsMessageEvent ...
+type LatencyWindowsMessageEvent struct {
+	Message string `json:"message"`
+}
+
 // StartWinOpLatency ...
 func (a *Api) StartWinOpLatency(config latencywin.Config) {
-	// a.latencyWinManager = &latencywin.OpLatencyWindowsManager{}
 	if a.latencyWinManager == nil {
 		return
 	}
 
 	go func() {
-		err := a.latencyWinManager.Start(config)
+		err := a.latencyWinManager.Start(config, func(s string) {
+			runtime.EventsEmit(a.ctx, "latencyWindowsMessage", LatencyWindowsMessageEvent{Message: s})
+		})
 		if err != nil {
 			return
 		}
