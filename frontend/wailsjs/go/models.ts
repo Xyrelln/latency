@@ -1,40 +1,3 @@
-export namespace app {
-	
-	export class UpdateInfo {
-	    latestVersion: string;
-	    needUpdate: boolean;
-	    err?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latestVersion = source["latestVersion"];
-	        this.needUpdate = source["needUpdate"];
-	        this.err = source["err"];
-	    }
-	}
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
-
-}
-
 export namespace adb {
 	
 	export class SwipeEvent {
@@ -155,6 +118,43 @@ export namespace fs {
 	        this.dir_name = source["dir_name"];
 	        this.file_path = source["file_path"];
 	        this.size = source["size"];
+	    }
+	}
+
+}
+
+export namespace app {
+	
+	export class UpdateInfo {
+	    latestVersion: string;
+	    needUpdate: boolean;
+	    err?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latestVersion = source["latestVersion"];
+	        this.needUpdate = source["needUpdate"];
+	        this.err = source["err"];
+	    }
+	}
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
 	    }
 	}
 

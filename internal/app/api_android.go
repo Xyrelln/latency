@@ -1,5 +1,5 @@
 package app
 
-func (a *Api) ClearCacheData() {
-	fs.ClearCacheDir()
-}
+// func (a *Api) ClearCacheData() {
+// 	fs.ClearCacheDir()
+// }

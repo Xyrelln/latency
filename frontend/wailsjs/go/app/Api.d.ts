@@ -7,6 +7,8 @@ import {fs} from '../models';
 
 export function CheckUpdate():Promise<app.UpdateInfo>;
 
+export function ClearCacheData():Promise<void>;
+
 export function DoUpdate(arg1:string):Promise<void>;
 
 export function GetDisplay(arg1:string):Promise<adb.Display>;

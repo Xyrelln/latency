@@ -499,3 +499,7 @@ func (a *Api) DoUpdate(version string) {
 		}
 	}()
 }
+
+func (a *Api) ClearCacheData() {
+	fs.ClearCacheDir()
+}
