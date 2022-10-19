@@ -5,6 +5,8 @@ go 1.18
 require (
 	github.com/corona10/goimagehash v1.1.0
 	github.com/dgraph-io/badger/v3 v3.2103.2
+	github.com/go-vgo/robotgo v0.100.10
+	github.com/moutend/go-hook v0.1.0
 	github.com/otiai10/gosseract/v2 v2.4.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
@@ -14,6 +16,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.2.0 // indirect
+	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
@@ -26,8 +29,21 @@ require (
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/klauspost/compress v1.12.3 // indirect
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
+	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/robotn/gohook v0.31.3 // indirect
+	github.com/robotn/xgb v0.0.0-20190912153532-2cb92d044934 // indirect
+	github.com/robotn/xgbutil v0.0.0-20190912154524-c861d6f87770 // indirect
+	github.com/shirou/gopsutil v3.21.10+incompatible // indirect
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
+	github.com/tklauser/numcpus v0.3.0 // indirect
+	github.com/vcaesar/gops v0.21.3 // indirect
+	github.com/vcaesar/imgo v0.30.0 // indirect
+	github.com/vcaesar/keycode v0.10.0 // indirect
+	github.com/vcaesar/tt v0.20.0 // indirect
 	go.opencensus.io v0.22.5 // indirect
+	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
