@@ -18,8 +18,6 @@ import {
   ListDevices,
   Start,
   StartRecord,
-  // StopRecord,
-  // StopProcessing,
   StartTransform,
   StartAnalyse,
   SetPointerLocationOff,
@@ -35,7 +33,6 @@ import {
   StartWithVideo,
   GetPhysicalSize,
   ListRecords,
-  // IsAppReady2,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import {
@@ -652,7 +649,7 @@ function handleGetImage() {
               :data="imageInfo"
               />
             </div>
-            <el-row>
+            <!-- <el-row>
               <el-col :span="4">
                 <el-input placeholder="X"></el-input>
               </el-col>
@@ -665,11 +662,7 @@ function handleGetImage() {
               <el-col :span="4">
                 <el-input placeholder="X"></el-input>
               </el-col>
-
-            
-              
-              
-            </el-row>
+            </el-row> -->
             <!-- <ImagePreview
             ref="imagePreviewRef"
             :data="imageInfo"

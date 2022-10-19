@@ -15,8 +15,12 @@ import {
   ClearCacheData,
   GetDisplay,
   IsAppReady,
+  StartWinOpLatency,
+  CalculateLatencyByImageDiff,
+  CalculateLatencyByCurrentImage,
+  GetImage,
 } from '../../wailsjs/go/app/Api'
-import {adb, core} from '../../wailsjs/go/models'
+import {adb, core, latencywin} from '../../wailsjs/go/models'
 import {
   EventsOn,
   EventsOff,
@@ -139,7 +143,27 @@ async function handleGetDisplay() {
   return status
 }
 
-const handleStart = () => {}
+const handleStart = () => {
+  const input_config = latencywin.InputConf.createFrom({
+    type: latencyForm.operate_method,
+    isAuto: latencyForm.auto,
+    keyTap: latencyForm.operate_key
+  })
+  
+  const config = latencywin.Config.createFrom({
+    inputCconf: input_config,
+    imageDiff_threshold: latencyForm.diffScore,
+    frames: latencyForm.frame_count,
+    startKey: latencyForm.start_hotkey,
+  })
+
+  StartWinOpLatency(config).then(res => {
+
+  }).catch(err => {
+
+  })
+  
+}
 
 async function removeEventLister() {
   EventsOff("latency:record_start")
@@ -168,6 +192,9 @@ async function initCheck() {
 const handleOperateKeyFocus = (event: FocusEvent) => {
   // event.stopPropagation()
   document.onkeydown=function(e){
+    console.log(e.key)
+    console.log(e.code)
+    console.log(e)
     latencyForm.operate_key = e.key
   }
 }
