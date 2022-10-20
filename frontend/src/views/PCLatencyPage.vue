@@ -57,8 +57,11 @@ const cropInfo:CropArea = reactive({
 })
 
 const imagePageInfo:ImagePage = reactive({
-  page: 0,
-  count: 0,
+  // page: 0,
+  // count: 0,
+  size: 1,
+  total: 0,
+  currentPage: 1,
 })
 
 const operateMethod = ref('keyboard')
@@ -113,6 +116,7 @@ const result = reactive({
   responseTime: 0,
   imageCount: 0,
   inputTime: 0,
+  currentImageIndex: 0,
 })
 
 function checkGreaterThanZero (rule: any, value: any, callback: any)  {
@@ -157,7 +161,10 @@ async function addEventLister() {
     isStared.value = false
 
     console.log("GetImage")
-    handleLoadImage(0)
+
+    const firstImageIndex = 0
+    handleLoadImage(firstImageIndex)
+    result.currentImageIndex = firstImageIndex
     // GetImage(0).then((res:app.GetImageResp) => {
     //   console.log(res)
     //   imageInfo.path = res.imageFilePath
@@ -266,6 +273,21 @@ const handleCropChange = (res: CropInfo)=> {
   cropInfo.height = res.height
 }
 
+const handleGetPreviousPage = () => {
+  result.currentImageIndex -= 1
+  handleLoadImage(result.currentImageIndex)
+}
+
+const handleGetNextPage = () => {
+  result.currentImageIndex += 1
+  handleLoadImage(result.currentImageIndex)
+}
+
+const handlePageChange = (val: number) => {
+  imagePageInfo.currentPage = val
+  handleLoadImage(imagePageInfo.currentPage)
+}
+
 const handleCalc = () => {
   console.log("handleCalcWithCurrent")
   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
@@ -303,6 +325,10 @@ const handleCalcWithCurrent = () => {
   }).catch(err => {
     console.log(err)
   })
+}
+
+const handleOpenImage = () => {
+  
 }
 
 onUnmounted(()=>{
@@ -399,6 +425,9 @@ function handleGetImage() {
                 :cropInfo="cropInfo"
                 :pageInfo="imagePageInfo"
                 @crop-change="handleCropChange"
+                @get-previous-page="handleGetPreviousPage"
+                @get-next-page="handleGetNextPage"
+                @page-change="handlePageChange"
                 />
             </div>
             <el-row>

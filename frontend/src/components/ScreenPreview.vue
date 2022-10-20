@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} from 'vue'
 import {adb, core} from '@/../wailsjs/go/models'
+import { ElMessage } from 'element-plus'
 
 interface Props {
   imageInfo: core.ImageInfo
@@ -11,6 +12,9 @@ interface Props {
 interface Emits {
   (e: 'crop-change', val: CropInfo): void
   (e: 'page-change', val: CropInfo): void
+  (e: 'get-previous-page'): void
+  (e: 'get-next-page'): void
+  (e: 'page-change', val: number): void
 }
 
 const props = defineProps<Props>()
@@ -28,15 +32,14 @@ const resizeLeftRef = ref()
 const isPaged = ref(true)
 
 
-const threshold = inject('threshold') as number
-const currentPage = ref(1)
-const pageSize = ref(1)
+// const threshold = inject('threshold') as number
+// const currentPage = ref(1)
+// const pageSize = ref(1)
 const small = ref(false)
-const background = ref(false)
-const disabled = ref(false)
-const total = ref(10)
-const imgs = ref<Array<string>>([])
-const isImgLoaded = ref(true)
+const paginationDisabled = ref(false)
+// const total = ref(10)
+// const imgs = ref<Array<string>>([])
+// const isImgLoaded = ref(true)
 
 const selectBoxStyle = reactive({
   width: '446px', 
@@ -211,21 +214,43 @@ function setDefaultTime() {
 }
 
 
-const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
-}
+// const handleSizeChange = (val: number) => {
+//   console.log(`${val} items per page`)
+// }
 
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
+  emit('page-change', val)
   // imageInfo.path = imgs.value[val -1]
 }
 
-const getPreviewImage = ()=> {
-
+const getPreviousImage = ()=> {
+  if (props.pageInfo.currentPage === 0 ) {
+    ElMessage({
+      type: 'warning',
+      message: '当前为第一张图片'
+    })
+  } else {
+    const page = props.pageInfo.currentPage - 1
+    emit('page-change', page)
+  }
+  // emit('get-previous-page')
 }
 
 const getNextImage = ()=> {
-
+  if (props.pageInfo.currentPage === props.pageInfo.total ) {
+    ElMessage({
+      type: 'warning',
+      message: '当前为最后一张图片'
+    })
+  } else {
+    const page = props.pageInfo.currentPage + 1
+    emit('page-change', page)
+  }
+  // emit('page-change', val)
+  // const page = props.pageInfo.currentPage + 1
+  // emit('page-change', page)
+  // emit('get-next-page')
 }
 
 onMounted(()=>{
@@ -249,9 +274,9 @@ defineExpose({
       <!-- <el-col> -->
         <!-- <span>标识检测区域</span> -->
         <!-- <div class="out-img-box"> -->
-          <span v-if="isPaged" @click="getPreviewImage" class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <span v-if="isPaged" @click="getPreviousImage" class="page-button el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
-          <span v-if="isPaged" @click="getNextImage"  class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <span v-if="isPaged" @click="getNextImage"  class="page-button el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
@@ -269,14 +294,13 @@ defineExpose({
     </el-row> -->
     <el-row v-if="isPaged" justify="center">
         <el-pagination
-          :currentPage="currentPage"
-          :page-size="pageSize"
+          :currentPage="props.pageInfo.currentPage"
+          :page-size="1"
           :small="small"
-          :disabled="disabled"
-          :background="background"
+          :disabled="paginationDisabled"
+          :background="false"
           layout="total, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
+          :total="props.pageInfo.total"
           @current-change="handleCurrentChange"
         />
     </el-row>
@@ -398,6 +422,10 @@ img {
 
 .item-result {
   margin-top: 0.5rem;
+}
+
+.page-button:hover {
+  color: rgb(90, 156, 248);
 }
 
 
