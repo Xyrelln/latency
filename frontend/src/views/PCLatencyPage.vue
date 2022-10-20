@@ -133,6 +133,7 @@ function checkGreaterThanZero (rule: any, value: any, callback: any)  {
  * 绑定监听
  */
 async function addEventLister() {
+  console.log("addEventLister")
   EventsOn("latencyWindowsComplete", (res)=>{
     imageDetail.count = res.imageCount
     imageDetail.input_time = res.inputTime
@@ -143,7 +144,9 @@ async function addEventLister() {
       message: "录制成功",
     })
 
+    console.log("GetImage")
     GetImage(0).then((res:app.GetImageResp) => {
+      console.log(res)
       imageInfo.path = res.imageFilePath
       imageInfo.width = res.imageWidth
       imageInfo.height = res.imageHeight
@@ -158,26 +161,28 @@ async function addEventLister() {
   })
 
   EventsOn("latencyWindowsMessage", (res) => {
+    console.log(latencyWindowsMessage)
     console.log(res)
   })
  
 }
 
-async function handleGetDisplay() {
-  let status = false
-  await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
-      deviceInfo.width = res.width
-      deviceInfo.height = res.height
-      status = true
-  }).catch(err => {
-    // deviceInfo.width = 1080
-    // deviceInfo.height = 1920
-    console.log(err)
-  })
-  return status
-}
+// async function handleGetDisplay() {
+//   let status = false
+//   await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
+//       deviceInfo.width = res.width
+//       deviceInfo.height = res.height
+//       status = true
+//   }).catch(err => {
+//     // deviceInfo.width = 1080
+//     // deviceInfo.height = 1920
+//     console.log(err)
+//   })
+//   return status
+// }
 
 const handleStart = () => {
+  console.log("handleStart")
   const input_config = latencywin.InputConf.createFrom({
     type: latencyForm.operate_method,
     isAuto: latencyForm.auto,
@@ -192,7 +197,7 @@ const handleStart = () => {
   })
 
   StartWinOpLatency(config).then(res => {
-
+    console.log("StartWinOpLatency")
   }).catch(err => {
     console.log(err)
   })
@@ -243,7 +248,7 @@ onMounted(()=> {
   if (isWailsRun()) {
     // initCheck()
     addEventLister()
-    fileRecordRef.value.handleLoadCacheFiles()
+    // fileRecordRef.value.handleLoadCacheFiles()
   }
   // addKeydownListen()
 })
