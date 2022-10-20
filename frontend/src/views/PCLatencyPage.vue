@@ -149,6 +149,8 @@ const handleLoadImage = async(imageIndex: number) => {
 async function addEventLister() {
   console.log("addEventLister")
   EventsOn("latencyWindowsComplete", (res)=>{
+    console.log("latencyWindowsComplete")
+    console.log(res)
     result.imageCount = res.imageCount
     result.inputTime = res.inputTime
 
@@ -161,7 +163,6 @@ async function addEventLister() {
     isStared.value = false
 
     console.log("GetImage")
-
     const firstImageIndex = 0
     handleLoadImage(firstImageIndex)
     result.currentImageIndex = firstImageIndex
@@ -438,8 +439,8 @@ function handleGetImage() {
             <el-row>
               <span>截图总数: {{ result.imageCount}}</span>
               <span>操作时间: {{ result.inputTime}}</span>
-              <span>响应时间: {{ result.latency}}</span>
-              <span>操作延迟: {{ result.responseTime}}</span>
+              <span>响应时间: {{ result.responseTime }}</span>
+              <span>操作延迟: {{ result.latency }}</span>
             </el-row>
             <!-- <el-row>
               <el-col :span="4">
