@@ -11,9 +11,9 @@ interface Props {
 
 interface Emits {
   (e: 'crop-change', val: CropInfo): void
-  (e: 'page-change', val: CropInfo): void
-  (e: 'get-previous-page'): void
-  (e: 'get-next-page'): void
+  // (e: 'page-change', val: CropInfo): void
+  // (e: 'get-previous-page'): void
+  // (e: 'get-next-page'): void
   (e: 'page-change', val: number): void
 }
 
@@ -29,6 +29,8 @@ const resizeTopRef = ref()
 const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
+const previousPageRef = ref()
+const nextPageRef = ref()
 const isPaged = ref(true)
 
 
@@ -172,51 +174,12 @@ function selectBoxInit() {
   resizeLeftRef.value.addEventListener('mousedown', mouseDownHandler);
 }
 
-// function handleCalcCostTime() {
-//   const rectinfo = core.ImageRectInfo.createFrom({
-//     x: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft,
-//     y: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop,
-//     w: selectBoxRef.value.offsetWidth,
-//     h: selectBoxRef.value.offsetHeight,
-//     preview_width: previewImgRef.value.offsetWidth,
-//     preview_height: previewImgRef.value.offsetHeight,
-//     source_width: props.imageInfo.width,
-//     source_height: props.imageInfo.height,
-//   })
-
-//   StartAnalyse(rectinfo, threshold)
-//   NProgress.start()
-//   delayTimes.value = 0 
-//   calcButtonDisable.value = true
-// }
-
 const getPreviewImgSize = () => {
   const w = previewImgRef.value.offsetWidth
   const h = previewImgRef.value.offsetHeight
 
   return { width: w, height: h}
 }
-
-function handleImageLoadSuccess() {
-  console.log("handleImageLoadSuccess")
-}
-
-function enableCalcButton() {
-  calcButtonDisable.value = false
-}
-
-function setCalcButtonDisable(value: boolean) {
-  calcButtonDisable.value = value
-}
-
-function setDefaultTime() {
-  delayTimes.value = 0
-}
-
-
-// const handleSizeChange = (val: number) => {
-//   console.log(`${val} items per page`)
-// }
 
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
@@ -258,10 +221,17 @@ onMounted(()=>{
 })
 
 
+watch(props.pageInfo, (val: ImagePage) => {
+  if (val.currentPage === 0) {
+    // console.log(previousPageRef.value.style)
+    previousPageRef.value.style.opacity = 0.5
+  } else if (val.currentPage === props.pageInfo.total) {
+    nextPageRef.value.style.opacity = 0.5
+  }
+})
+
+
 defineExpose({
-  enableCalcButton,
-  setCalcButtonDisable,
-  setDefaultTime,
   getPreviewImgSize,
 })
 
@@ -274,9 +244,9 @@ defineExpose({
       <!-- <el-col> -->
         <!-- <span>标识检测区域</span> -->
         <!-- <div class="out-img-box"> -->
-          <span v-if="isPaged" @click="getPreviousImage" class="page-button el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <span v-if="isPaged" ref="previousPageRef" @click="getPreviousImage" class="page-button el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
-          <span v-if="isPaged" @click="getNextImage"  class="page-button el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <span v-if="isPaged" ref="nextPageRef" @click="getNextImage"  class="page-button el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
@@ -426,6 +396,7 @@ img {
 
 .page-button:hover {
   color: rgb(90, 156, 248);
+  
 }
 
 

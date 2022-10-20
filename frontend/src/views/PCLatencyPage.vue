@@ -151,40 +151,40 @@ async function addEventLister() {
   EventsOn("latencyWindowsComplete", (res)=>{
     console.log("latencyWindowsComplete")
     console.log(res)
-    result.imageCount = res.imageCount
+
+    // result.imageCount = res.imageCount
     result.inputTime = res.inputTime
+    imagePageInfo.total = res.imageCount
+
+    NProgress.done()
+    isStared.value = false
 
     ElNotification({
       title: '进度提醒-录制完成',
       type: 'success',
       message: "录制成功",
     })
-    NProgress.done()
-    isStared.value = false
 
-    console.log("GetImage")
+
+    console.log("handleLoadImage")
     const firstImageIndex = 0
     handleLoadImage(firstImageIndex)
     result.currentImageIndex = firstImageIndex
-    // GetImage(0).then((res:app.GetImageResp) => {
-    //   console.log(res)
-    //   imageInfo.path = res.imageFilePath
-    //   imageInfo.width = res.imageWidth
-    //   imageInfo.height = res.imageHeight
-    //   imageInfo.count = res.length
-    //   // imageInfo.createTime = res.screenshotTime
-    //   imageInfo.index = res.currentIndex
-
-    // }).catch(err => {
-    //   console.log(err)
-    // })
   })
 
   EventsOn("latencyWindowsMessage", (res) => {
     ElNotification({
-      title: '操作提醒',
+      title: '处理过程提醒',
       type: 'info',
       message: res.message,
+    })
+  })
+
+  EventsOn("latencyWindowsError", (res) => {
+    ElNotification({
+      title: '处理过程异常',
+      type: 'error',
+      message: res.error,
     })
   })
  
@@ -217,9 +217,10 @@ const handleStart = () => {
 }
 
 
-
 async function removeEventLister() {
   EventsOff("latencyWindowsComplete")
+  EventsOff("latencyWindowsMessage")
+  EventsOff("latencyWindowsError")
 }
 
 /**
@@ -240,7 +241,7 @@ async function initCheck() {
 const handleOperateKeyFocus = (event: FocusEvent) => {
   window.onkeydown=function(e){
     console.log(e)
-    if (unVisualKeys.indexOf(e.code) !== -1) {
+    if (unVisualKeys.indexOf(e.code) >= 0) {
       latencyForm.operate_key = e.code
     }
   }
@@ -250,22 +251,13 @@ const handleOperateKeyBlur = (event: FocusEvent) => {
   window.onkeydown = null
 }
 
-onMounted(()=> {
-  // 如果是在 wails 运行环境则运行环境检查及事件监听
-  if (isWailsRun()) {
-    // initCheck()
-    addEventLister()
-  }
-})
-
-
 function handleReload() {
   WindowReload();
 }
 
-function handleStopProcessing() {
+// function handleStopProcessing() {
 
-}
+// }
 
 const handleCropChange = (res: CropInfo)=> {
   cropInfo.left = res.left
@@ -274,15 +266,15 @@ const handleCropChange = (res: CropInfo)=> {
   cropInfo.height = res.height
 }
 
-const handleGetPreviousPage = () => {
-  result.currentImageIndex -= 1
-  handleLoadImage(result.currentImageIndex)
-}
+// const handleGetPreviousPage = () => {
+//   result.currentImageIndex -= 1
+//   handleLoadImage(result.currentImageIndex)
+// }
 
-const handleGetNextPage = () => {
-  result.currentImageIndex += 1
-  handleLoadImage(result.currentImageIndex)
-}
+// const handleGetNextPage = () => {
+//   result.currentImageIndex += 1
+//   handleLoadImage(result.currentImageIndex)
+// }
 
 const handlePageChange = (val: number) => {
   imagePageInfo.currentPage = val
@@ -328,21 +320,21 @@ const handleCalcWithCurrent = () => {
   })
 }
 
-const handleOpenImage = () => {
-  
-}
+
+onMounted(()=> {
+  // 如果是在 wails 运行环境则运行环境检查及事件监听
+  if (isWailsRun()) {
+    // initCheck()
+    addEventLister()
+  }
+})
+
 
 onUnmounted(()=>{
-  // removeEventLister()
   if (isWailsRun()) {
     removeEventLister()
   }
 })
-
-function handleGetImage() {
-  imagePreviewRef.value.handleGetImage()
-}
-
 
 
 </script>
@@ -426,8 +418,6 @@ function handleGetImage() {
                 :cropInfo="cropInfo"
                 :pageInfo="imagePageInfo"
                 @crop-change="handleCropChange"
-                @get-previous-page="handleGetPreviousPage"
-                @get-next-page="handleGetNextPage"
                 @page-change="handlePageChange"
                 />
             </div>
