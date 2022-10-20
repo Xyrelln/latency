@@ -1,47 +1,20 @@
 <script setup lang="ts">
 import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} from 'vue'
-import { ElMessage } from 'element-plus'
-import { ElNotification } from 'element-plus'
-import NProgress from 'nprogress'
 import {adb, core} from '@/../wailsjs/go/models'
-import { 
-  StartAnalyse,
-  GetImageFiles
-} from '@/../wailsjs/go/app/Api'
-import {
-  EventsOn,
-  EventsOff,
-} from '@/../wailsjs/runtime/runtime'
-
-import { isWailsRun } from '@/utils/utils'
-
 
 interface Props {
-  data: core.ImageInfo
   imageInfo: core.ImageInfo
   cropInfo: CropInfo
+  pageInfo: ImagePage
 }
 
 interface Emits {
-  // (e: 'submit'): void
-  // (e: 'change'): void
-  // (e: 'tag-close', tag: any): void
-  (e: 'crop-change', val: CropArea): void
-  (e: 'page-change', val: CropArea): void
-  // (e: 'tag-submit', val: any): void
+  (e: 'crop-change', val: CropInfo): void
+  (e: 'page-change', val: CropInfo): void
 }
-
-
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
-
-// const imageInfo = reactive({
-//   path: '',
-//   width: 0,
-//   height: 0,
-//   size: 0,
-// })
 
 const defaultImageHolder = './assets/images/placeholder.png'
 
@@ -79,13 +52,6 @@ const location = reactive({
   h: 0,
 })
 
-// const scene_dwrg_crop:CropArea = reactive({
-//   top: 26,
-//   left: 0,
-//   width: 466,
-//   height: 90
-// })
-
 /**
  * 鼠标点击事件处理
  * @param e 
@@ -117,7 +83,6 @@ const mouseMoveHandler = function (e: any) {
   // How far the mouse has been moved
   const dx = e.clientX - location.x;
   const dy = e.clientY - location.y;
-  // console.log(dx, dy)
 
   // Adjust the dimension of element
   selectBoxStyle.width = `${location.w + dx}px`;
@@ -139,7 +104,6 @@ const mouseUpHandler = function () {
     height: selectBoxRef.value.offsetHeight, 
   })
 };
-
 
 /**
  * 初始化选择区域
@@ -203,78 +167,35 @@ function selectBoxInit() {
   resizeRightRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeBottomRef.value.addEventListener('mousedown', mouseDownHandler);
   resizeLeftRef.value.addEventListener('mousedown', mouseDownHandler);
-
 }
 
+// function handleCalcCostTime() {
+//   const rectinfo = core.ImageRectInfo.createFrom({
+//     x: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft,
+//     y: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop,
+//     w: selectBoxRef.value.offsetWidth,
+//     h: selectBoxRef.value.offsetHeight,
+//     preview_width: previewImgRef.value.offsetWidth,
+//     preview_height: previewImgRef.value.offsetHeight,
+//     source_width: props.imageInfo.width,
+//     source_height: props.imageInfo.height,
+//   })
 
-function handleCalcCostTime() {
-  const rectinfo = core.ImageRectInfo.createFrom({
-    x: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft,
-    y: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop,
-    w: selectBoxRef.value.offsetWidth,
-    h: selectBoxRef.value.offsetHeight,
-    preview_width: previewImgRef.value.offsetWidth,
-    preview_height: previewImgRef.value.offsetHeight,
-    source_width: props.imageInfo.width,
-    source_height: props.imageInfo.height,
-  })
-
-  StartAnalyse(rectinfo, threshold)
-  NProgress.start()
-  delayTimes.value = 0 
-  calcButtonDisable.value = true
-}
+//   StartAnalyse(rectinfo, threshold)
+//   NProgress.start()
+//   delayTimes.value = 0 
+//   calcButtonDisable.value = true
+// }
 
 const getPreviewImgSize = () => {
   const w = previewImgRef.value.offsetWidth
   const h = previewImgRef.value.offsetHeight
 
   return { width: w, height: h}
-  // console.log(w)
-  // return previewImgRef.value.offsetWidth, previewImgRef.value.offsetHeight
 }
 
 function handleImageLoadSuccess() {
   console.log("handleImageLoadSuccess")
-}
-
-function addEventLister() {
-  EventsOn("latency:analyse_start", ()=>{
-    ElNotification({
-      title: '进度提示',
-      type: 'info',
-      message: "数据分析中， 请稍后...",
-    })
-  })
-  EventsOn("latency:analyse_filish", (res: number)=>{
-    if (res) {
-      delayTimes.value =  Math.floor(res * 100)/100
-      ElNotification({
-        title: '进度提示: 3/3',
-        type: 'success',
-        message: "数据处理完成",
-      })
-      NProgress.done()
-      calcButtonDisable.value = false
-      if (delayTimes.value <= 50 || delayTimes.value >= 1000 ) {
-        ElNotification({
-          title: '数值异常',
-          type: 'error',
-          message: "当前数值不在串流延迟正常范围内，建议重试",
-          duration: 0,
-        })
-      }
-    } else {
-      ElNotification({
-        title: '进度提示: 3/3',
-        type: 'error',
-        message: "数据分析异常，请确认是否在指定业务场景下操作，建议重试",
-      })
-      NProgress.done()
-      calcButtonDisable.value = false
-    }
-  })
-
 }
 
 function enableCalcButton() {
@@ -285,21 +206,10 @@ function setCalcButtonDisable(value: boolean) {
   calcButtonDisable.value = value
 }
 
-// function setImagePlaceHolder() {
-//   imageInfo.path = ""
-// }
-
 function setDefaultTime() {
   delayTimes.value = 0
 }
 
-// function loadNewImage(info: core.ImageInfo) {
-//   console.log(previewImgRef.value)
-//   previewImgRef.value.src = info.path
-//   imageInfo.path = info.path
-//   imageInfo.width = info.height
-//   imageInfo.height = info.height
-// }
 
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
@@ -310,32 +220,22 @@ const handleCurrentChange = (val: number) => {
   // imageInfo.path = imgs.value[val -1]
 }
 
+const getPreviewImage = ()=> {
 
-// function handleGetImage () {
-//   GetImageFiles().then(res => {
-//     if (res.length > 0) {
-//       imgs.value = res
-//       total.value = imgs.value.length
-//       imageInfo.path = imgs.value[0]
-//     }
-//   })
-// }
+}
+
+const getNextImage = ()=> {
+
+}
 
 onMounted(()=>{
   selectBoxInit()
-
-  if (isWailsRun()) {
-    addEventLister()
-  }
 })
 
 
 defineExpose({
   enableCalcButton,
   setCalcButtonDisable,
-  // setImagePlaceHolder,
-  // loadNewImage,
-  // handleGetImage,
   setDefaultTime,
   getPreviewImgSize,
 })
@@ -349,9 +249,9 @@ defineExpose({
       <!-- <el-col> -->
         <!-- <span>标识检测区域</span> -->
         <!-- <div class="out-img-box"> -->
-          <span v-if="isPaged" class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <span v-if="isPaged" @click="getPreviewImage" class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
-          <span v-if="isPaged" class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
+          <span v-if="isPaged" @click="getNextImage"  class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>

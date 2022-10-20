@@ -56,6 +56,11 @@ const cropInfo:CropArea = reactive({
   height: 90
 })
 
+const imagePageInfo:ImagePage = reactive({
+  page: 0,
+  count: 0,
+})
+
 const operateMethod = ref('keyboard')
 const operateMethods = ['keyboard', 'mouse']
 
@@ -75,9 +80,6 @@ const imageInfo = reactive({
   index: 0,
   createTime: 0,
 })
-
-
-// provide('threshold', settingForm.diffScore)
 
 
 const rules =  {
@@ -105,6 +107,13 @@ const rules =  {
   ],
 }
 
+const result = reactive({
+  latency: 0,
+  responseIndex: 0,
+  responseTime: 0,
+  imageCount: 0,
+  inputTime: 0,
+})
 
 function checkGreaterThanZero (rule: any, value: any, callback: any)  {
   if (value <= 0) {
@@ -114,26 +123,8 @@ function checkGreaterThanZero (rule: any, value: any, callback: any)  {
   }
 }
 
-
-/**
- * 绑定监听
- */
-async function addEventLister() {
-  console.log("addEventLister")
-  EventsOn("latencyWindowsComplete", (res)=>{
-    imageDetail.count = res.imageCount
-    imageDetail.input_time = res.inputTime
-
-    ElNotification({
-      title: '进度提醒-录制完成',
-      type: 'success',
-      message: "录制成功",
-    })
-    NProgress.done()
-    isStared.value = false
-
-    console.log("GetImage")
-    GetImage(0).then((res:app.GetImageResp) => {
+const handleLoadImage = async(imageIndex: number) => {
+  GetImage(imageIndex).then((res:app.GetImageResp) => {
       console.log(res)
       imageInfo.path = res.imageFilePath
       imageInfo.width = res.imageWidth
@@ -145,6 +136,40 @@ async function addEventLister() {
     }).catch(err => {
       console.log(err)
     })
+}
+
+
+/**
+ * 绑定监听
+ */
+async function addEventLister() {
+  console.log("addEventLister")
+  EventsOn("latencyWindowsComplete", (res)=>{
+    result.imageCount = res.imageCount
+    result.inputTime = res.inputTime
+
+    ElNotification({
+      title: '进度提醒-录制完成',
+      type: 'success',
+      message: "录制成功",
+    })
+    NProgress.done()
+    isStared.value = false
+
+    console.log("GetImage")
+    handleLoadImage(0)
+    // GetImage(0).then((res:app.GetImageResp) => {
+    //   console.log(res)
+    //   imageInfo.path = res.imageFilePath
+    //   imageInfo.width = res.imageWidth
+    //   imageInfo.height = res.imageHeight
+    //   imageInfo.count = res.length
+    //   // imageInfo.createTime = res.screenshotTime
+    //   imageInfo.index = res.currentIndex
+
+    // }).catch(err => {
+    //   console.log(err)
+    // })
   })
 
   EventsOn("latencyWindowsMessage", (res) => {
@@ -153,8 +178,6 @@ async function addEventLister() {
       type: 'info',
       message: res.message,
     })
-    // console.log("latencyWindowsMessage")
-    // console.log(res)
   })
  
 }
@@ -257,16 +280,26 @@ const handleCalc = () => {
     source_height: imageInfo.height,
   })
   console.log(rectinfo)
-  CalculateLatencyByImageDiff(rectinfo).then(res => {
-    console.log(res)
+  CalculateLatencyByImageDiff(rectinfo).then((res:app.WinOpLatencyResult) => {
+    // console.log(res)
+    result.latency = res.latency
+    result.responseIndex = res.responseIndex
+    result.responseTime = res.responseTime
+
+    // 加载至目标图片
+    handleLoadImage(result.responseIndex)
+
   }).catch(err => {
     console.log(err)
   })
 }
 
 const handleCalcWithCurrent = () => {
-  CalculateLatencyByCurrentImage(imageInfo.index).then(res => {
+  CalculateLatencyByCurrentImage(imageInfo.index).then((res:app.WinOpLatencyResult) => {
     console.log(res)
+    result.latency = res.latency
+    result.responseIndex = res.responseIndex
+    result.responseTime = res.responseTime
   }).catch(err => {
     console.log(err)
   })
@@ -361,12 +394,12 @@ function handleGetImage() {
         <el-main class="main-content">
             <div>
               <ScreenPreview
-              ref="imagePreviewRef"
-              :data="imageInfo"
-              :imageInfo="imageInfo"
-              :cropInfo="cropInfo"
-              @crop-change="handleCropChange"
-              />
+                ref="imagePreviewRef"
+                :imageInfo="imageInfo"
+                :cropInfo="cropInfo"
+                :pageInfo="imagePageInfo"
+                @crop-change="handleCropChange"
+                />
             </div>
             <el-row>
               <el-button @click="handleCalc">计算延迟</el-button>
@@ -374,9 +407,10 @@ function handleGetImage() {
               <el-button>打开当前截图</el-button>
             </el-row>
             <el-row>
-              <span>操作时间</span>
-              <span>响应时间</span>
-              <span>操作延迟</span>
+              <span>截图总数: {{ result.imageCount}}</span>
+              <span>操作时间: {{ result.inputTime}}</span>
+              <span>响应时间: {{ result.latency}}</span>
+              <span>操作延迟: {{ result.responseTime}}</span>
             </el-row>
             <!-- <el-row>
               <el-col :span="4">
