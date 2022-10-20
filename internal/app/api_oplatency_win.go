@@ -6,7 +6,9 @@ package app
 import (
 	"fmt"
 	"op-latency-mobile/internal/core"
+	"op-latency-mobile/internal/fs"
 	latencywin "op-latency-mobile/internal/latency_win"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -116,10 +118,15 @@ func (a *Api) GetImage(index int) GetImageResp {
 		return GetImageResp{}
 	}
 
+	screenshotPath := screenshot.FilePath
+	if fs.IsWindowsDrivePath(screenshotPath) {
+		screenshotPath = "/" + strings.ReplaceAll(screenshotPath, "\\", "/")
+	}
+
 	return GetImageResp{
 		ImageCount:     imageCount,
 		CurrentIndex:   index,
-		ImageFilePath:  screenshot.FilePath,
+		ImageFilePath:  screenshotPath,
 		ScreenshotTime: fmt.Sprintf("%d", screenshot.Time.UnixMilli()),
 		ImageWidth:     img.Bounds().Dx(),
 		ImageHeight:    img.Bounds().Dy(),
