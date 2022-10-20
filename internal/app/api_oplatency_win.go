@@ -4,7 +4,7 @@
 package app
 
 import (
-	// "fmt"
+	"fmt"
 	"op-latency-mobile/internal/core"
 	latencywin "op-latency-mobile/internal/latency_win"
 
@@ -14,8 +14,8 @@ import (
 
 // LatencyWindowsCompleteEvent ...
 type LatencyWindowsCompleteEvent struct {
-	ImageCount int   `json:"imageCount"`
-	InputTime  int64 `json:"inputTime"`
+	ImageCount int    `json:"imageCount"`
+	InputTime  string `json:"inputTime"`
 }
 
 // LatencyWindowsMessageEvent ...
@@ -39,7 +39,7 @@ func (a *Api) StartWinOpLatency(config latencywin.Config) {
 		imageCount := a.latencyWinManager.GetScreenshotCount()
 		inputTime := a.latencyWinManager.GetInputTime()
 
-		runtime.EventsEmit(a.ctx, "latencyWindowsComplete", LatencyWindowsCompleteEvent{ImageCount: imageCount, InputTime: inputTime.UnixMilli()})
+		runtime.EventsEmit(a.ctx, "latencyWindowsComplete", LatencyWindowsCompleteEvent{ImageCount: imageCount, InputTime: fmt.Sprintf("%d", inputTime.UnixMilli())})
 
 	}()
 	return
@@ -92,7 +92,7 @@ func (a *Api) CalculateLatencyByCurrentImage(currenIndex int) (result WinOpLaten
 type GetImageResp struct {
 	ImageCount     int    `json:"length"`
 	CurrentIndex   int    `json:"currentIndex"`
-	ScreenshotTime int64  `json:"screenshotTime"`
+	ScreenshotTime string `json:"screenshotTime"`
 	ImageFilePath  string `json:"imageFilePath"`
 	ImageWidth     int    `json:"imageWidth"`
 	ImageHeight    int    `json:"imageHeight"`
@@ -120,7 +120,7 @@ func (a *Api) GetImage(index int) GetImageResp {
 		ImageCount:     imageCount,
 		CurrentIndex:   index,
 		ImageFilePath:  screenshot.FilePath,
-		ScreenshotTime: screenshot.Time.UnixMilli(),
+		ScreenshotTime: fmt.Sprintf("%d", screenshot.Time.UnixMilli()),
 		ImageWidth:     img.Bounds().Dx(),
 		ImageHeight:    img.Bounds().Dy(),
 	}
