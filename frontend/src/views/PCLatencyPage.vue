@@ -20,7 +20,7 @@ import {
   CalculateLatencyByCurrentImage,
   GetImage,
 } from '../../wailsjs/go/app/Api'
-import {adb, core, latencywin} from '../../wailsjs/go/models'
+import {adb, app, core, latencywin} from '../../wailsjs/go/models'
 import {
   EventsOn,
   EventsOff,
@@ -32,11 +32,15 @@ const deviceSelected = ref("")
 const latencyTabName = ref('list')
 const placeholder = "./src/assets/images/placeholder.png"
 const fileRecordRef = ref()
-
+const unVisualKeys = ["F1", "F2", "Enter"]
+const imageDetail = reactive({
+  count: 0,
+  input_time: 0
+})
 
 const latencyForm = reactive({
   operate_method: 'keyboard',
-  operate_key: 'A',
+  operate_key: 'a',
   auto: false,
   start_hotkey: 'F2',
   diffScore: 20,
@@ -58,7 +62,10 @@ const imageInfo = reactive({
   path: placeholder,
   width: 0,
   height: 0,
-  size: 0
+  size: 0,
+  count: 0,
+  index: 0,
+  createTime: 0,
 })
 
 
@@ -126,6 +133,29 @@ function checkGreaterThanZero (rule: any, value: any, callback: any)  {
  * 绑定监听
  */
 async function addEventLister() {
+  EventsOn("latencyWindowsComplete", (res)=>{
+    imageDetail.count = res.imageCount
+    imageDetail.input_time = res.inputTime
+
+    ElNotification({
+      title: '录制完成',
+      type: 'success',
+      message: "录制成功",
+    })
+
+    GetImage(0).then((res:app.GetImageResp) => {
+      imageInfo.path = res.imageFilePath
+      imageInfo.width = res.imageWidth
+      imageInfo.height = res.imageHeight
+
+      imageInfo.count = res.length
+      // imageInfo.createTime = res.screenshotTime
+      imageInfo.index = res.currentIndex
+
+    }).catch(err => {
+      console.log(err)
+    })
+  })
  
 }
 
@@ -160,18 +190,18 @@ const handleStart = () => {
   StartWinOpLatency(config).then(res => {
 
   }).catch(err => {
-
+    console.log(err)
   })
   
 }
 
 async function removeEventLister() {
-  EventsOff("latency:record_start")
-  EventsOff("latency:record_filish")
-  EventsOff("latency:transform_start")
-  EventsOff("latency:transform_start_error")
-  EventsOff("latency:record_start_error")
-  EventsOff("latency:transform_filish")
+  EventsOff("latencyWindowsComplete")
+  // EventsOff("latency:record_filish")
+  // EventsOff("latency:transform_start")
+  // EventsOff("latency:transform_start_error")
+  // EventsOff("latency:record_start_error")
+  // EventsOff("latency:transform_filish")
 }
 
 /**
@@ -190,23 +220,24 @@ async function initCheck() {
 }
 
 const handleOperateKeyFocus = (event: FocusEvent) => {
-  // event.stopPropagation()
-  document.onkeydown=function(e){
-    console.log(e.key)
-    console.log(e.code)
+  window.onkeydown=function(e){
+    // console.log(e.key)
+    // console.log(e.code)
     console.log(e)
-    latencyForm.operate_key = e.key
+    if (unVisualKeys.indexOf(e.code) !== -1) {
+      latencyForm.operate_key = e.code
+    }
   }
 }
 
 const handleOperateKeyBlur = (event: FocusEvent) => {
-  document.onkeydown = null
+  window.onkeydown = null
 }
 
 onMounted(()=> {
   // 如果是在 wails 运行环境则运行环境检查及事件监听
   if (isWailsRun()) {
-    initCheck()
+    // initCheck()
     addEventLister()
     fileRecordRef.value.handleLoadCacheFiles()
   }
