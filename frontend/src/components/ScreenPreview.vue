@@ -15,15 +15,18 @@ import {
 
 import { isWailsRun } from '@/utils/utils'
 
-// interface CropArea {
-//   top: number
-//   left: number
-//   width: number
-//   height: number
-// }
+interface CropInfo {
+  top: number
+  left: number
+  width: number
+  height: number
+}
+
 
 interface Props {
   data: core.ImageInfo
+  imageInfo: core.ImageInfo
+  cropInfo: CropInfo
 }
 
 interface Emits {
@@ -31,6 +34,7 @@ interface Emits {
   // (e: 'change'): void
   // (e: 'tag-close', tag: any): void
   (e: 'crop-change', val: CropArea): void
+  (e: 'page-change', val: CropArea): void
   // (e: 'tag-submit', val: any): void
 }
 
@@ -39,12 +43,12 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const imageInfo = reactive({
-  path: '',
-  width: 0,
-  height: 0,
-  size: 0,
-})
+// const imageInfo = reactive({
+//   path: '',
+//   width: 0,
+//   height: 0,
+//   size: 0,
+// })
 
 const defaultImageHolder = './assets/images/placeholder.png'
 
@@ -82,12 +86,12 @@ const location = reactive({
   h: 0,
 })
 
-const scene_dwrg_crop:CropArea = reactive({
-  top: 26,
-  left: 0,
-  width: 466,
-  height: 90
-})
+// const scene_dwrg_crop:CropArea = reactive({
+//   top: 26,
+//   left: 0,
+//   width: 466,
+//   height: 90
+// })
 
 /**
  * 鼠标点击事件处理
@@ -142,8 +146,8 @@ const mouseUpHandler = function () {
  */
 function selectBoxInit() {
   previewImgRef.value.addEventListener('load', ()=>{
-    selectBoxRef.value.style.top = previewImgRef.value.offsetTop + scene_dwrg_crop.top + 'px'
-    selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + scene_dwrg_crop.left + 'px'
+    selectBoxRef.value.style.top = previewImgRef.value.offsetTop + props.cropInfo.top + 'px'
+    selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + props.cropInfo.left + 'px'
   })
 
   selectBoxRef.value.addEventListener('mousedown', (ev:any) => {
@@ -212,14 +216,18 @@ function handleCalcCostTime() {
     h: selectBoxRef.value.offsetHeight,
     preview_width: previewImgRef.value.offsetWidth,
     preview_height: previewImgRef.value.offsetHeight,
-    source_width: props.data.width,
-    source_height: props.data.height,
+    source_width: props.imageInfo.width,
+    source_height: props.imageInfo.height,
   })
 
   StartAnalyse(rectinfo, threshold)
   NProgress.start()
   delayTimes.value = 0 
   calcButtonDisable.value = true
+}
+
+const getPreviewImgSize = () => {
+  return previewImgRef.value.offsetWidth, previewImgRef.value.offsetHeight
 }
 
 function handleImageLoadSuccess() {
@@ -273,21 +281,21 @@ function setCalcButtonDisable(value: boolean) {
   calcButtonDisable.value = value
 }
 
-function setImagePlaceHolder() {
-  imageInfo.path = ""
-}
+// function setImagePlaceHolder() {
+//   imageInfo.path = ""
+// }
 
 function setDefaultTime() {
   delayTimes.value = 0
 }
 
-function loadNewImage(info: core.ImageInfo) {
-  console.log(previewImgRef.value)
-  previewImgRef.value.src = info.path
-  imageInfo.path = info.path
-  imageInfo.width = info.height
-  imageInfo.height = info.height
-}
+// function loadNewImage(info: core.ImageInfo) {
+//   console.log(previewImgRef.value)
+//   previewImgRef.value.src = info.path
+//   imageInfo.path = info.path
+//   imageInfo.width = info.height
+//   imageInfo.height = info.height
+// }
 
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
@@ -295,19 +303,19 @@ const handleSizeChange = (val: number) => {
 
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
-  imageInfo.path = imgs.value[val -1]
+  // imageInfo.path = imgs.value[val -1]
 }
 
 
-function handleGetImage () {
-  GetImageFiles().then(res => {
-    if (res.length > 0) {
-      imgs.value = res
-      total.value = imgs.value.length
-      imageInfo.path = imgs.value[0]
-    }
-  })
-}
+// function handleGetImage () {
+//   GetImageFiles().then(res => {
+//     if (res.length > 0) {
+//       imgs.value = res
+//       total.value = imgs.value.length
+//       imageInfo.path = imgs.value[0]
+//     }
+//   })
+// }
 
 onMounted(()=>{
   selectBoxInit()
@@ -321,10 +329,11 @@ onMounted(()=>{
 defineExpose({
   enableCalcButton,
   setCalcButtonDisable,
-  setImagePlaceHolder,
-  loadNewImage,
-  handleGetImage,
-  setDefaultTime
+  // setImagePlaceHolder,
+  // loadNewImage,
+  // handleGetImage,
+  setDefaultTime,
+  getPreviewImgSize,
 })
 
 
@@ -337,7 +346,7 @@ defineExpose({
         <!-- <span>标识检测区域</span> -->
         <!-- <div class="out-img-box"> -->
           <span v-if="isPaged" class="el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
-          <img ref="previewImgRef" class="preview-img" draggable="false" :src="imageInfo.path == '' ? defaultImageHolder : imageInfo.path" alt=""/>
+          <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
           <span v-if="isPaged" class="el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span>
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>

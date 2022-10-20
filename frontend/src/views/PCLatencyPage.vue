@@ -32,6 +32,7 @@ const deviceSelected = ref("")
 const latencyTabName = ref('list')
 const placeholder = "./src/assets/images/placeholder.png"
 const fileRecordRef = ref()
+const isStared = ref(false)
 const unVisualKeys = ["F1", "F2", "Enter"]
 const imageDetail = reactive({
   count: 0,
@@ -46,6 +47,13 @@ const latencyForm = reactive({
   diffScore: 20,
   frame_count: 300,
   auto_upload: false,
+})
+
+const cropInfo:CropArea = reactive({
+  top: 26,
+  left: 0,
+  width: 466,
+  height: 90
 })
 
 const operateMethod = ref('keyboard')
@@ -73,21 +81,10 @@ const imageInfo = reactive({
 
 
 const rules =  {
-  touchScore: [
-    {
-      required: true,
-      message: '触控比对阈值',
-      trigger: 'blur',
-    },
-    {
-      validator: checkGreaterThanZero,
-      trigger: 'blur',
-    }
-  ],
   diffScore: [
     {
       required: true,
-      message: '选中区域比对阈值',
+      message: '图片比对阈值',
       trigger: 'blur',
     },
     {
@@ -95,21 +92,10 @@ const rules =  {
       trigger: 'blur',
     }
   ],
-  timeout: [
+  frame_count: [
     {
       required: true,
-      message: '录制时长',
-      trigger: 'blur',
-    },
-    {
-      validator: checkGreaterThanZero,
-      trigger: 'blur',
-    }
-  ],
-  sceneStart: [
-    {
-      required: true,
-      message: '场景相对录制开始时间',
+      message: '截图总数',
       trigger: 'blur',
     },
     {
@@ -139,10 +125,12 @@ async function addEventLister() {
     imageDetail.input_time = res.inputTime
 
     ElNotification({
-      title: '录制完成',
+      title: '进度提醒-录制完成',
       type: 'success',
       message: "录制成功",
     })
+    NProgress.done()
+    isStared.value = false
 
     console.log("GetImage")
     GetImage(0).then((res:app.GetImageResp) => {
@@ -150,7 +138,6 @@ async function addEventLister() {
       imageInfo.path = res.imageFilePath
       imageInfo.width = res.imageWidth
       imageInfo.height = res.imageHeight
-
       imageInfo.count = res.length
       // imageInfo.createTime = res.screenshotTime
       imageInfo.index = res.currentIndex
@@ -161,8 +148,13 @@ async function addEventLister() {
   })
 
   EventsOn("latencyWindowsMessage", (res) => {
-    console.log("latencyWindowsMessage")
-    console.log(res)
+    ElNotification({
+      title: '操作提醒',
+      type: 'info',
+      message: res.message,
+    })
+    // console.log("latencyWindowsMessage")
+    // console.log(res)
   })
  
 }
@@ -183,6 +175,8 @@ async function addEventLister() {
 
 const handleStart = () => {
   console.log("handleStart")
+  NProgress.start()
+  isStared.value = true
   const input_config = latencywin.InputConf.createFrom({
     type: latencyForm.operate_method,
     isAuto: latencyForm.auto,
@@ -265,6 +259,34 @@ function handleStopProcessing() {
 
 }
 
+const handleCalcWithCurrent = () => {
+  let w, h = imagePreviewRef.value.getPreviewImgSize()
+  const rectinfo = core.ImageRectInfo.createFrom({
+    x: cropInfo.left,
+    y: cropInfo.top,
+    w: cropInfo.width,
+    h: cropInfo.height,
+    preview_width: w,
+    preview_height: h,
+    source_width: imageInfo.width,
+    source_height: imageInfo.height,
+  })
+  CalculateLatencyByImageDiff(rectinfo).then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+const handleCalc = () => {
+  CalculateLatencyByCurrentImage(imageInfo.index).then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+
 onUnmounted(()=>{
   // removeEventLister()
   if (isWailsRun()) {
@@ -314,7 +336,7 @@ function handleGetImage() {
               </el-form>
             </el-row>
             <el-row class="row-item">
-            <el-button class="operation-button" type="primary" @click="handleStart" >开始</el-button>
+            <el-button class="operation-button" type="primary" @click="handleStart" :disabled="isStared" >开始</el-button>
             </el-row>
 
             <el-tabs 
@@ -332,7 +354,7 @@ function handleGetImage() {
                         <el-form-item label="对比阈值" prop="diffScore">
                           <el-input v-model.number="latencyForm.diffScore"/>
                         </el-form-item>
-                        <el-form-item label="截图帧数" prop="timeout">
+                        <el-form-item label="截图总数" prop="frame_count">
                           <el-input v-model.number="latencyForm.frame_count"/>
                         </el-form-item>
                         <el-form-item label="自动上传">
@@ -356,11 +378,13 @@ function handleGetImage() {
               <ScreenPreview
               ref="imagePreviewRef"
               :data="imageInfo"
+              :imageInfo="imageInfo"
+              :cropInfo="cropInfo"
               />
             </div>
             <el-row>
-              <el-button>计算延迟</el-button>
-              <el-button>计算延迟（当前截图）</el-button>
+              <el-button @click="handleCalc">计算延迟</el-button>
+              <el-button @click="handleCalcWithCurrent">计算延迟（当前截图）</el-button>
               <el-button>打开当前截图</el-button>
             </el-row>
             <el-row>
