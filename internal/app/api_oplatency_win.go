@@ -25,8 +25,14 @@ type LatencyWindowsMessageEvent struct {
 	Message string `json:"message"`
 }
 
+// LatencyWindowsErrorEvent ...
+type LatencyWindowsErrorEvent struct {
+	Error string `json:"error"`
+}
+
 // StartWinOpLatency ...
 func (a *Api) StartWinOpLatency(config latencywin.Config) {
+	log.Info("start windows op latency")
 	if a.latencyWinManager == nil {
 		return
 	}
@@ -36,6 +42,8 @@ func (a *Api) StartWinOpLatency(config latencywin.Config) {
 			runtime.EventsEmit(a.ctx, "latencyWindowsMessage", LatencyWindowsMessageEvent{Message: s})
 		})
 		if err != nil {
+			log.Errorf("start windows op latency error: %v", err)
+			runtime.EventsEmit(a.ctx, "latencyWindowsError", LatencyWindowsErrorEvent{Error: err.Error()})
 			return
 		}
 		imageCount := a.latencyWinManager.GetScreenshotCount()

@@ -42,13 +42,13 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 		return nil, time.Time{}, fmt.Errorf("start_key: %s 配置了无效的按键", cfg.StartKey)
 	}
 
-	printFunc(fmt.Sprintf("按 %s 开始测量", cfg.StartKey))
+	printFunc(fmt.Sprintf("按 %s 键开始录屏", cfg.StartKey))
 	_, err = input.WindowsInputEv{}.WaitKeyBoardEvent(context.Background(), keyCode)
 	// time.Sleep(time.Second)
 	if cfg.InputConf.Type == "keyboard" {
-		printFunc(fmt.Sprintf("开始测量，请按 %s 键操作游戏", cfg.InputConf.KeyTap))
+		printFunc(fmt.Sprintf("已开始录屏，请按 %s 键操作游戏", cfg.InputConf.KeyTap))
 	} else {
-		printFunc(fmt.Sprintf("开始测量，请鼠标点击操作游戏"))
+		printFunc(fmt.Sprintf("已开始录屏，请鼠标点击操作游戏"))
 	}
 
 	errg, ctx := errgroup.WithContext(context.Background())
@@ -62,7 +62,7 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 		)
 		if cfg.InputConf.Type == "mouse" {
 			t, err = wev.WaitMouseEvent(ctx, input.WM_LBUTTONDOWN)
-			printFunc(fmt.Sprintf("鼠标按下事件: %d", t.UnixMilli()))
+			printFunc(fmt.Sprintf("已监听到鼠标操作，时间: %d", t.UnixMilli()))
 		} else if cfg.InputConf.Type == "keyboard" {
 			if cfg.InputConf.KeyTap == "" {
 				return fmt.Errorf("配置 input_conf.key_tap 为空")
@@ -72,7 +72,7 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 				return fmt.Errorf("input_conf.key_tap: %s 配置了无效的按键", cfg.InputConf.KeyTap)
 			}
 			t, err = wev.WaitKeyBoardEvent(ctx, keyCode)
-			printFunc(fmt.Sprintf("键盘事件(%d): %d", keyCode, t.UnixMilli()))
+			printFunc(fmt.Sprintf("已监听到键盘输入(%d)，时间:%d", keyCode, t.UnixMilli()))
 		} else {
 			return fmt.Errorf("input_conf.type 必须是 mouse 或 keyboard")
 		}
@@ -85,7 +85,7 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 		return nil
 	})
 
-	rsCap := capture.RustCapture{ExePath: filepath.Join(workdir, "rscapture.exe"), OutputDir: filepath.Join(workdir, "screenshots"), PrintFunc: printFunc}
+	rsCap := capture.RustCapture{ExePath: filepath.Join(workdir, "rscapture.exe"), OutputDir: filepath.Join(workdir, "cache", "screenshots"), PrintFunc: printFunc}
 	screenshotC := make(chan capture.ScreenshotSeq, 1)
 	errg.Go(func() error {
 		imgs, err := rsCap.CaptureScreenshots(cfg.Frames)
@@ -161,6 +161,10 @@ func (owm *OpLatencyWindowsManager) Start(cfg Config, printFunc func(string)) er
 func (owm *OpLatencyWindowsManager) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo) (respIndex int, responseTime time.Time, latency time.Duration, err error) {
 	// selectedRect := rp.imgRegionSelect.SelectedRegion()
 	// selectedRect := image.Rectangle{} // TODO
+	if imageRect.PreviewWidth == 0 || imageRect.PreviewHeight == 0 {
+		err = fmt.Errorf("invalid rect info: %v", imageRect)
+		return
+	}
 	x0 := imageRect.X * imageRect.SourceWidth / imageRect.PreviewWidth
 	y0 := imageRect.Y * imageRect.SourceHeight / imageRect.PreviewHeight
 	x1 := imageRect.W*imageRect.SourceWidth/imageRect.PreviewWidth + x0

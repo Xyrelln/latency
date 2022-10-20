@@ -79,7 +79,7 @@ func (rsc *RustCapture) loadScreenshotsResult() (imgs []ScreenshotWithTs, err er
 		imgFilePath := filepath.Join(rsc.OutputDir, f.Name())
 		imgs = append(imgs, ScreenshotWithTs{FilePath: imgFilePath, Time: screenshotTime})
 	}
-	rsc.PrintFunc(fmt.Sprintf("截图数量: %d", len(imgs)))
+	rsc.PrintFunc(fmt.Sprintf("已完成截图，截图数量: %d", len(imgs)))
 
 	// resultCh := make(chan readImgResult, len(jobs))
 	// jobCh := make(chan readImgJob, len(jobs))
