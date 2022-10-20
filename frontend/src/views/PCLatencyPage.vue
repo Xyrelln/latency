@@ -159,19 +159,6 @@ async function addEventLister() {
  
 }
 
-// async function handleGetDisplay() {
-//   let status = false
-//   await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
-//       deviceInfo.width = res.width
-//       deviceInfo.height = res.height
-//       status = true
-//   }).catch(err => {
-//     // deviceInfo.width = 1080
-//     // deviceInfo.height = 1920
-//     console.log(err)
-//   })
-//   return status
-// }
 
 const handleStart = () => {
   console.log("handleStart")
@@ -200,11 +187,6 @@ const handleStart = () => {
 
 async function removeEventLister() {
   EventsOff("latencyWindowsComplete")
-  // EventsOff("latency:record_filish")
-  // EventsOff("latency:transform_start")
-  // EventsOff("latency:transform_start_error")
-  // EventsOff("latency:record_start_error")
-  // EventsOff("latency:transform_filish")
 }
 
 /**
@@ -224,8 +206,6 @@ async function initCheck() {
 
 const handleOperateKeyFocus = (event: FocusEvent) => {
   window.onkeydown=function(e){
-    // console.log(e.key)
-    // console.log(e.code)
     console.log(e)
     if (unVisualKeys.indexOf(e.code) !== -1) {
       latencyForm.operate_key = e.code
@@ -242,14 +222,9 @@ onMounted(()=> {
   if (isWailsRun()) {
     // initCheck()
     addEventLister()
-    // fileRecordRef.value.handleLoadCacheFiles()
   }
-  // addKeydownListen()
 })
 
-function handleClearCache() {
-  ClearCacheData()
-}
 
 function handleReload() {
   WindowReload();
@@ -259,7 +234,8 @@ function handleStopProcessing() {
 
 }
 
-const handleCalcWithCurrent = () => {
+const handleCalc = () => {
+  console.log("handleCalcWithCurrent")
   let w, h = imagePreviewRef.value.getPreviewImgSize()
   const rectinfo = core.ImageRectInfo.createFrom({
     x: cropInfo.left,
@@ -271,6 +247,7 @@ const handleCalcWithCurrent = () => {
     source_width: imageInfo.width,
     source_height: imageInfo.height,
   })
+  console.log(rectinfo)
   CalculateLatencyByImageDiff(rectinfo).then(res => {
     console.log(res)
   }).catch(err => {
@@ -278,7 +255,7 @@ const handleCalcWithCurrent = () => {
   })
 }
 
-const handleCalc = () => {
+const handleCalcWithCurrent = () => {
   CalculateLatencyByCurrentImage(imageInfo.index).then(res => {
     console.log(res)
   }).catch(err => {
