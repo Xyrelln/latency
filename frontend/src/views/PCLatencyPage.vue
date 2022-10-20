@@ -48,6 +48,13 @@ const latencyForm = reactive({
   auto_upload: false,
 })
 
+const cropInfo:CropArea = reactive({
+  top: 26,
+  left: 0,
+  width: 466,
+  height: 90
+})
+
 const operateMethod = ref('keyboard')
 const operateMethods = ['keyboard', 'mouse']
 
@@ -150,7 +157,6 @@ async function addEventLister() {
       imageInfo.path = res.imageFilePath
       imageInfo.width = res.imageWidth
       imageInfo.height = res.imageHeight
-
       imageInfo.count = res.length
       // imageInfo.createTime = res.screenshotTime
       imageInfo.index = res.currentIndex
@@ -265,6 +271,34 @@ function handleStopProcessing() {
 
 }
 
+const handleCalcWithCurrent = () => {
+  const w, h = imagePreviewRef.value.getPreviewImgSize()
+  const rectinfo = core.ImageRectInfo.createFrom({
+    x: cropInfo.left,
+    y: cropInfo.top,
+    w: cropInfo.width,
+    h: cropInfo.height,
+    preview_width: w,
+    preview_height: h,
+    source_width: imageInfo.width,
+    source_height: imageInfo.height,
+  })
+  CalculateLatencyByImageDiff(rectinfo).then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+const handleCalc = () => {
+  CalculateLatencyByCurrentImage(imageInfo.index).then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+
 onUnmounted(()=>{
   // removeEventLister()
   if (isWailsRun()) {
@@ -356,11 +390,13 @@ function handleGetImage() {
               <ScreenPreview
               ref="imagePreviewRef"
               :data="imageInfo"
+              :imageInfo="imageInfo"
+              :cropInfo="cropInfo"
               />
             </div>
             <el-row>
-              <el-button>计算延迟</el-button>
-              <el-button>计算延迟（当前截图）</el-button>
+              <el-button @click="handleCalc">计算延迟</el-button>
+              <el-button @click="handleCalcWithCurrent">计算延迟（当前截图）</el-button>
               <el-button>打开当前截图</el-button>
             </el-row>
             <el-row>
