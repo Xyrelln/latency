@@ -161,7 +161,7 @@ async function addEventLister() {
   })
 
   EventsOn("latencyWindowsMessage", (res) => {
-    console.log(latencyWindowsMessage)
+    console.log("latencyWindowsMessage")
     console.log(res)
   })
  
