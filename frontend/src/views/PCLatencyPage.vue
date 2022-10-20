@@ -185,6 +185,8 @@ const handleStart = () => {
   
 }
 
+
+
 async function removeEventLister() {
   EventsOff("latencyWindowsComplete")
 }
@@ -234,16 +236,23 @@ function handleStopProcessing() {
 
 }
 
+const handleCropChange = (res: CropInfo)=> {
+  cropInfo.left = res.left
+  cropInfo.top = res.top
+  cropInfo.width = res.width
+  cropInfo.height = res.height
+}
+
 const handleCalc = () => {
   console.log("handleCalcWithCurrent")
-  let w, h = imagePreviewRef.value.getPreviewImgSize()
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
   const rectinfo = core.ImageRectInfo.createFrom({
     x: cropInfo.left,
     y: cropInfo.top,
     w: cropInfo.width,
     h: cropInfo.height,
-    preview_width: w,
-    preview_height: h,
+    preview_width: pImgSize.width,
+    preview_height: pImgSize.height,
     source_width: imageInfo.width,
     source_height: imageInfo.height,
   })
@@ -262,7 +271,6 @@ const handleCalcWithCurrent = () => {
     console.log(err)
   })
 }
-
 
 onUnmounted(()=>{
   // removeEventLister()
@@ -357,6 +365,7 @@ function handleGetImage() {
               :data="imageInfo"
               :imageInfo="imageInfo"
               :cropInfo="cropInfo"
+              @crop-change="handleCropChange"
               />
             </div>
             <el-row>

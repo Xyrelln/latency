@@ -15,13 +15,6 @@ import {
 
 import { isWailsRun } from '@/utils/utils'
 
-interface CropInfo {
-  top: number
-  left: number
-  width: number
-  height: number
-}
-
 
 interface Props {
   data: core.ImageInfo
@@ -138,6 +131,13 @@ const mouseUpHandler = function () {
   // Remove the handlers of `mousemove` and `mouseup`
   document.removeEventListener('mousemove', mouseMoveHandler);
   document.removeEventListener('mouseup', mouseUpHandler);
+
+  emit('crop-change', {
+    left: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft, 
+    top: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop, 
+    width: selectBoxRef.value.offsetWidth, 
+    height: selectBoxRef.value.offsetHeight, 
+  })
 };
 
 
@@ -183,17 +183,17 @@ function selectBoxInit() {
       } else {
         selectBoxRef.value.style.top = ty + 'px'
       }
-
-      emit('crop-change', {
-        top: selectBoxRef.value.style.top, 
-        left: selectBoxRef.value.style.left, 
-        width: width, 
-        height: height, 
-      })
     }
 
-    document.onmouseup = (ev:any) => {
+    document.onmouseup = (ev:any) => {``
       document.onmousemove = null;
+
+      emit('crop-change', {
+        left: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft, 
+        top: selectBoxRef.value.offsetTop - previewImgRef.value.offsetTop, 
+        width: selectBoxRef.value.offsetWidth, 
+        height: selectBoxRef.value.offsetHeight, 
+      })
     }
     return false;
   })
@@ -205,7 +205,6 @@ function selectBoxInit() {
   resizeLeftRef.value.addEventListener('mousedown', mouseDownHandler);
 
 }
-
 
 
 function handleCalcCostTime() {
@@ -227,7 +226,12 @@ function handleCalcCostTime() {
 }
 
 const getPreviewImgSize = () => {
-  return previewImgRef.value.offsetWidth, previewImgRef.value.offsetHeight
+  const w = previewImgRef.value.offsetWidth
+  const h = previewImgRef.value.offsetHeight
+
+  return { width: w, height: h}
+  // console.log(w)
+  // return previewImgRef.value.offsetWidth, previewImgRef.value.offsetHeight
 }
 
 function handleImageLoadSuccess() {
