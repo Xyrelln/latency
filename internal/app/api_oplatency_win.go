@@ -8,6 +8,7 @@ import (
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/fs"
 	latencywin "op-latency-mobile/internal/latency_win"
+	"os/exec"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -139,4 +140,20 @@ func (a *Api) GetImage(index int) GetImageResp {
 		ImageWidth:     img.Bounds().Dx(),
 		ImageHeight:    img.Bounds().Dy(),
 	}
+}
+
+// OpenImageInExplorer ...
+func (a *Api) OpenImageInExplorer(index int) {
+	if a.latencyWinManager == nil {
+		return
+	}
+
+	imageCount := a.latencyWinManager.GetScreenshotCount()
+	if index < 0 || index >= imageCount {
+		return
+	}
+
+	screenshot := a.latencyWinManager.GetScreenshotByIndex(index)
+	cmd := exec.Command("explorer.exe", "/select,", screenshot.FilePath)
+	cmd.Start()
 }
