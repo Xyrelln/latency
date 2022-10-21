@@ -53,7 +53,7 @@ const cropInfo:CropArea = reactive({
 
 const imagePageInfo:ImagePage = reactive({
   size: 1,
-  total: 1,
+  total: 0,
   currentPage: 1,
 })
 
@@ -111,7 +111,7 @@ const result = reactive({
   responseTime: 0,
   imageCount: 0,
   inputTime: 0,
-  currentImageIndex: 0,
+  // currentImageIndex: 0,
 })
 
 function checkGreaterThanZero (rule: any, value: any, callback: any)  {
@@ -164,7 +164,8 @@ async function addEventLister() {
     console.log("handleLoadImage")
     const firstImageIndex = 0
     handleLoadImage(firstImageIndex)
-    result.currentImageIndex = firstImageIndex
+    // result.currentImageIndex = firstImageIndex
+    imagePageInfo.currentPage = 1
   })
 
   EventsOn("latencyWindowsMessage", (res) => {
@@ -261,7 +262,7 @@ const handleCropChange = (res: CropInfo)=> {
 
 const handlePageChange = (val: number) => {
   imagePageInfo.currentPage = val
-  handleLoadImage(imagePageInfo.currentPage)
+  handleLoadImage(imagePageInfo.currentPage -1)
 }
 
 const handleOpenFolder = (val: number) => {
@@ -291,7 +292,7 @@ const handleCalc = () => {
     result.responseIndex = res.responseIndex
     result.responseTime = res.responseTime
 
-    imagePageInfo.currentPage = result.responseIndex
+    imagePageInfo.currentPage = result.responseIndex +1
 
     // 加载至目标图片
     handleLoadImage(result.responseIndex)
