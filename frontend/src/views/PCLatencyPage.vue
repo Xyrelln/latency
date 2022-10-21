@@ -45,10 +45,10 @@ const latencyForm = reactive({
 })
 
 const cropInfo:CropArea = reactive({
-  top: 26,
-  left: 0,
-  width: 466,
-  height: 90
+  top: 50,
+  left: 50,
+  width: 90,
+  height: 90,
 })
 
 const imagePageInfo:ImagePage = reactive({

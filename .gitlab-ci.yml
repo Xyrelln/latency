@@ -32,7 +32,7 @@ CompileWinAmd64:
     - $CommitShortSHA = $env:CI_COMMIT_SHORT_SHA
     - $BuildTimestamp = [DateTimeOffset]::Now.ToUnixTimeSeconds()
     - $LDFLAGS = "-X 'gitlab.vrviu.com/epc/lighttest-lib/version.Version=$Version' -X 'gitlab.vrviu.com/epc/lighttest-lib/version.CommitShortSHA=$CommitShortSHA' -X 'gitlab.vrviu.com/epc/lighttest-lib/version.BuildTimastamp=$BuildTimestamp'"
-    - wails build -s -platform windows/amd64 -ldflags $LDFLAGS -o latency-mobile.exe -webview2 embed -debug
+    - wails build -s -platform windows/amd64 -ldflags $LDFLAGS -o latency-mobile.exe -webview2 embed
   artifacts:
     paths:
       - build/bin/latency-mobile.exe

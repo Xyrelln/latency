@@ -45,8 +45,8 @@ const paginationDisabled = ref(false)
 // const isImgLoaded = ref(true)
 
 const selectBoxStyle = reactive({
-  width: '446px', 
-  height: '70px'
+  width: '1px', 
+  height: '1px'
 })
 const calcButtonDisable = ref(true)
 
@@ -118,6 +118,8 @@ function selectBoxInit() {
   previewImgRef.value.addEventListener('load', ()=>{
     selectBoxRef.value.style.top = previewImgRef.value.offsetTop + props.cropInfo.top + 'px'
     selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + props.cropInfo.left + 'px'
+    selectBoxRef.value.style.width = props.cropInfo.width + 'px'
+    selectBoxRef.value.style.height = props.cropInfo.height + 'px'
   })
 
   selectBoxRef.value.addEventListener('mousedown', (ev:any) => {
@@ -185,37 +187,36 @@ const getPreviewImgSize = () => {
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
   emit('page-change', val)
-  // imageInfo.path = imgs.value[val -1]
 }
 
-const getPreviousImage = ()=> {
-  if (props.pageInfo.currentPage === 0 ) {
-    ElMessage({
-      type: 'warning',
-      message: '当前为第一张图片'
-    })
-  } else {
-    const page = props.pageInfo.currentPage - 1
-    emit('page-change', page)
-  }
-  // emit('get-previous-page')
-}
+// const getPreviousImage = ()=> {
+//   if (props.pageInfo.currentPage === 0 ) {
+//     ElMessage({
+//       type: 'warning',
+//       message: '当前为第一张图片'
+//     })
+//   } else {
+//     const page = props.pageInfo.currentPage - 1
+//     emit('page-change', page)
+//   }
+//   // emit('get-previous-page')
+// }
 
-const getNextImage = ()=> {
-  if (props.pageInfo.currentPage === props.pageInfo.total ) {
-    ElMessage({
-      type: 'warning',
-      message: '当前为最后一张图片'
-    })
-  } else {
-    const page = props.pageInfo.currentPage + 1
-    emit('page-change', page)
-  }
-  // emit('page-change', val)
-  // const page = props.pageInfo.currentPage + 1
-  // emit('page-change', page)
-  // emit('get-next-page')
-}
+// const getNextImage = ()=> {
+//   if (props.pageInfo.currentPage === props.pageInfo.total ) {
+//     ElMessage({
+//       type: 'warning',
+//       message: '当前为最后一张图片'
+//     })
+//   } else {
+//     const page = props.pageInfo.currentPage + 1
+//     emit('page-change', page)
+//   }
+//   // emit('page-change', val)
+//   // const page = props.pageInfo.currentPage + 1
+//   // emit('page-change', page)
+//   // emit('get-next-page')
+// }
 
 const handleOpenFileFolder = () => {
   emit('open-folder', props.pageInfo.currentPage)
