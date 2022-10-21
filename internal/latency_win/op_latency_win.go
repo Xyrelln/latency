@@ -158,7 +158,7 @@ func (owm *OpLatencyWindowsManager) Start(cfg Config, printFunc func(string)) er
 }
 
 // CalculateLatencyByImageDiff ...
-func (owm *OpLatencyWindowsManager) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo) (respIndex int, responseTime time.Time, latency time.Duration, err error) {
+func (owm *OpLatencyWindowsManager) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo, diffThreshold int) (respIndex int, responseTime time.Time, latency time.Duration, err error) {
 	// selectedRect := rp.imgRegionSelect.SelectedRegion()
 	// selectedRect := image.Rectangle{} // TODO
 	if imageRect.PreviewWidth == 0 || imageRect.PreviewHeight == 0 {
@@ -171,7 +171,7 @@ func (owm *OpLatencyWindowsManager) CalculateLatencyByImageDiff(imageRect core.I
 	y1 := imageRect.H*imageRect.SourceHeight/imageRect.PreviewHeight + y0
 	selectedRect := image.Rect(x0, y0, x1, y1)
 
-	respIndex, err = owm.screenshotSeq.FindImageHashResponseTime(selectedRect, owm.Cfg.ImageDiffThreshold, owm.inputTime)
+	respIndex, err = owm.screenshotSeq.FindImageHashResponseTime(selectedRect, diffThreshold, owm.inputTime)
 	if err != nil {
 		log.Errorf("识别画面响应时间失败: %v\n", err)
 		return

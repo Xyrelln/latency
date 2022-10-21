@@ -64,12 +64,12 @@ type WinOpLatencyResult struct {
 }
 
 // CalculateLatencyByImageDiff ...
-func (a *Api) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo) (result WinOpLatencyResult) {
+func (a *Api) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo, diffThreshold int) (result WinOpLatencyResult) {
 	if a.latencyWinManager == nil {
 		return
 	}
 
-	respIndex, responseTime, latency, err := a.latencyWinManager.CalculateLatencyByImageDiff(imageRect)
+	respIndex, responseTime, latency, err := a.latencyWinManager.CalculateLatencyByImageDiff(imageRect, diffThreshold)
 	if err != nil {
 		log.Errorf("calculate latency error: %v", err)
 		return

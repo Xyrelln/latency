@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	_ "image/jpeg" // register format
-	// "op-latency/imageutil"
 	"os"
 	"time"
 )
@@ -37,11 +36,10 @@ func (seq ScreenshotSeq) FindImageHashResponseTime(diffArea image.Rectangle, dif
 		return 0, fmt.Errorf("not enough screenshots")
 	}
 
-	var curImg image.Image
-	prevImg, err := seq[0].DecodeImg()
-	if err != nil {
-		return 0, fmt.Errorf("decode %s error: %w", seq[0].FilePath, err)
-	}
+	var (
+		curImg, prevImg image.Image
+		err             error
+	)
 
 	for idx := 1; idx < len(seq); idx++ {
 		// 忽略在操作时间之前的截图
@@ -53,6 +51,13 @@ func (seq ScreenshotSeq) FindImageHashResponseTime(diffArea image.Rectangle, dif
 		if err != nil {
 			return 0, fmt.Errorf("decode %s error: %w", seq[idx].FilePath, err)
 		}
+		if prevImg == nil {
+			prevImg, err = seq[idx-1].DecodeImg()
+			if err != nil {
+				return 0, fmt.Errorf("decode %s error: %w", seq[idx-1].FilePath, err)
+			}
+		}
+
 		distance, _ := ImageHashDistance(prevImg, curImg, diffArea)
 		// fmt.Printf("i1: %d, i2: %d, distance: %d\n", seq[idx-1].Time.UnixMilli(), seq[idx].Time.UnixMilli(), distance)
 		if distance > diffThreshold {
