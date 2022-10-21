@@ -63,10 +63,6 @@ const operateMethods = [
 ]
 
 const imagePreviewRef = ref()
-// const deviceInfo = reactive({
-//   width: 1080,
-//   height: 1920,
-// })
 
 const imageInfo = reactive({
   path: placeholder,
@@ -202,6 +198,7 @@ const handleStart = () => {
     startKey: latencyForm.start_hotkey,
   })
 
+  console.log(config)
   StartWinOpLatency(config).then(res => {
     console.log("StartWinOpLatency")
   }).catch(err => {
@@ -468,9 +465,6 @@ onUnmounted(()=>{
               <el-col :span="4" class="info-line">
                 {{ result.responseTime}}
               </el-col>
-             
-              <!-- <span>响应时间: {{ result.responseTime }}</span> -->
-              <!-- <span>操作延迟: {{ result.latency }}</span> -->
             </el-row>
             <el-row justify="center" class="result-row">
               <el-col :span="4" class="info-line">
@@ -486,20 +480,6 @@ onUnmounted(()=>{
                 <!-- {{ result.latency}} -->
               </el-col>
             </el-row>
-            <!-- <el-row>
-              <el-col :span="4">
-                <el-input placeholder="left"></el-input>
-              </el-col>
-              <el-col :span="4">
-                <el-input placeholder="top"></el-input>
-              </el-col>
-              <el-col :span="4">
-                <el-input placeholder="width"></el-input>
-              </el-col>
-              <el-col :span="4">
-                <el-input placeholder="height"></el-input>
-              </el-col>
-            </el-row> -->
         </el-main>
         </el-container>
     </el-scrollbar>
