@@ -20,7 +20,7 @@ import {reactive, ref } from 'vue'
           版本号
         </el-col>
         <el-col :span="4">
-          0.1.0
+          0.2.0
         </el-col>
       </el-row>
     </div>

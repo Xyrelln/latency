@@ -236,6 +236,30 @@ defineExpose({
           @current-change="handleCurrentChange"
         />
         <div class="folder-open">
+          <!-- <el-tooltip
+            class="device-question"
+            effect="dark"
+            content="定位至开始操作图片"
+            placement="right"
+            >
+            <el-button @click="handleOpenFileFolder">
+              <i class="el-icon button-icon arrow-icon">
+                <svg t="1666351371761" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6779" width="200" height="200"><path d="M981.333333 512 810.666667 682.666667 810.666667 554.666667 291.413333 554.666667C273.92 604.586667 226.56 640 170.666667 640 99.84 640 42.666667 582.826667 42.666667 512 42.666667 441.173333 99.84 384 170.666667 384 226.56 384 273.92 419.413333 291.413333 469.333333L810.666667 469.333333 810.666667 341.333333 981.333333 512Z" p-id="6780" fill="#8a8a8a"></path></svg>
+              </i>
+            </el-button>
+          </el-tooltip>
+          <el-tooltip
+            class="device-question"
+            effect="dark"
+            content="定位至画面变化图片"
+            placement="right"
+            >
+            <el-button @click="handleOpenFileFolder">
+              <i class="el-icon button-icon arrow-icon">
+                <svg t="1666351383127" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5319" width="200" height="200"><path d="M42.666667 512 213.333333 682.666667 213.333333 554.666667 732.586667 554.666667C750.08 604.586667 797.44 640 853.333333 640 924.16 640 981.333333 582.826667 981.333333 512 981.333333 441.173333 924.16 384 853.333333 384 797.44 384 750.08 419.413333 732.586667 469.333333L213.333333 469.333333 213.333333 341.333333 42.666667 512Z" p-id="5320" fill="#8a8a8a"></path></svg>
+              </i>
+            </el-button>
+          </el-tooltip> -->
           <el-tooltip
             class="device-question"
             effect="dark"

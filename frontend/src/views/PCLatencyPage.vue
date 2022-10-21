@@ -455,14 +455,14 @@ onUnmounted(()=>{
             </el-row>
             <el-row justify="center" class="result-row">
               <el-col :span="4" class="info-line">
-                <span>操作时间(时间戳)</span>
+                <span>操作时间</span>
               </el-col>
               <el-col :span="4" class="info-line">
                 {{ result.inputTime}}
               </el-col>
 
               <el-col :span="4" class="info-line">
-                <span>响应时间(时间戳)</span>
+                <span>响应时间</span>
               </el-col>
               <el-col :span="4" class="info-line">
                 {{ result.responseTime}}

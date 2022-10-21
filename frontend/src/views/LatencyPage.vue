@@ -530,8 +530,6 @@ async function initCheck() {
   })
 }
 
-
-
 function handleClearCache() {
   ClearCacheData()
 }
@@ -646,48 +644,36 @@ onUnmounted(()=>{
                 v-model="latencyTabName" 
                 class="platform-tabs">
                 <el-tab-pane label="记录" name="list">
-                <FileRecord ref="fileRecordRef"/>
-
+                  <FileRecord ref="fileRecordRef"/>
                 </el-tab-pane>
             
                 <el-tab-pane label="设置" name="setting">
-                    <el-row>
+                  <el-row>
                     <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
-                        <el-form-item label="触控阈值" prop="touchScore">
+                      <el-form-item label="触控阈值" prop="touchScore">
                         <el-input v-model.number="settingForm.touchScore"/>
-                        </el-form-item>
-                        <el-form-item label="区域阈值" prop="diffScore">
+                      </el-form-item>
+                      <el-form-item label="区域阈值" prop="diffScore">
                         <el-input v-model.number="settingForm.diffScore"/>
-                        </el-form-item>
+                      </el-form-item>
                         <el-form-item label="录制时长" prop="timeout">
-                        <el-input v-model.number="settingForm.timeout"/>
-                        </el-form-item>
-                        <el-form-item label="场景时间" prop="sceneStart">
+                      <el-input v-model.number="settingForm.timeout"/>
+                      </el-form-item>
+                      <el-form-item label="场景时间" prop="sceneStart">
                         <el-input v-model.number="settingForm.sceneStart"/>
-                        </el-form-item>
-                        <el-form-item label="调试开关">
-                        <el-switch v-model="settingForm.develop" />
-                        </el-form-item>
-                        <el-form-item label="数据清理">
-                        <el-button @click="handleClearCache">清理缓存数据</el-button>
-                        </el-form-item>
-                        <el-form-item label="调式">
-                        <el-button @click="handleReload">重载页面</el-button>
-                        </el-form-item>
-                        <el-form-item label="自动上传">
+                      </el-form-item>
+                      <el-form-item label="自动上传">
                         <el-switch v-model="settingForm.autoUpload" />
-                        </el-form-item>
-                        <el-form-item label="视频地址">
-                        <el-input v-model="externalVideoPath"></el-input>
-                        <el-button @click="handleLoadExtVideo">加载</el-button>
-                        </el-form-item>
+                      </el-form-item>
+                      <el-form-item label="调式">
+                        <el-button @click="handleReload">重载页面</el-button>
+                      </el-form-item>
                     </el-form>
-                    </el-row>
+                  </el-row>
                 </el-tab-pane>
                 <!-- <el-tab-pane label="帮助" name="detail" disabled>
                     <HelpPage></HelpPage>
                 </el-tab-pane> -->
-                
             </el-tabs>
         </el-aside>
         <el-main class="main-content">
@@ -717,20 +703,6 @@ onUnmounted(()=>{
               <!-- <el-button>打开当前截图</el-button> -->
             </el-row>
             <el-row justify="center" class="result-row">
-              <!-- <span>截图总数: {{ result.imageCount}}</span> -->
-              <el-col :span="4" class="info-line">
-                <span>操作时间(时间戳)</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.inputTime}}
-              </el-col>
-
-              <el-col :span="4" class="info-line">
-                <span>响应时间(时间戳)</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.responseTime}}
-              </el-col>
             </el-row>
             <el-row justify="center" class="result-row">
               <el-col :span="4" class="info-line">
@@ -740,8 +712,10 @@ onUnmounted(()=>{
                 {{ result.latency}}
               </el-col>
               <el-col :span="4" class="info-line">
+                <el-button link>开始图片</el-button>
               </el-col>
               <el-col :span="4" class="info-line">
+                <el-button link>结束图片</el-button>
               </el-col>
             </el-row>
         </el-main>
