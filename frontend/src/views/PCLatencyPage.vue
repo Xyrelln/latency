@@ -29,7 +29,7 @@ import {
 
 
 const latencyTabName = ref('list')
-const placeholder = "./src/assets/images/placeholder.png"
+// const placeholder = "./src/assets/images/placeholder.png"
 const fileRecordRef = ref()
 const isRunning = ref(false)
 const unVisualKeys = ["F1", "F2", "Enter"]
@@ -65,7 +65,7 @@ const operateMethods = [
 const imagePreviewRef = ref()
 
 const imageInfo = reactive({
-  path: placeholder,
+  path: '',
   width: 0,
   height: 0,
   size: 0,
@@ -192,8 +192,7 @@ const handleStart = () => {
   })
   
   const config = latencywin.Config.createFrom({
-    inputCconf: input_config,
-    imageDiff_threshold: latencyForm.diffScore,
+    inputConf: input_config,
     frames: latencyForm.frame_count,
     startKey: latencyForm.start_hotkey,
   })

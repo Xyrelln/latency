@@ -1,58 +1,3 @@
-export namespace adb {
-	
-	export class Display {
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Display(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
-	export class SwipeEvent {
-	    sx: number;
-	    sy: number;
-	    dx: number;
-	    dy: number;
-	    speed: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new SwipeEvent(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.sx = source["sx"];
-	        this.sy = source["sy"];
-	        this.dx = source["dx"];
-	        this.dy = source["dy"];
-	        this.speed = source["speed"];
-	    }
-	}
-	export class Device {
-	    Serial: string;
-	    State: number;
-	    abi: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Device(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Serial = source["Serial"];
-	        this.State = source["State"];
-	        this.abi = source["abi"];
-	    }
-	}
-
-}
-
 export namespace fs {
 	
 	export class RecordFile {
@@ -79,7 +24,7 @@ export namespace latencywin {
 	export class InputConf {
 	    type: string;
 	    isAuto: boolean;
-	    keyTap?: string;
+	    keyTap: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new InputConf(source);
@@ -93,8 +38,7 @@ export namespace latencywin {
 	    }
 	}
 	export class Config {
-	    inputCconf?: InputConf;
-	    imageDiff_threshold: number;
+	    inputConf?: InputConf;
 	    frames?: number;
 	    startKey: string;
 	
@@ -104,8 +48,7 @@ export namespace latencywin {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.inputCconf = this.convertValues(source["inputCconf"], InputConf);
-	        this.imageDiff_threshold = source["imageDiff_threshold"];
+	        this.inputConf = this.convertValues(source["inputConf"], InputConf);
 	        this.frames = source["frames"];
 	        this.startKey = source["startKey"];
 	    }
@@ -133,6 +76,22 @@ export namespace latencywin {
 
 export namespace app {
 	
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
+	    }
+	}
 	export class WinOpLatencyResult {
 	    latency: number;
 	    responseIndex: number;
@@ -187,22 +146,6 @@ export namespace app {
 	        this.imageHeight = source["imageHeight"];
 	    }
 	}
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
 
 }
 
@@ -250,6 +193,61 @@ export namespace core {
 	        this.width = source["width"];
 	        this.height = source["height"];
 	        this.size = source["size"];
+	    }
+	}
+
+}
+
+export namespace adb {
+	
+	export class Display {
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Display(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
+	export class SwipeEvent {
+	    sx: number;
+	    sy: number;
+	    dx: number;
+	    dy: number;
+	    speed: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SwipeEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sx = source["sx"];
+	        this.sy = source["sy"];
+	        this.dx = source["dx"];
+	        this.dy = source["dy"];
+	        this.speed = source["speed"];
+	    }
+	}
+	export class Device {
+	    Serial: string;
+	    State: number;
+	    abi: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Device(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Serial = source["Serial"];
+	        this.State = source["State"];
+	        this.abi = source["abi"];
 	    }
 	}
 
