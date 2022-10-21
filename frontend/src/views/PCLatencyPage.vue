@@ -36,7 +36,7 @@ const unVisualKeys = ["F1", "F2", "Enter"]
 
 const latencyForm = reactive({
   operate_method: 'keyboard',
-  operate_key: 'a',
+  operate_key: 'KeyA',
   auto: false,
   start_hotkey: 'F2',
   diffScore: 20,
@@ -233,21 +233,33 @@ async function removeEventLister() {
 // }
 
 const handleOperateKeyFocus = (event: FocusEvent, name: string) => {
-  window.onkeydown=function(e){
-    console.log(e)
-    if (unVisualKeys.indexOf(e.code) >= 0) {
 
-      switch (name) {
-        case 'operate_key':
-          latencyForm.operate_key = e.code
-          break
-        case 'start_hotkey':
-          latencyForm.start_hotkey = e.code
-          break
-      }
-      
+  window.onkeyup=function(e: KeyboardEvent){
+    switch (name) {
+      case 'operate_key':
+        latencyForm.operate_key = e.code
+        break
+      case 'start_hotkey':
+        latencyForm.start_hotkey = e.code
+        break
     }
+
   }
+  // window.onkeydown=function(e: KeyboardEvent){
+  //   console.log(e)
+  //   // if (unVisualKeys.indexOf(e.code) >= 0) {
+
+  //     switch (name) {
+  //       case 'operate_key':
+  //         latencyForm.operate_key = e.code
+  //         break
+  //       case 'start_hotkey':
+  //         latencyForm.start_hotkey = e.code
+  //         break
+  //     }
+      
+  //   }
+  // }
 }
 
 const handleOperateKeyBlur = (event: FocusEvent, name: string) => {
