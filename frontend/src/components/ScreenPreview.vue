@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {reactive, ref, inject, Ref, watch, onMounted, onUnmounted, computed} from 'vue'
-import {adb, core} from '@/../wailsjs/go/models'
-import { ElMessage } from 'element-plus'
+import {reactive, ref, watch, onMounted} from 'vue'
+import {core} from '@/../wailsjs/go/models'
+// import { ElMessage } from 'element-plus'
 
 interface Props {
   imageInfo: core.ImageInfo
@@ -11,17 +11,12 @@ interface Props {
 
 interface Emits {
   (e: 'crop-change', val: CropInfo): void
-  // (e: 'page-change', val: CropInfo): void
-  // (e: 'get-previous-page'): void
-  // (e: 'get-next-page'): void
   (e: 'page-change', val: number): void
   (e: 'open-folder', val: number): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
-
-const defaultImageHolder = './assets/images/placeholder.png'
 
 // element refs
 const selectBoxRef = ref()
@@ -34,23 +29,14 @@ const previousPageRef = ref()
 const nextPageRef = ref()
 const isPaged = ref(true)
 
-
-// const threshold = inject('threshold') as number
-// const currentPage = ref(1)
-// const pageSize = ref(1)
-const small = ref(false)
 const paginationDisabled = ref(false)
-// const total = ref(10)
-// const imgs = ref<Array<string>>([])
-// const isImgLoaded = ref(true)
+const defaultImageHolder = './assets/images/placeholder.png'
 
 const selectBoxStyle = reactive({
   width: '1px', 
   height: '1px'
 })
-const calcButtonDisable = ref(true)
 
-const delayTimes = ref<number>()
 const location = reactive({
   x: 0,
   y: 0,
@@ -189,34 +175,6 @@ const handleCurrentChange = (val: number) => {
   emit('page-change', val)
 }
 
-// const getPreviousImage = ()=> {
-//   if (props.pageInfo.currentPage === 0 ) {
-//     ElMessage({
-//       type: 'warning',
-//       message: '当前为第一张图片'
-//     })
-//   } else {
-//     const page = props.pageInfo.currentPage - 1
-//     emit('page-change', page)
-//   }
-//   // emit('get-previous-page')
-// }
-
-// const getNextImage = ()=> {
-//   if (props.pageInfo.currentPage === props.pageInfo.total ) {
-//     ElMessage({
-//       type: 'warning',
-//       message: '当前为最后一张图片'
-//     })
-//   } else {
-//     const page = props.pageInfo.currentPage + 1
-//     emit('page-change', page)
-//   }
-//   // emit('page-change', val)
-//   // const page = props.pageInfo.currentPage + 1
-//   // emit('page-change', page)
-//   // emit('get-next-page')
-// }
 
 const handleOpenFileFolder = () => {
   emit('open-folder', props.pageInfo.currentPage)
@@ -240,7 +198,6 @@ watch(props.pageInfo, (val: ImagePage) => {
 defineExpose({
   getPreviewImgSize,
 })
-
 
 </script>
 
@@ -272,7 +229,6 @@ defineExpose({
         <el-pagination
           :currentPage="props.pageInfo.currentPage"
           :page-size="1"
-          :small="small"
           :disabled="paginationDisabled"
           :background="false"
           layout="total, prev, pager, next, jumper"
@@ -294,17 +250,6 @@ defineExpose({
           </el-tooltip>
         </div>
     </el-row>
-    <!-- <el-row justify="space-between" class="item-result">
-      <el-col :span="4">
-        <el-button type="primary" @click="handleCalcCostTime" :disabled="calcButtonDisable">计算延迟</el-button>
-      </el-col>
-      <el-col :span="12">
-        <span class="data-item">结果（毫秒）: {{ delayTimes }}</span>
-      </el-col>
-    </el-row>
-    <el-row> -->
-     
-    <!-- </el-row> -->
   </div>
 </template>
 

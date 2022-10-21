@@ -11,6 +11,7 @@ import FileRecord from '../components/FileRecord.vue';
 import Automation from '../components/Automation.vue';
 import AboutPage from '../components/AboutPage.vue';
 import HelpPage from '../components/HelpPage.vue';
+import ScreenPreview from '../components/ScreenPreview.vue';
 
 import { isWailsRun } from '@/utils/utils'
 
@@ -47,13 +48,13 @@ const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
 
-const topTabName = ref('latency')
+// const topTabName = ref('latency')
 const latencyTabName = ref('list')
 const placeholder = "./src/assets/images/placeholder.png"
 
 const fileRecordRef = ref()
 
-const status = ref(false)
+// const status = ref(false)
 const form = reactive({
   device: '',
   sx: 0,
@@ -64,6 +65,12 @@ const form = reactive({
   interval: 2000,
   scene_id: '',
   location: true
+})
+
+const latencyForm = reactive({
+  serial: '',
+  auto: true,
+  scene: ''
 })
 
 const interval = ref()
@@ -81,6 +88,28 @@ const imageInfo = reactive({
   width: 0,
   height: 0,
   size: 0
+})
+
+const result = reactive({
+  latency: 0,
+  responseIndex: 0,
+  responseTime: 0,
+  imageCount: 0,
+  inputTime: 0,
+  // currentImageIndex: 0,
+})
+
+const cropInfo:CropArea = reactive({
+  top: 50,
+  left: 50,
+  width: 90,
+  height: 90,
+})
+
+const imagePageInfo:ImagePage = reactive({
+  size: 1,
+  total: 0,
+  currentPage: 1,
 })
 
 const settingForm = reactive({
@@ -196,11 +225,15 @@ function getDeviceList (value: any) {``
  */
 function getSelectDeviceState(){
   for(let d of data.devices) {
-    if (d.Serial == deviceSelected.value) {
+    if (d.Serial == latencyForm.serial) {
       return d.State
     }
   }
 }
+
+// const deviceStateCheck = () => {
+  
+// }
 
 function handleLoadExtVideo() {
   handleResetStatus()
@@ -229,7 +262,7 @@ function handleInputSwipe() {
 /**
  * 启动录制
  */
-async function handleStartRecord() {
+async function handleStart() {
   // 设备状态检查
   const state = getSelectDeviceState()
   if (state == 0) {
@@ -249,14 +282,15 @@ async function handleStartRecord() {
 
   handleResetStatus()
   NProgress.start()
-  const result = await setPointerLocationOn()
+
+  await setPointerLocationOn()
 
   const status = await handleGetDisplay()
   if (!status) {
     await handleGetPhysicalSize()
   }
 
-  Start(deviceSelected.value, settingForm.timeout)
+  Start(latencyForm.serial, settingForm.timeout)
 
   // 1s 后拖动
   // doSwipe()
@@ -265,15 +299,12 @@ async function handleStartRecord() {
   processStatus.value = 2
   runUntilCountDown(settingForm.timeout)
 
-  setTimeout(() => {
-    handleInputSwipe()
-  }, 1500);
+  if (latencyForm.auto === true) {
+    setTimeout(() => {
+      handleInputSwipe()
+    }, 1500);
+  }
 }
-
-function handleStart() {
-  StartRecord(deviceSelected.value)
-}
-
 
 function handleStopRecord() {
 }
@@ -288,6 +319,27 @@ function clearCurrentInterval() {
     interval.value = null
   }
 }
+
+const handleCropChange = (res: CropInfo)=> {
+  cropInfo.left = res.left
+  cropInfo.top = res.top
+  cropInfo.width = res.width
+  cropInfo.height = res.height
+}
+
+const handlePageChange = (val: number) => {
+  imagePageInfo.currentPage = val
+  handleLoadImage(imagePageInfo.currentPage -1)
+}
+
+const handleOpenFolder = (val: number) => {
+  // OpenImageInExplorer(val).then().catch(err => console.log(err))
+}
+
+const handleLoadImage = (val: number) => {}
+const handleCalc = () => {}
+const handleCalcWithCurrent = () => {}
+
 
 function runUntilCountDown(second: number, callback?: Function){
   countDownSecond.value = second
@@ -333,8 +385,8 @@ async function setPointerLocationOn():Promise<Boolean> {
     }
   ).catch(err => {
     ElMessage({
-      type: 'error',
-      message: '开启指针失败'
+      type: 'warning',
+      message: '开启指针失败, 请确定已手工开启'
     })
     result = false
   })
@@ -350,7 +402,7 @@ function setPointerLocationOff():Boolean {
       return true
   }).catch(err => {
     ElMessage({
-      type: 'error',
+      type: 'warning',
       message: '关闭指针失败'
     })
   })
@@ -478,14 +530,7 @@ async function initCheck() {
   })
 }
 
-onMounted(()=> {
-  // 如果是在 wails 运行环境则运行环境检查及事件监听
-  if (isWailsRun()) {
-    initCheck()
-    addEventLister()
-    fileRecordRef.value.handleLoadCacheFiles()
-  }
-})
+
 
 function handleClearCache() {
   ClearCacheData()
@@ -499,17 +544,25 @@ function handleStopProcessing() {
 
 }
 
-onUnmounted(()=>{
-  // removeEventLister()
-  if (isWailsRun()) {
-    removeEventLister()
-  }
-})
-
 function handleGetImage() {
   imagePreviewRef.value.handleGetImage()
 }
 
+
+onMounted(()=> {
+  // 如果是在 wails 运行环境则运行环境检查及事件监听
+  if (isWailsRun()) {
+    initCheck()
+    addEventLister()
+    fileRecordRef.value.handleLoadCacheFiles()
+  }
+})
+
+onUnmounted(()=>{
+  if (isWailsRun()) {
+    removeEventLister()
+  }
+})
 
 
 </script>
@@ -519,80 +572,76 @@ function handleGetImage() {
         <el-container>
         <el-aside class="aside-content" width="240px">
             <el-row class="row-item">
-            <el-col :span="20">
-                <el-select
-                v-model="deviceSelected"
-                @focus="getDeviceList"
-                filterable
-                placeholder="请选择设备"
-                style="width:100%">
-                <el-option
-                    v-for="item in data.devices"
-                    :key="item.Serial"
-                    :label="item.Serial"
-                    :value="item.Serial"
-                >
-                </el-option>
-                </el-select>
+              <el-form :model="latencyForm">
+                <el-form-item label="设备">
+                  <el-col :span="20">
+                  <el-select
+                    v-model="latencyForm.serial"
+                    @focus="getDeviceList"
+                    filterable
+                    placeholder="请选择设备"
+                    style="width:100%">
+                    <el-option
+                        v-for="item in data.devices"
+                        :key="item.Serial"
+                        :label="item.Serial"
+                        :value="item.Serial"
+                    >
+                    </el-option>
+                  </el-select>
+                </el-col>
+                <el-col :span="4">
+                  <el-tooltip
+                    class="device-question"
+                    effect="dark"
+                    content="如列表为空，请检查设备是否正常连接"
+                    placement="right"
+                    >
+                    <i class="el-icon button-icon" style="float: right;">
+                      <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                    </i>
+                  </el-tooltip>
+                </el-col>
+                </el-form-item>
+                <el-form-item label="自动">
+                  <el-switch v-model="latencyForm.auto" />
+                </el-form-item>
+                <el-form-item label="场景">
+                  <el-col :span="20">
+                    <el-select
+                      v-model="latencyForm.scene"
+                      filterable
+                      placeholder="请选择场景"
+                      style="width:100%">
+                      <el-option
+                          v-for="item in scenes"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value"
+                      >
+                      </el-option>
+                    </el-select>
+                  </el-col>
+                  <el-col :span="4">
+                    <el-tooltip
+                      class="device-question"
+                      effect="dark"
+                      content="选择自动运行场景"
+                      placement="right"
+                      >
+                      <i class="el-icon button-icon" style="float: right;">
+                        <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                      </i>
+                    </el-tooltip>
 
-            </el-col>
-            <el-col :span="4">
-                <el-tooltip
-                class="device-question"
-                effect="dark"
-                content="如列表为空，请检查设备是否正常连接"
-                placement="right"
-                >
-                <i class="el-icon button-icon" style="float: right;">
-                    <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
-                </i>
-                </el-tooltip>
-            </el-col>
+                  </el-col>
+                </el-form-item>
+              </el-form>
             </el-row>
             <el-row class="row-item">
-            <el-col :span="20">
-                <el-select
-                v-model="sceneSelected"
-                filterable
-                placeholder="请选择场景"
-                style="width:100%">
-                <el-option
-                    v-for="item in scenes"
-                    :key="item.value"
-                    :label="item.name"
-                    :value="item.value"
-                >
-                </el-option>
-                </el-select>
-            </el-col>
-            <el-col :span="4">
-                <el-tooltip
-                class="device-question"
-                effect="dark"
-                content="选择自动运行场景"
-                placement="right"
-                >
-                <i class="el-icon button-icon" style="float: right;">
-                  <!-- <svg t="1666319707500" class="icon" viewBox="0 0 1260 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4392" width="200" height="200"><path d="M1058.848012 935.688021H88.993243l113.018307-453.124559h969.854769zM88.993243 88.839223h397.403905l52.566655 157.699962h554.052534v147.186632h-893.63312A88.837646 88.837646 0 0 0 115.802237 461.011134l-27.33466 109.338641zM1181.853983 394.251483V246.013518A88.311979 88.311979 0 0 0 1093.016337 157.701539h-490.972549l-31.014326-95.67131A88.311979 88.311979 0 0 0 486.922815 0.001577H88.993243A88.311979 88.311979 0 0 0 0.155598 88.839223V935.688021a88.837646 88.837646 0 0 0 0 10.513331v14.718663a87.260646 87.260646 0 0 0 26.808993 37.847991h5.782332a87.260646 87.260646 0 0 0 39.950657 14.718663h986.150432A88.837646 88.837646 0 0 0 1145.057325 946.201352l113.018307-453.124559a88.837646 88.837646 0 0 0-76.221649-98.82531z" fill="#8a8a8a" p-id="4393"></path></svg> -->
-                    <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
-                </i>
-                </el-tooltip>
-            </el-col>
-            </el-row>
-            <el-row class="row-item">
-            <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStartRecord" >开始</el-button>
+            <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStart" >开始</el-button>
             <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
             </el-row>
-            <!-- <el-row class="row-item" v-if="settingForm.develop">
-            <el-button-group>
-                <el-button @click="handleStart">rec</el-button>
-                <el-button @click="handleToImage">to_img</el-button>
-                <el-button @click="setPointerLocationOn">pl_on</el-button>
-                <el-button @click="setPointerLocationOff">pl_off</el-button>
-                <el-button @click="handleGetImage">get_imgs</el-button>
-            </el-button-group>
-            </el-row> -->
-
             <el-tabs 
                 v-model="latencyTabName" 
                 class="platform-tabs">
@@ -602,7 +651,6 @@ function handleGetImage() {
                 </el-tab-pane>
             
                 <el-tab-pane label="设置" name="setting">
-                <!-- <el-scrollbar style="height:60vh"> -->
                     <el-row>
                     <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
                         <el-form-item label="触控阈值" prop="touchScore">
@@ -635,39 +683,67 @@ function handleGetImage() {
                         </el-form-item>
                     </el-form>
                     </el-row>
-                <!-- </el-scrollbar> -->
                 </el-tab-pane>
-                <el-tab-pane label="帮助" name="detail" disabled>
+                <!-- <el-tab-pane label="帮助" name="detail" disabled>
                     <HelpPage></HelpPage>
-                </el-tab-pane>
+                </el-tab-pane> -->
                 
             </el-tabs>
         </el-aside>
         <el-main class="main-content">
-            <div>
-              <ImagePreview
-              ref="imagePreviewRef"
-              :data="imageInfo"
-              />
+          <div>
+              <ScreenPreview
+                ref="imagePreviewRef"
+                :imageInfo="imageInfo"
+                :cropInfo="cropInfo"
+                :pageInfo="imagePageInfo"
+                @crop-change="handleCropChange"
+                @page-change="handlePageChange"
+                @open-folder="handleOpenFolder"
+                />
             </div>
-            <!-- <el-row>
-              <el-col :span="4">
-                <el-input placeholder="X"></el-input>
+            <el-row justify="center" class="button-row">
+              <el-button type="success" @click="handleCalc">
+                <i class="el-icon button-icon">
+                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+                </i>
+                计算延迟
+              </el-button>
+              <el-button @click="handleCalcWithCurrent">
+                <i class="el-icon button-icon">
+                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+                </i>
+                计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
+              <!-- <el-button>打开当前截图</el-button> -->
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <!-- <span>截图总数: {{ result.imageCount}}</span> -->
+              <el-col :span="4" class="info-line">
+                <span>操作时间(时间戳)</span>
               </el-col>
-              <el-col :span="4">
-                <el-input placeholder="X"></el-input>
+              <el-col :span="4" class="info-line">
+                {{ result.inputTime}}
               </el-col>
-              <el-col :span="4">
-                <el-input placeholder="X"></el-input>
+
+              <el-col :span="4" class="info-line">
+                <span>响应时间(时间戳)</span>
               </el-col>
-              <el-col :span="4">
-                <el-input placeholder="X"></el-input>
+              <el-col :span="4" class="info-line">
+                {{ result.responseTime}}
               </el-col>
-            </el-row> -->
-            <!-- <ImagePreview
-            ref="imagePreviewRef"
-            :data="imageInfo"
-            /> -->
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <el-col :span="4" class="info-line">
+                <span>操作延迟(毫秒)</span>
+              </el-col>
+              <el-col :span="4" class="info-line">
+                {{ result.latency}}
+              </el-col>
+              <el-col :span="4" class="info-line">
+              </el-col>
+              <el-col :span="4" class="info-line">
+              </el-col>
+            </el-row>
         </el-main>
         </el-container>
     </el-scrollbar>
@@ -717,5 +793,19 @@ function handleGetImage() {
   width: 24px;
   height: 24px;
   margin: 2px;
+}
+
+.info-line {
+  border: solid 1px #e6e6e6;
+  opacity: 0.6;
+  font-size: 12px;
+  line-height: 18px;
+  display:table-cell;
+  vertical-align:middle;
+  padding: 3px;
+}
+
+.button-row {
+  margin: 7px 0;
 }
 </style>

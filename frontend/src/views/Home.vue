@@ -17,7 +17,7 @@ import { app } from '@/../wailsjs/go/models'
 import { isWailsRun } from '@/utils/utils'
 
 
-const topTabName = ref('latency')
+const topTabName = ref('latency-pc')
 const upgradeDialogVisible = ref(false)
 const upgradeInfo = reactive({
   latestVersion: '',
@@ -106,11 +106,11 @@ onUnmounted(()=>{
 <template>
   <el-container>
     <el-tabs type="border-card" v-model="topTabName" >
-      <el-tab-pane label="延迟测试-Android" name="latency">
-        <LatencyPage></LatencyPage>
-      </el-tab-pane>
       <el-tab-pane label="延迟测试-PC" name="latency-pc">
         <PCLatencyPage></PCLatencyPage>
+      </el-tab-pane>
+      <el-tab-pane label="延迟测试-Android" name="latency">
+        <LatencyPage></LatencyPage>
       </el-tab-pane>
       <el-tab-pane label="场景配置" name="automation">
         <Automation/>

@@ -29,10 +29,8 @@ import {
 
 
 const latencyTabName = ref('list')
-// const placeholder = "./src/assets/images/placeholder.png"
 const fileRecordRef = ref()
 const isRunning = ref(false)
-const unVisualKeys = ["F1", "F2", "Enter"]
 
 const latencyForm = reactive({
   operate_method: 'keyboard',
@@ -131,6 +129,13 @@ const handleLoadImage = async(imageIndex: number) => {
     })
 }
 
+const resetStatus = () => {
+  if (NProgress.isStarted()) {
+    NProgress.done()
+  }
+  isRunning.value = false
+}
+
 
 /**
  * 绑定监听
@@ -145,8 +150,7 @@ async function addEventLister() {
     result.inputTime = res.inputTime
     imagePageInfo.total = res.imageCount
 
-    NProgress.done()
-    isRunning.value = false
+    resetStatus()
 
     ElNotification({
       title: '进度提醒-录制完成',
@@ -171,7 +175,8 @@ async function addEventLister() {
   })
 
   EventsOn("latencyWindowsError", (res) => {
-    isRunning.value = false
+    resetStatus()
+
     ElNotification({
       title: '处理过程异常',
       type: 'error',
@@ -417,9 +422,9 @@ onUnmounted(()=>{
                     </el-row>
                 <!-- </el-scrollbar> -->
                 </el-tab-pane>
-                <el-tab-pane label="帮助" name="detail" disabled>
+                <!-- <el-tab-pane label="帮助" name="detail" disabled>
                     <HelpPage></HelpPage>
-                </el-tab-pane>
+                </el-tab-pane> -->
                 
             </el-tabs>
         </el-aside>
@@ -447,10 +452,8 @@ onUnmounted(()=>{
                   <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
                 </i>
                 计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
-              <!-- <el-button>打开当前截图</el-button> -->
             </el-row>
             <el-row justify="center" class="result-row">
-              <!-- <span>截图总数: {{ result.imageCount}}</span> -->
               <el-col :span="4" class="info-line">
                 <span>操作时间(时间戳)</span>
               </el-col>
@@ -473,10 +476,8 @@ onUnmounted(()=>{
                 {{ result.latency}}
               </el-col>
               <el-col :span="4" class="info-line">
-                <!-- <span>操作延迟</span> -->
               </el-col>
               <el-col :span="4" class="info-line">
-                <!-- {{ result.latency}} -->
               </el-col>
             </el-row>
         </el-main>
