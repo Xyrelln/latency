@@ -15,6 +15,7 @@ interface Emits {
   // (e: 'get-previous-page'): void
   // (e: 'get-next-page'): void
   (e: 'page-change', val: number): void
+  (e: 'open-folder', val: number): void
 }
 
 const props = defineProps<Props>()
@@ -217,7 +218,7 @@ const getNextImage = ()=> {
 }
 
 const handleOpenFileFolder = () => {
-  
+  emit('open-folder', props.pageInfo.currentPage)
 }
 
 onMounted(()=>{

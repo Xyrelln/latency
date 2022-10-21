@@ -32,14 +32,19 @@ func (a *Api) CalculateLatencyByCurrentImage(currenIndex int) (result WinOpLaten
 
 // GetImageResp ...
 type GetImageResp struct {
-	ImageCount    int    `json:"length"`
-	CurrentIndex  int    `json:"currentIndex"`
-	ImageFilePath string `json:"imageFilePath"`
-	ImageWidth    int    `json:"imageWidth"`
-	ImageHeight   int    `json:"imageHeight"`
+	ImageCount     int    `json:"length"`
+	CurrentIndex   int    `json:"currentIndex"`
+	ScreenshotTime string `json:"screenshotTime"`
+	ImageFilePath  string `json:"imageFilePath"`
+	ImageWidth     int    `json:"imageWidth"`
+	ImageHeight    int    `json:"imageHeight"`
 }
 
 // GetImage ...
 func (a *Api) GetImage(index int) GetImageResp {
 	return GetImageResp{}
+}
+
+// OpenImageInExplorer ...
+func (a *Api) OpenImageInExplorer(index int) {
 }

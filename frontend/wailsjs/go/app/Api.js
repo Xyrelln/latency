@@ -62,6 +62,10 @@ export function ListRecords() {
   return window['go']['app']['Api']['ListRecords']();
 }
 
+export function OpenImageInExplorer(arg1) {
+  return window['go']['app']['Api']['OpenImageInExplorer'](arg1);
+}
+
 export function SetAutoSwipeOff() {
   return window['go']['app']['Api']['SetAutoSwipeOff']();
 }

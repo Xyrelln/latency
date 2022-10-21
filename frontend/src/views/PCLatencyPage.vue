@@ -13,12 +13,12 @@ import { isWailsRun } from '@/utils/utils'
 
 import { 
   ClearCacheData,
-  GetDisplay,
   IsAppReady,
   StartWinOpLatency,
   CalculateLatencyByImageDiff,
   CalculateLatencyByCurrentImage,
   GetImage,
+  OpenImageInExplorer,
 } from '../../wailsjs/go/app/Api'
 import {adb, app, core, latencywin} from '../../wailsjs/go/models'
 import {
@@ -27,17 +27,12 @@ import {
   WindowReload,
 } from '../../wailsjs/runtime/runtime'
 
-const deviceSelected = ref("")
 
 const latencyTabName = ref('list')
 const placeholder = "./src/assets/images/placeholder.png"
 const fileRecordRef = ref()
-const isStared = ref(false)
+const isRunning = ref(false)
 const unVisualKeys = ["F1", "F2", "Enter"]
-const imageDetail = reactive({
-  count: 0,
-  input_time: 0
-})
 
 const latencyForm = reactive({
   operate_method: 'keyboard',
@@ -57,15 +52,16 @@ const cropInfo:CropArea = reactive({
 })
 
 const imagePageInfo:ImagePage = reactive({
-  // page: 0,
-  // count: 0,
   size: 1,
   total: 1,
   currentPage: 1,
 })
 
 const operateMethod = ref('keyboard')
-const operateMethods = ['keyboard', 'mouse']
+const operateMethods = [
+  { name: '键盘', value: 'keyboard'},
+  { name: '鼠标', value: 'mouse'},
+]
 
 
 const imagePreviewRef = ref()
@@ -83,7 +79,6 @@ const imageInfo = reactive({
   index: 0,
   createTime: 0,
 })
-
 
 const rules =  {
   diffScore: [
@@ -157,7 +152,7 @@ async function addEventLister() {
     imagePageInfo.total = res.imageCount
 
     NProgress.done()
-    isStared.value = false
+    isRunning.value = false
 
     ElNotification({
       title: '进度提醒-录制完成',
@@ -181,6 +176,7 @@ async function addEventLister() {
   })
 
   EventsOn("latencyWindowsError", (res) => {
+    isRunning.value = false
     ElNotification({
       title: '处理过程异常',
       type: 'error',
@@ -190,11 +186,10 @@ async function addEventLister() {
  
 }
 
-
 const handleStart = () => {
   console.log("handleStart")
   NProgress.start()
-  isStared.value = true
+  isRunning.value = true
   const input_config = latencywin.InputConf.createFrom({
     type: latencyForm.operate_method,
     isAuto: latencyForm.auto,
@@ -223,20 +218,20 @@ async function removeEventLister() {
   EventsOff("latencyWindowsError")
 }
 
-/**
- * 环境检查
- */
-async function initCheck() {
-  IsAppReady().then(res => {
-  }).catch(err => {
-    ElNotification({
-      title: '环境检查',
-      type: 'error',
-      message: err,
-      duration: 0,
-    })
-  })
-}
+// /**
+//  * 环境检查
+//  */
+// async function initCheck() {
+//   IsAppReady().then(res => {
+//   }).catch(err => {
+//     ElNotification({
+//       title: '环境检查',
+//       type: 'error',
+//       message: err,
+//       duration: 0,
+//     })
+//   })
+// }
 
 const handleOperateKeyFocus = (event: FocusEvent) => {
   window.onkeydown=function(e){
@@ -255,9 +250,6 @@ function handleReload() {
   WindowReload();
 }
 
-// function handleStopProcessing() {
-
-// }
 
 const handleCropChange = (res: CropInfo)=> {
   cropInfo.left = res.left
@@ -266,21 +258,19 @@ const handleCropChange = (res: CropInfo)=> {
   cropInfo.height = res.height
 }
 
-// const handleGetPreviousPage = () => {
-//   result.currentImageIndex -= 1
-//   handleLoadImage(result.currentImageIndex)
-// }
-
-// const handleGetNextPage = () => {
-//   result.currentImageIndex += 1
-//   handleLoadImage(result.currentImageIndex)
-// }
 
 const handlePageChange = (val: number) => {
   imagePageInfo.currentPage = val
   handleLoadImage(imagePageInfo.currentPage)
 }
 
+const handleOpenFolder = (val: number) => {
+  OpenImageInExplorer(val).then().catch(err => console.log(err))
+}
+
+/**
+ * 计算延迟
+ */
 const handleCalc = () => {
   console.log("handleCalcWithCurrent")
   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
@@ -301,6 +291,8 @@ const handleCalc = () => {
     result.responseIndex = res.responseIndex
     result.responseTime = res.responseTime
 
+    imagePageInfo.currentPage = result.responseIndex
+
     // 加载至目标图片
     handleLoadImage(result.responseIndex)
 
@@ -309,6 +301,9 @@ const handleCalc = () => {
   })
 }
 
+/**
+ * 根据图片计算延迟
+ */
 const handleCalcWithCurrent = () => {
   CalculateLatencyByCurrentImage(imageInfo.index).then((res:app.WinOpLatencyResult) => {
     console.log(res)
@@ -320,7 +315,6 @@ const handleCalcWithCurrent = () => {
   })
 }
 
-
 onMounted(()=> {
   // 如果是在 wails 运行环境则运行环境检查及事件监听
   if (isWailsRun()) {
@@ -329,13 +323,11 @@ onMounted(()=> {
   }
 })
 
-
 onUnmounted(()=>{
   if (isWailsRun()) {
     removeEventLister()
   }
 })
-
 
 </script>
 
@@ -349,13 +341,13 @@ onUnmounted(()=>{
                   <el-select v-model="operateMethod" class="m-2" placeholder="Select" size="default">
                     <el-option
                       v-for="item in operateMethods"
-                      :key="item"
-                      :label="item"
-                      :value="item"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value"
                     />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="操控按键">
+                <el-form-item v-if="operateMethod==='keyboard'" label="操控按键">
                   <el-input 
                     v-model="latencyForm.operate_key"
                     @focus="handleOperateKeyFocus"
@@ -373,7 +365,7 @@ onUnmounted(()=>{
               </el-form>
             </el-row>
             <el-row class="row-item">
-            <el-button class="operation-button" type="primary" @click="handleStart" :disabled="isStared" >开始</el-button>
+            <el-button class="operation-button" type="primary" @click="handleStart" :disabled="isRunning" >开始</el-button>
             </el-row>
 
             <el-tabs 
@@ -419,6 +411,7 @@ onUnmounted(()=>{
                 :pageInfo="imagePageInfo"
                 @crop-change="handleCropChange"
                 @page-change="handlePageChange"
+                @open-folder="handleOpenFolder"
                 />
             </div>
             <el-row justify="center" class="button-row">
@@ -438,14 +431,14 @@ onUnmounted(()=>{
             <el-row justify="center" class="result-row">
               <!-- <span>截图总数: {{ result.imageCount}}</span> -->
               <el-col :span="4" class="info-line">
-                <span>操作时间</span>
+                <span>操作时间(时间戳)</span>
               </el-col>
               <el-col :span="4" class="info-line">
                 {{ result.inputTime}}
               </el-col>
 
               <el-col :span="4" class="info-line">
-                <span>响应时间</span>
+                <span>响应时间(时间戳)</span>
               </el-col>
               <el-col :span="4" class="info-line">
                 {{ result.responseTime}}
@@ -456,7 +449,7 @@ onUnmounted(()=>{
             </el-row>
             <el-row justify="center" class="result-row">
               <el-col :span="4" class="info-line">
-                <span>操作延迟</span>
+                <span>操作延迟(毫秒)</span>
               </el-col>
               <el-col :span="4" class="info-line">
                 {{ result.latency}}

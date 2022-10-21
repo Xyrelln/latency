@@ -36,6 +36,8 @@ export function ListDevices():Promise<Array<adb.Device>>;
 
 export function ListRecords():Promise<Array<fs.RecordFile>>;
 
+export function OpenImageInExplorer(arg1:number):Promise<void>;
+
 export function SetAutoSwipeOff():Promise<Error>;
 
 export function SetAutoSwipeOn(arg1:adb.SwipeEvent,arg2:number):Promise<Error>;
