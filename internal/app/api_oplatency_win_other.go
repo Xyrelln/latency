@@ -21,7 +21,7 @@ type WinOpLatencyResult struct {
 }
 
 // CalculateLatencyByImageDiff ...
-func (a *Api) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo) (result WinOpLatencyResult) {
+func (a *Api) CalculateLatencyByImageDiff(imageRect core.ImageRectInfo, diffThreshold int) (result WinOpLatencyResult) {
 	return
 }
 

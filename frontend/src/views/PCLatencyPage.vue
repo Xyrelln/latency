@@ -293,7 +293,7 @@ const handleCalc = () => {
     source_height: imageInfo.height,
   })
   console.log(rectinfo)
-  CalculateLatencyByImageDiff(rectinfo).then((res:app.WinOpLatencyResult) => {
+  CalculateLatencyByImageDiff(rectinfo, latencyForm.diffScore).then((res:app.WinOpLatencyResult) => {
     // console.log(res)
     result.latency = res.latency
     result.responseIndex = res.responseIndex

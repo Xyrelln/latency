@@ -6,8 +6,8 @@ export function CalculateLatencyByCurrentImage(arg1) {
   return window['go']['app']['Api']['CalculateLatencyByCurrentImage'](arg1);
 }
 
-export function CalculateLatencyByImageDiff(arg1) {
-  return window['go']['app']['Api']['CalculateLatencyByImageDiff'](arg1);
+export function CalculateLatencyByImageDiff(arg1, arg2) {
+  return window['go']['app']['Api']['CalculateLatencyByImageDiff'](arg1, arg2);
 }
 
 export function CheckUpdate() {

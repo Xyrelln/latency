@@ -8,7 +8,7 @@ import {latencywin} from '../models';
 
 export function CalculateLatencyByCurrentImage(arg1:number):Promise<app.WinOpLatencyResult>;
 
-export function CalculateLatencyByImageDiff(arg1:core.ImageRectInfo):Promise<app.WinOpLatencyResult>;
+export function CalculateLatencyByImageDiff(arg1:core.ImageRectInfo,arg2:number):Promise<app.WinOpLatencyResult>;
 
 export function CheckUpdate():Promise<app.UpdateInfo>;
 
