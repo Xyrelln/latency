@@ -73,7 +73,9 @@ func (s storeLogger) Warningf(message string, args ...interface{}) {
 
 // NewApp creates a new Api application struct
 func NewApp() *Api {
-	return &Api{}
+	return &Api{
+		latencyWinManager: latencywin.NewOpLatencyWindowsManager(),
+	}
 }
 
 // startup is called when the Api starts. The context is saved
@@ -89,8 +91,6 @@ func (a *Api) startup(ctx context.Context) {
 	} else {
 		a.state = a.getCurrentState()
 	}
-
-	a.latencyWinManager = latencywin.NewOpLatencyWindowsManager()
 }
 
 func (a *Api) shutdown(ctx context.Context) {
