@@ -57,18 +57,16 @@ const imagePageInfo:ImagePage = reactive({
   currentPage: 1,
 })
 
-const operateMethod = ref('keyboard')
 const operateMethods = [
   { name: '键盘', value: 'keyboard'},
   { name: '鼠标', value: 'mouse'},
 ]
 
-
 const imagePreviewRef = ref()
-const deviceInfo = reactive({
-  width: 1080,
-  height: 1920,
-})
+// const deviceInfo = reactive({
+//   width: 1080,
+//   height: 1920,
+// })
 
 const imageInfo = reactive({
   path: placeholder,
@@ -339,7 +337,7 @@ onUnmounted(()=>{
             <el-row class="row-item">
               <el-form :model="latencyForm">
                 <el-form-item label="操控方式">
-                  <el-select v-model="operateMethod" class="m-2" placeholder="Select" size="default">
+                  <el-select v-model="latencyForm.operate_method" class="m-2" placeholder="Select" size="default">
                     <el-option
                       v-for="item in operateMethods"
                       :key="item.value"
@@ -348,7 +346,7 @@ onUnmounted(()=>{
                     />
                   </el-select>
                 </el-form-item>
-                <el-form-item v-if="operateMethod==='keyboard'" label="操控按键">
+                <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="操控按键">
                   <el-input 
                     v-model="latencyForm.operate_key"
                     @focus="handleOperateKeyFocus"
@@ -356,7 +354,7 @@ onUnmounted(()=>{
                     placeholder="请进行按键操作">
                   </el-input>
                 </el-form-item>
-                <el-form-item label="自动操作">
+                <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="自动操作">
                   <el-switch v-model="latencyForm.auto" />
                 </el-form-item>
                 <el-form-item label="快捷启动">
