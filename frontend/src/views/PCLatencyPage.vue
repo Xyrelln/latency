@@ -421,16 +421,52 @@ onUnmounted(()=>{
                 @page-change="handlePageChange"
                 />
             </div>
-            <el-row>
-              <el-button @click="handleCalc">计算延迟</el-button>
-              <el-button @click="handleCalcWithCurrent">计算延迟（当前截图）</el-button>
-              <el-button>打开当前截图</el-button>
+            <el-row justify="center" class="button-row">
+              <el-button type="success" @click="handleCalc">
+                <i class="el-icon button-icon">
+                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+                </i>
+                计算延迟
+              </el-button>
+              <el-button @click="handleCalcWithCurrent">
+                <i class="el-icon button-icon">
+                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+                </i>
+                计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
+              <!-- <el-button>打开当前截图</el-button> -->
             </el-row>
-            <el-row>
-              <span>截图总数: {{ result.imageCount}}</span>
-              <span>操作时间: {{ result.inputTime}}</span>
-              <span>响应时间: {{ result.responseTime }}</span>
-              <span>操作延迟: {{ result.latency }}</span>
+            <el-row justify="center" class="result-row">
+              <!-- <span>截图总数: {{ result.imageCount}}</span> -->
+              <el-col :span="4" class="info-line">
+                <span>操作时间</span>
+              </el-col>
+              <el-col :span="4" class="info-line">
+                {{ result.inputTime}}
+              </el-col>
+
+              <el-col :span="4" class="info-line">
+                <span>响应时间</span>
+              </el-col>
+              <el-col :span="4" class="info-line">
+                {{ result.responseTime}}
+              </el-col>
+             
+              <!-- <span>响应时间: {{ result.responseTime }}</span> -->
+              <!-- <span>操作延迟: {{ result.latency }}</span> -->
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <el-col :span="4" class="info-line">
+                <span>操作延迟</span>
+              </el-col>
+              <el-col :span="4" class="info-line">
+                {{ result.latency}}
+              </el-col>
+              <el-col :span="4" class="info-line">
+                <!-- <span>操作延迟</span> -->
+              </el-col>
+              <el-col :span="4" class="info-line">
+                <!-- {{ result.latency}} -->
+              </el-col>
             </el-row>
             <!-- <el-row>
               <el-col :span="4">
@@ -495,5 +531,19 @@ onUnmounted(()=>{
   width: 24px;
   height: 24px;
   margin: 2px;
+}
+
+.info-line {
+  border: solid 1px #e6e6e6;
+  opacity: 0.6;
+  font-size: 12px;
+  line-height: 18px;
+  display:table-cell;
+  vertical-align:middle;
+  padding: 3px;
+}
+
+.button-row {
+  margin: 7px 0;
 }
 </style>

@@ -216,6 +216,10 @@ const getNextImage = ()=> {
   // emit('get-next-page')
 }
 
+const handleOpenFileFolder = () => {
+  
+}
+
 onMounted(()=>{
   selectBoxInit()
 })
@@ -273,6 +277,20 @@ defineExpose({
           :total="props.pageInfo.total"
           @current-change="handleCurrentChange"
         />
+        <div class="folder-open">
+          <el-tooltip
+            class="device-question"
+            effect="dark"
+            content="打开当前图片所在目录"
+            placement="right"
+            >
+            <el-button @click="handleOpenFileFolder">
+              <i class="el-icon button-icon foler-open-icon">
+                <svg t="1666319707500" class="icon button-icon" viewBox="0 0 1260 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4392" width="200" height="200"><path d="M1058.848012 935.688021H88.993243l113.018307-453.124559h969.854769zM88.993243 88.839223h397.403905l52.566655 157.699962h554.052534v147.186632h-893.63312A88.837646 88.837646 0 0 0 115.802237 461.011134l-27.33466 109.338641zM1181.853983 394.251483V246.013518A88.311979 88.311979 0 0 0 1093.016337 157.701539h-490.972549l-31.014326-95.67131A88.311979 88.311979 0 0 0 486.922815 0.001577H88.993243A88.311979 88.311979 0 0 0 0.155598 88.839223V935.688021a88.837646 88.837646 0 0 0 0 10.513331v14.718663a87.260646 87.260646 0 0 0 26.808993 37.847991h5.782332a87.260646 87.260646 0 0 0 39.950657 14.718663h986.150432A88.837646 88.837646 0 0 0 1145.057325 946.201352l113.018307-453.124559a88.837646 88.837646 0 0 0-76.221649-98.82531z" fill="#8a8a8a" p-id="4393"></path></svg>
+              </i>
+            </el-button>
+          </el-tooltip>
+        </div>
     </el-row>
     <!-- <el-row justify="space-between" class="item-result">
       <el-col :span="4">
@@ -398,6 +416,15 @@ img {
 .page-button:hover {
   color: rgb(90, 156, 248);
   
+}
+
+.folder-open {
+  display: flex;
+  align-items: center;
+}
+
+.foler-open-icon:hover {
+  cursor: pointer;
 }
 
 
