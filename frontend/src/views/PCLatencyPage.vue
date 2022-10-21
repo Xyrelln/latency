@@ -60,7 +60,7 @@ const imagePageInfo:ImagePage = reactive({
   // page: 0,
   // count: 0,
   size: 1,
-  total: 0,
+  total: 1,
   currentPage: 1,
 })
 
