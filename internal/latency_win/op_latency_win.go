@@ -22,17 +22,14 @@ import (
 type InputConf struct {
 	Type   string `json:"type"` // mouse or keyboard
 	IsAuto bool   `json:"isAuto"`
-	KeyTap string `json:"keyTap,omitempty"`
-	// MousePos [2]int `json:"mouse_pos,omitempty"`
+	KeyTap string `json:"keyTap"`
 }
 
 // Config ...
 type Config struct {
-	InputConf          InputConf `json:"inputCconf,omitempty"`
-	ImageDiffThreshold int       `json:"imageDiff_threshold"`
-	Frames             int       `json:"frames,omitempty"`
-	StartKey           string    `json:"startKey"`
-	// OffsetMs           int       `json:"offset_ms"`
+	InputConf InputConf `json:"inputConf,omitempty"`
+	Frames    int       `json:"frames,omitempty"`
+	StartKey  string    `json:"startKey"`
 }
 
 // OpLatency ...
