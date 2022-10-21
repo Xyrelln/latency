@@ -232,16 +232,25 @@ async function removeEventLister() {
 //   })
 // }
 
-const handleOperateKeyFocus = (event: FocusEvent) => {
+const handleOperateKeyFocus = (event: FocusEvent, name: string) => {
   window.onkeydown=function(e){
     console.log(e)
     if (unVisualKeys.indexOf(e.code) >= 0) {
-      latencyForm.operate_key = e.code
+
+      switch (name) {
+        case 'operate_key':
+          latencyForm.operate_key = e.code
+          break
+        case 'start_hotkey':
+          latencyForm.start_hotkey = e.code
+          break
+      }
+      
     }
   }
 }
 
-const handleOperateKeyBlur = (event: FocusEvent) => {
+const handleOperateKeyBlur = (event: FocusEvent, name: string) => {
   window.onkeydown = null
 }
 
@@ -349,8 +358,8 @@ onUnmounted(()=>{
                 <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="操控按键">
                   <el-input 
                     v-model="latencyForm.operate_key"
-                    @focus="handleOperateKeyFocus"
-                    @blur="handleOperateKeyBlur"
+                    @focus="event => handleOperateKeyFocus(event, 'operate_key')"
+                    @blur="event => handleOperateKeyBlur(event, 'operate_key')"
                     placeholder="请进行按键操作">
                   </el-input>
                 </el-form-item>
@@ -358,7 +367,12 @@ onUnmounted(()=>{
                   <el-switch v-model="latencyForm.auto" />
                 </el-form-item>
                 <el-form-item label="快捷启动">
-                  <el-input v-model="latencyForm.start_hotkey" placeholder="请进行按键操作">
+                  <el-input 
+                    v-model="latencyForm.start_hotkey"
+                    @focus="event => handleOperateKeyFocus(event, 'start_hotkey')"
+                    @blur="event => handleOperateKeyBlur(event, 'start_hotkey')"
+                    placeholder="请进行按键操作"
+                    >
                   </el-input>
                 </el-form-item>
               </el-form>
