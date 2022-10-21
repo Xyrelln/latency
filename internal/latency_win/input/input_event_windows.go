@@ -251,6 +251,130 @@ var (
 		"BracketRight": types.VK_OEM_6,      // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the ']}' key
 		"Quote":        types.VK_OEM_7,      // Used for miscellaneous characters; it can vary by keyboard.  For the US standard keyboard, the 'single-quote/double-quote' key
 	}
+
+	keyCodeToRobotkey = map[string]string{
+		"Backspace": "backspace", // BACKSPACE key
+		"Tab":       "tab",       // TAB key
+		"Enter":     "enter",     // ENTER key
+		// "Pause":    "",   // PAUSE key
+		"CapsLock": "capslock", // CAPS LOCK key
+		"Escape":   "escape",   // ESC key
+		"Space":    "space",    // SPACEBAR
+		"PageUp":   "pageup",   // PAGE UP key
+		"PageDown": "pagedown", // PAGE DOWN key
+		"End":      "end",      // END key
+		"Home":     "home",     // HOME key
+
+		"ArrowLeft":  "left",  // LEFT ARROW key
+		"ArrowUp":    "up",    // UP ARROW key
+		"ArrowRight": "right", // RIGHT ARROW key
+		"ArrowDown":  "down",  // DOWN ARROW key
+
+		"PrintScreen": "printscreen", // PRINT SCREEN key
+		"Insert":      "insert",      // INS key
+		"Delete":      "delete",      // DEL key
+		// "Help":        "help",     // HELP key
+
+		"Digit0": "0", // 0 key
+		"Digit1": "1", // 1 key
+		"Digit2": "2", // 2 key
+		"Digit3": "3", // 3 key
+		"Digit4": "4", // 4 key
+		"Digit5": "5", // 5 key
+		"Digit6": "6", // 6 key
+		"Digit7": "7", // 7 key
+		"Digit8": "8", // 8 key
+		"Digit9": "9", // 9 key
+		"KeyA":   "a", // A key
+		"KeyB":   "b", // B key
+		"KeyC":   "c", // C key
+		"KeyD":   "d", // D key
+		"KeyE":   "e", // E key
+		"KeyF":   "f", // F key
+		"KeyG":   "g", // G key
+		"KeyH":   "h", // H key
+		"KeyI":   "i", // I key
+		"KeyJ":   "j", // J key
+		"KeyK":   "k", // K key
+		"KeyL":   "l", // L key
+		"KeyM":   "m", // M key
+		"KeyN":   "n", // N key
+		"KeyO":   "o", // O key
+		"KeyP":   "p", // P key
+		"KeyQ":   "q", // Q key
+		"KeyR":   "r", // R key
+		"KeyS":   "s", // S key
+		"KeyT":   "t", // T key
+		"KeyU":   "u", // U key
+		"KeyV":   "v", // V key
+		"KeyW":   "w", // W key
+		"KeyX":   "x", // X key
+		"KeyY":   "y", // Y key
+		"KeyZ":   "z", // Z key
+
+		"Numpad0": "num0", // Numeric keypad 0 key
+		"Numpad1": "num1", // Numeric keypad 1 key
+		"Numpad2": "num2", // Numeric keypad 2 key
+		"Numpad3": "num3", // Numeric keypad 3 key
+		"Numpad4": "num4", // Numeric keypad 4 key
+		"Numpad5": "num5", // Numeric keypad 5 key
+		"Numpad6": "num6", // Numeric keypad 6 key
+		"Numpad7": "num7", // Numeric keypad 7 key
+		"Numpad8": "num8", // Numeric keypad 8 key
+		"Numpad9": "num9", // Numeric keypad 9 key
+
+		"NumpadMultiply": "num*", // Multiply key
+		"NumpadAdd":      "num+", // Add key
+		"NumpadSubtract": "num-", // Subtract key
+		"NumpadDecimal":  "num.", // Decimal key
+		"NumpadDivide":   "num/", // Divide key
+
+		"F1":  "f1",  // F1 key
+		"F2":  "f2",  // F2 key
+		"F3":  "f3",  // F3 key
+		"F4":  "f4",  // F4 key
+		"F5":  "f5",  // F5 key
+		"F6":  "f6",  // F6 key
+		"F7":  "f7",  // F7 key
+		"F8":  "f8",  // F8 key
+		"F9":  "f9",  // F9 key
+		"F10": "f10", // F10 key
+		"F11": "f11", // F11 key
+		"F12": "f12", // F12 key
+		"F13": "f13", // F13 key
+		"F14": "f14", // F14 key
+		"F15": "f15", // F15 key
+		"F16": "f16", // F16 key
+		"F17": "f17", // F17 key
+		"F18": "f18", // F18 key
+		"F19": "f19", // F19 key
+		"F20": "f20", // F20 key
+		"F21": "f21", // F21 key
+		"F22": "f22", // F22 key
+		"F23": "f23", // F23 key
+		"F24": "f24", // F24 key
+
+		"NumLock": "numlock", // NUM LOCK key
+		// "ScrollLock":   "scor",   // SCROLL LOCK key
+		"ShiftLeft":    "lshift", // Left SHIFT key
+		"ShiftRight":   "rshift", // Right SHIFT key
+		"ControlLeft":  "lctrl",  // Left CONTROL key
+		"ControlRight": "rctrl",  // Right CONTROL key
+		"AltLeft":      "lalt",   // Left MENU key
+		"AltRight":     "ralt",   // Right MENU key
+
+		"Equal":        "=",  // For any country/region, the '+' key
+		"Comma":        ",",  // For any country/region, the ',' key
+		"Minus":        "-",  // For any country/region, the '-' key
+		"Period":       ".",  // For any country/region, the '.' key
+		"Semicolon":    ";",  // For any country/region, the ';' key
+		"Slash":        "/",  // For any country/region, the '/?' key
+		"Backquote":    "`",  // Used for miscellaneous characters; it can vary by keyboard.  For the US standard keyboard, the '`~' key
+		"BracketLeft":  "[",  // Used for miscellaneous characters; it can vary by keyboard.  For the US standard keyboard, the '[{' key
+		"Backslash":    "\\", // Used for miscellaneous characters; it can vary by keyboard.  For the US standard keyboard, the '\|' key
+		"BracketRight": "]",  // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the ']}' key
+		"Quote":        "'",  // Used for miscellaneous characters; it can vary by keyboard.  For the US standard keyboard, the 'single-quote/double-quote' key
+	}
 )
 
 // KeyToVKCode ...

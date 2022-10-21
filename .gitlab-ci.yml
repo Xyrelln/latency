@@ -60,6 +60,9 @@ PubBin:
     - 'cp .\build\bin\latency-mobile.exe $LATENCY_PKG\'
     - 'mkdir $LATENCY_PKG\lib\'
     - 'cp -r $env:LIB_WINDOWS_PATH\* $LATENCY_PKG\lib\'
+    # rscapture
+    - 'mkdir $LATENCY_PKG\lib\rscapture'
+    - 'curl.exe -k --output $OP_LATENCY_PKG\lib\rscapture\rscapture.exe --header "PRIVATE-TOKEN: $env:EPC_TOKEN" "https://$env:CI_SERVER_HOST/api/v4/projects/895/jobs/artifacts/master/raw/target/release/rscapture.exe?job=Compile"'
     - Compress-Archive -Path .\$LATENCY_PKG\* -DestinationPath .\$LATENCY_PKG.zip
     - 'curl.exe -k --header "JOB-TOKEN: $env:CI_JOB_TOKEN" --upload-file .\$LATENCY_PKG.zip "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/packages/generic/latency-mobile-$env:CI_COMMIT_TAG/$env:CI_COMMIT_TAG/$LATENCY_PKG.zip"'
 

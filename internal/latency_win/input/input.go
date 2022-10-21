@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-vgo/robotgo"
+	log "github.com/sirupsen/logrus"
 )
 
 // MouseClick ...
@@ -25,7 +26,10 @@ func MouseClick(x, y int) {
 
 // KeyboardPress ...
 func KeyboardPress(key string) {
-	fmt.Printf("KeyPress: %s\n", key)
 	robotgo.KeySleep = 100 // 100 millisecond
-	robotgo.KeyTap(key)
+	robotgoKey, exist := keyCodeToRobotkey[key]
+	if exist {
+		log.Infof("KeyPress: %s", robotgoKey)
+		robotgo.KeyTap(robotgoKey)
+	}
 }
