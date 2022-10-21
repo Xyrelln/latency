@@ -8,6 +8,22 @@ import (
 	latencywin "op-latency-mobile/internal/latency_win"
 )
 
+// LatencyWindowsCompleteEvent ...
+type LatencyWindowsCompleteEvent struct {
+	ImageCount int    `json:"imageCount"`
+	InputTime  string `json:"inputTime"`
+}
+
+// LatencyWindowsMessageEvent ...
+type LatencyWindowsMessageEvent struct {
+	Message string `json:"message"`
+}
+
+// LatencyWindowsErrorEvent ...
+type LatencyWindowsErrorEvent struct {
+	Error string `json:"error"`
+}
+
 // StartWinOpLatency ...
 func (a *Api) StartWinOpLatency(config latencywin.Config) (imageCount int, err error) {
 	return

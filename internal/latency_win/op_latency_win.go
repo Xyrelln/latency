@@ -34,6 +34,10 @@ type Config struct {
 
 // OpLatency ...
 func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.ScreenshotSeq, time.Time, error) {
+	if cfg.InputConf.Type != "mouse" && cfg.InputConf.Type != "keyboard" {
+		return nil, time.Time{}, fmt.Errorf("invalid input type: %s", cfg.InputConf.Type)
+	}
+
 	keyCode, err := input.KeyToVKCode(cfg.StartKey)
 	if err != nil {
 		return nil, time.Time{}, fmt.Errorf("start_key: %s 配置了无效的按键", cfg.StartKey)
