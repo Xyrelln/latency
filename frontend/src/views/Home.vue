@@ -9,6 +9,7 @@ import Automation from '../components/Automation.vue';
 import AboutPage from '../components/AboutPage.vue';
 
 import LatencyPage from './LatencyPage.vue';
+import AndroidLatencyPage from './AndroidLatencyPage.vue';
 import PCLatencyPage from './PCLatencyPage.vue';
 
 import { EventsOn, EventsOff } from '@/../wailsjs/runtime/runtime'
@@ -99,8 +100,6 @@ onUnmounted(()=>{
 })
 
 
-
-
 </script>
 
 <template>
@@ -110,11 +109,11 @@ onUnmounted(()=>{
         <PCLatencyPage></PCLatencyPage>
       </el-tab-pane>
       <el-tab-pane label="延迟测试-Android" name="latency">
+        <AndroidLatencyPage></AndroidLatencyPage>
+      </el-tab-pane>
+      <el-tab-pane label="自动化配置-Android" name="automation">
         <LatencyPage></LatencyPage>
       </el-tab-pane>
-      <!-- <el-tab-pane label="场景配置" name="automation">
-        <Automation/>
-      </el-tab-pane> -->
       <el-tab-pane label="关于" name="about">
         <AboutPage></AboutPage>
       </el-tab-pane>
