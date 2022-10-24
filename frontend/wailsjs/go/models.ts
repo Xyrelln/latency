@@ -1,78 +1,3 @@
-export namespace app {
-	
-	export class WinOpLatencyResult {
-	    latency: number;
-	    responseIndex: number;
-	    responseTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new WinOpLatencyResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latency = source["latency"];
-	        this.responseIndex = source["responseIndex"];
-	        this.responseTime = source["responseTime"];
-	    }
-	}
-	export class UpdateInfo {
-	    latestVersion: string;
-	    needUpdate: boolean;
-	    err?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latestVersion = source["latestVersion"];
-	        this.needUpdate = source["needUpdate"];
-	        this.err = source["err"];
-	    }
-	}
-	export class GetImageResp {
-	    length: number;
-	    currentIndex: number;
-	    screenshotTime: string;
-	    imageFilePath: string;
-	    imageWidth: number;
-	    imageHeight: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new GetImageResp(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.length = source["length"];
-	        this.currentIndex = source["currentIndex"];
-	        this.screenshotTime = source["screenshotTime"];
-	        this.imageFilePath = source["imageFilePath"];
-	        this.imageWidth = source["imageWidth"];
-	        this.imageHeight = source["imageHeight"];
-	    }
-	}
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
-
-}
-
 export namespace core {
 	
 	export class ImageRectInfo {
@@ -251,6 +176,81 @@ export namespace latencywin {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace app {
+	
+	export class WinOpLatencyResult {
+	    latency: number;
+	    responseIndex: number;
+	    responseTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WinOpLatencyResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latency = source["latency"];
+	        this.responseIndex = source["responseIndex"];
+	        this.responseTime = source["responseTime"];
+	    }
+	}
+	export class UpdateInfo {
+	    latestVersion: string;
+	    needUpdate: boolean;
+	    err?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latestVersion = source["latestVersion"];
+	        this.needUpdate = source["needUpdate"];
+	        this.err = source["err"];
+	    }
+	}
+	export class GetImageResp {
+	    length: number;
+	    currentIndex: number;
+	    screenshotTime: string;
+	    imageFilePath: string;
+	    imageWidth: number;
+	    imageHeight: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetImageResp(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.length = source["length"];
+	        this.currentIndex = source["currentIndex"];
+	        this.screenshotTime = source["screenshotTime"];
+	        this.imageFilePath = source["imageFilePath"];
+	        this.imageWidth = source["imageWidth"];
+	        this.imageHeight = source["imageHeight"];
+	    }
+	}
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
+	    }
 	}
 
 }

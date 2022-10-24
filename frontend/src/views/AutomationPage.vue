@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import {reactive, ref, h, inject, Ref, provide, onMounted, computed, watch, onUnmounted} from 'vue'
-import { UserFilled } from '@element-plus/icons-vue'
+import { UserFilled, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-import ImagePreview from '../components/ImagePreview.vue';
-import FileRecord from '../components/FileRecord.vue';
-import Automation from '../components/Automation.vue';
-import AboutPage from '../components/AboutPage.vue';
-import HelpPage from '../components/HelpPage.vue';
+// import ImagePreview from '../components/ImagePreview.vue';
+// import FileRecord from '../components/FileRecord.vue';
+// import Automation from '../components/Automation.vue';
+// import AboutPage from '../components/AboutPage.vue';
+// import HelpPage from '../components/HelpPage.vue';
 import ScreenPreview from '../components/ScreenPreview.vue';
 
 import { isWailsRun } from '@/utils/utils'
@@ -85,7 +85,9 @@ const deviceInfo = reactive({
   height: 1920,
 })
 
+
 const imageInfo = reactive({
+  // path: '/Users/jason/Developer/epc/op-latency-mobile/tmp001.png',
   path: '',
   width: 0,
   height: 0,
@@ -99,6 +101,7 @@ const result = reactive({
   imageCount: 0,
   inputTime: 0,
 })
+const imageZoom = ref(1)
 
 const cropInfo:CropArea = reactive({
   top: 50,
@@ -106,6 +109,46 @@ const cropInfo:CropArea = reactive({
   width: 90,
   height: 90,
 })
+
+const userAction = reactive({
+  type: 'click',
+  x: 0,
+  y: 0,
+  tx: 0,
+  ty:0,
+  speed: 0,
+})
+
+const realCropInfo:Ref<CropArea> = computed(()=> {
+  return {
+    top: cropInfo.top * imageZoom.value,
+    left: cropInfo.left * imageZoom.value,
+    width: cropInfo.width * imageZoom.value,
+    height: cropInfo.height * imageZoom.value,
+  }
+})
+
+const realUserAction = computed(() => {
+  return {
+    type: 'click',
+    x: userAction.x * imageZoom.value,
+    y: userAction.y * imageZoom.value,
+    tx: userAction.tx * imageZoom.value,
+    ty: userAction.ty * imageZoom.value,
+    speed: userAction.speed,
+  }
+})
+
+// const realUserAction = reactive({
+//   type: 'click',
+//   x: 0,
+//   y: 0,
+//   tx: 0,
+//   ty:0,
+//   speed: 0,
+// })
+
+
 
 const imagePageInfo:ImagePage = reactive({
   size: 1,
@@ -122,6 +165,8 @@ const settingForm = reactive({
   develop: false,
   autoUpload: false
 })
+
+
 
 provide('threshold', settingForm.diffScore)
 
@@ -343,6 +388,23 @@ const handleOpenFolder = (val: number) => {
   // OpenImageInExplorer(val).then().catch(err => console.log(err))
 }
 
+const handleUserAction = (action: any) => {
+  console.log(action)
+
+  if (action.type === 'click') {
+    userAction.type = action.type
+    userAction.x = action.x
+    userAction.y = action.y
+  } else {
+    userAction.type = action.type
+    userAction.x = action.x
+    userAction.y = action.y
+    userAction.tx = action.tx
+    userAction.ty = action.ty
+    userAction.speed = action.speed
+  }
+}
+
 const handleLoadImage = (val: number) => {}
 const handleCalc = () => {}
 const handleCalcWithCurrent = () => {}
@@ -561,6 +623,12 @@ function handleGetImage() {
 }
 
 
+watch(imageInfo, (val: any) => {
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  imageZoom.value = imageInfo.width / pImgSize.width
+})
+
+
 onMounted(()=> {
   // 如果是在 wails 运行环境则运行环境检查及事件监听
   if (isWailsRun()) {
@@ -654,7 +722,7 @@ onUnmounted(()=>{
             <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStart" >开始</el-button>
             <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
             </el-row>
-            <el-tabs 
+            <!-- <el-tabs 
                 v-model="latencyTabName" 
                 class="platform-tabs">
                 <el-tab-pane label="记录" name="list">
@@ -685,10 +753,8 @@ onUnmounted(()=>{
                     </el-form>
                   </el-row>
                 </el-tab-pane>
-                <!-- <el-tab-pane label="帮助" name="detail" disabled>
-                    <HelpPage></HelpPage>
-                </el-tab-pane> -->
-            </el-tabs>
+            </el-tabs> -->
+            <el-button @click="handleReload">重载页面</el-button>
         </el-aside>
         <el-main class="main-content">
           <div>
@@ -700,37 +766,38 @@ onUnmounted(()=>{
                 @crop-change="handleCropChange"
                 @page-change="handlePageChange"
                 @open-folder="handleOpenFolder"
+                @user-action="handleUserAction"
                 />
             </div>
+
+            <el-row justify="center" class="result-row">
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <el-col :span="4" class="info-line">
+                <span>动作</span>
+              </el-col>
+              <el-col :span="8" class="info-line">
+                <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
+                <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ realUserAction.speed }}</span>
+              </el-col>
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <el-col :span="4" class="info-line">
+                <span>观察区域</span>
+              </el-col>
+              <el-col :span="8" class="info-line">
+                left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
+              </el-col>
+            </el-row>
             <el-row justify="center" class="button-row">
-              <el-button type="success" @click="handleCalc">
-                <i class="el-icon button-icon">
-                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
-                </i>
-                计算延迟
+              <el-button type="success" @click="handleCalc" :icon="VideoPlay">
+                执行动作
               </el-button>
               <el-button @click="handleCalcWithCurrent">
                 <i class="el-icon button-icon">
-                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+                  <svg t="1666605626827" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4819" width="200" height="200"><path d="M665.6 332.8 665.6 128C665.6 113.86151 654.13849 102.4 640 102.4 625.86151 102.4 614.4 113.86151 614.4 128L614.4 332.8C614.4 346.93849 625.86151 358.4 640 358.4 654.13849 358.4 665.6 346.93849 665.6 332.8L665.6 332.8ZM640 51.2 819.2 51.2 793.6 25.6 793.6 384.133545C793.6 426.406699 759.102946 460.8 716.727898 460.8L281.672102 460.8C239.236715 460.8 204.8 426.413438 204.8 384.133545L204.8 25.6C204.8 11.46151 193.33849 0 179.2 0 165.06151 0 153.6 11.46151 153.6 25.6L153.6 384.133545C153.6 454.707134 210.976425 512 281.672102 512L716.727898 512C787.345461 512 844.8 454.718257 844.8 384.133545L844.8 25.6 844.8 0 819.2 0 640 0C625.86151 0 614.4 11.46151 614.4 25.6 614.4 39.73849 625.86151 51.2 640 51.2L640 51.2Z" p-id="4820" fill="#8a8a8a"></path><path d="M844.8 972.8 128.081132 972.8C85.544157 972.8 51.2 938.575806 51.2 896.163853L51.2 100.711064 51.2 25.6 25.6 51.2 102.4 51.2 896.233363 51.2C938.580175 51.2 972.8 85.414085 972.8 127.868001L972.8 998.4C972.8 1012.53849 984.26151 1024 998.4 1024 1012.53849 1024 1024 1012.53849 1024 998.4L1024 127.868001C1024 57.135182 966.85523 0 896.233363 0L102.4 0 25.6 0 0 0 0 25.6 0 100.711064 0 896.163853C0 966.892966 57.307204 1024 128.081132 1024L844.8 1024C858.93849 1024 870.4 1012.53849 870.4 998.4 870.4 984.26151 858.93849 972.8 844.8 972.8L844.8 972.8Z" p-id="4821" fill="#8a8a8a"></path></svg>
                 </i>
-                计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
-              <!-- <el-button>打开当前截图</el-button> -->
-            </el-row>
-            <el-row justify="center" class="result-row">
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>操作延迟(毫秒)</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.latency}}
-              </el-col>
-              <el-col :span="4" class="info-line">
-                <el-button link>开始图片</el-button>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                <el-button link>结束图片</el-button>
-              </el-col>
+                保存 </el-button>
             </el-row>
         </el-main>
         </el-container>

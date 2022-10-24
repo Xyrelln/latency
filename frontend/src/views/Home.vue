@@ -8,7 +8,7 @@ import 'nprogress/nprogress.css'
 import Automation from '../components/Automation.vue';
 import AboutPage from '../components/AboutPage.vue';
 
-import LatencyPage from './LatencyPage.vue';
+import AutomationPage from './AutomationPage.vue';
 import AndroidLatencyPage from './AndroidLatencyPage.vue';
 import PCLatencyPage from './PCLatencyPage.vue';
 
@@ -112,7 +112,8 @@ onUnmounted(()=>{
         <AndroidLatencyPage></AndroidLatencyPage>
       </el-tab-pane>
       <el-tab-pane label="自动化配置-Android" name="automation">
-        <LatencyPage></LatencyPage>
+        <AutomationPage></AutomationPage>
+        <!-- <Automation></Automation> -->
       </el-tab-pane>
       <el-tab-pane label="关于" name="about">
         <AboutPage></AboutPage>

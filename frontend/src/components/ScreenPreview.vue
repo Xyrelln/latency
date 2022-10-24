@@ -13,6 +13,7 @@ interface Emits {
   (e: 'crop-change', val: CropInfo): void
   (e: 'page-change', val: number): void
   (e: 'open-folder', val: number): void
+  (e: 'user-action', val: any): void
 }
 
 const props = defineProps<Props>()
@@ -25,6 +26,7 @@ const resizeTopRef = ref()
 const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
+const previewImgDivRef = ref()
 const previousPageRef = ref()
 const nextPageRef = ref()
 const isPaged = ref(true)
@@ -96,6 +98,37 @@ const mouseUpHandler = function () {
     height: selectBoxRef.value.offsetHeight, 
   })
 };
+
+const actionBoxInit = () => {
+  previewImgDivRef.value.addEventListener('mousedown', (ev: MouseEvent) => {
+    const x = ev.offsetX 
+    const y = ev.offsetY
+    const timeStamp = ev.timeStamp
+
+    let actionType = 'click'   // click/swipe
+    let tx = 0    // target x
+    let ty = 0
+    let tTimeStamp = 0
+  
+    document.onmousemove = (ev:MouseEvent) => {
+      actionType = 'swipe'
+      tx = ev.offsetX
+      ty = ev.offsetY
+      tTimeStamp = ev.timeStamp
+    }
+
+    document.onmouseup = (ev:any) => {
+      document.onmousemove = null;
+
+      if (actionType === 'click') {
+        emit('user-action', { type: 'click', x: x, y: y})
+      } else {
+        emit('user-action', { type: 'swipe', x: x, y: y, tx: tx, ty: ty, speed: Math.trunc(tTimeStamp-timeStamp)})
+      }
+    }
+
+  })
+}
 
 /**
  * 初始化选择区域
@@ -182,17 +215,18 @@ const handleOpenFileFolder = () => {
 
 onMounted(()=>{
   selectBoxInit()
+  actionBoxInit()
 })
 
 
-watch(props.pageInfo, (val: ImagePage) => {
-  if (val.currentPage === 0) {
-    // console.log(previousPageRef.value.style)
-    previousPageRef.value.style.opacity = 0.5
-  } else if (val.currentPage === props.pageInfo.total) {
-    nextPageRef.value.style.opacity = 0.5
-  }
-})
+// watch(props.pageInfo, (val: ImagePage) => {
+//   if (val.currentPage === 0) {
+//     // console.log(previousPageRef.value.style)
+//     previousPageRef.value.style.opacity = 0.5
+//   } else if (val.currentPage === props.pageInfo.total) {
+//     nextPageRef.value.style.opacity = 0.5
+//   }
+// })
 
 
 defineExpose({
@@ -206,9 +240,10 @@ defineExpose({
     <el-row justify="center" class="preview-content">
       <!-- <el-col> -->
         <!-- <span>标识检测区域</span> -->
-        <!-- <div class="out-img-box"> -->
+        <div ref="previewImgDivRef" class="out-img-box">
           <!-- <span v-if="isPaged" ref="previousPageRef" @click="getPreviousImage" class="page-button el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
+          </div>
           <!-- <span v-if="isPaged" ref="nextPageRef" @click="getNextImage"  class="page-button el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
@@ -280,16 +315,18 @@ defineExpose({
 <style>
 
 .out-img-box {
-  width: 100%;
+  /* width: 100%; */
   /* width: 500px; */
-  height: 100%;
+  /* height: 100%; */
   /* line-height: 600px; */
+  max-width: 70%;
+  max-height: 70%;
   text-align: center;
 }
 
 .preview-img {
-    max-width: 70%;
-    max-height: 70%;
+    max-width: 100%;
+    max-height: 100%;
     /* max-width: 500px;
     max-height: 500px; */
     vertical-align: middle;
