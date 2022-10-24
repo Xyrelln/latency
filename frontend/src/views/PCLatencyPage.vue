@@ -296,6 +296,7 @@ const handleOpenFolder = (val: number) => {
 
 const getCaptureWindows = () => {
   ListCaptureWindows().then((res:any) => {
+    console.log(res)
     capture_windows.value = res
   }).catch(err => {
     console.log(err)
