@@ -34,6 +34,8 @@ export function IsAppReady():Promise<Error>;
 
 export function IsPointerLocationOn(arg1:string):Promise<boolean>;
 
+export function ListCaptureWindows():Promise<Array<string>>;
+
 export function ListDevices():Promise<Array<adb.Device>>;
 
 export function ListRecords():Promise<Array<fs.RecordFile>>;

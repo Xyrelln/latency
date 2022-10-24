@@ -58,6 +58,10 @@ export function IsPointerLocationOn(arg1) {
   return window['go']['app']['Api']['IsPointerLocationOn'](arg1);
 }
 
+export function ListCaptureWindows() {
+  return window['go']['app']['Api']['ListCaptureWindows']();
+}
+
 export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
 }

@@ -19,6 +19,7 @@ import {
   CalculateLatencyByCurrentImage,
   GetImage,
   OpenImageInExplorer,
+  ListCaptureWindows,
 } from '../../wailsjs/go/app/Api'
 import {adb, app, core, latencywin} from '../../wailsjs/go/models'
 import {
@@ -33,6 +34,7 @@ const fileRecordRef = ref()
 const isRunning = ref(false)
 
 const latencyForm = reactive({
+  capture_window: '',
   operate_method: 'keyboard',
   operate_key: 'KeyA',
   auto: false,
@@ -41,6 +43,8 @@ const latencyForm = reactive({
   frame_count: 300,
   auto_upload: false,
 })
+
+const capture_windows = reactive({value: []})
 
 const cropInfo:CropArea = reactive({
   top: 50,
@@ -198,6 +202,7 @@ const handleStart = () => {
   
   const config = latencywin.Config.createFrom({
     inputConf: input_config,
+    captureWindow: latencyForm.capture_window,
     frames: latencyForm.frame_count,
     startKey: latencyForm.start_hotkey,
   })
@@ -289,6 +294,14 @@ const handleOpenFolder = (val: number) => {
   OpenImageInExplorer(val).then().catch(err => console.log(err))
 }
 
+const getCaptureWindows = () => {
+  ListCaptureWindows().then((res:any) => {
+    capture_windows.value = res
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
 /**
  * 计算延迟
  */
@@ -358,8 +371,23 @@ onUnmounted(()=>{
         <el-aside class="aside-content" width="240px">
             <el-row class="row-item">
               <el-form :model="latencyForm">
+                <el-form-item label="录制窗口">
+                  <el-select 
+                    v-model="latencyForm.capture_window" class="m-2" 
+                    @focus="getCaptureWindows"
+                    filterable
+                    placeholder="请选择录制窗口"
+                    size="default">
+                    <el-option
+                      v-for="item in capture_windows.value"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                    />
+                  </el-select>
+                </el-form-item>
                 <el-form-item label="操控方式">
-                  <el-select v-model="latencyForm.operate_method" class="m-2" placeholder="Select" size="default">
+                  <el-select v-model="latencyForm.operate_method" class="m-2" placeholder="请选择操控方式" size="default">
                     <el-option
                       v-for="item in operateMethods"
                       :key="item.value"
