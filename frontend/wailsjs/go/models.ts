@@ -76,38 +76,6 @@ export namespace latencywin {
 
 export namespace app {
 	
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
-	export class WinOpLatencyResult {
-	    latency: number;
-	    responseIndex: number;
-	    responseTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new WinOpLatencyResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latency = source["latency"];
-	        this.responseIndex = source["responseIndex"];
-	        this.responseTime = source["responseTime"];
-	    }
-	}
 	export class UpdateInfo {
 	    latestVersion: string;
 	    needUpdate: boolean;
@@ -144,6 +112,38 @@ export namespace app {
 	        this.imageFilePath = source["imageFilePath"];
 	        this.imageWidth = source["imageWidth"];
 	        this.imageHeight = source["imageHeight"];
+	    }
+	}
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
+	    }
+	}
+	export class WinOpLatencyResult {
+	    latency: number;
+	    responseIndex: number;
+	    responseTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WinOpLatencyResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latency = source["latency"];
+	        this.responseIndex = source["responseIndex"];
+	        this.responseTime = source["responseTime"];
 	    }
 	}
 

@@ -54,6 +54,10 @@ export function IsAppReady() {
   return window['go']['app']['Api']['IsAppReady']();
 }
 
+export function IsPointerLocationOn(arg1) {
+  return window['go']['app']['Api']['IsPointerLocationOn'](arg1);
+}
+
 export function ListDevices() {
   return window['go']['app']['Api']['ListDevices']();
 }

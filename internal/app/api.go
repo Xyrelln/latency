@@ -18,7 +18,7 @@ import (
 	"op-latency-mobile/internal/fs"
 	"op-latency-mobile/internal/upload"
 
-	"op-latency-mobile/internal/latency_win"
+	latencywin "op-latency-mobile/internal/latency_win"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/logger"
@@ -209,6 +209,16 @@ func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
 func (a *Api) SetAutoSwipeOff() error {
 	autorun = false
 	return nil
+}
+
+// IsPointerLocationOn 查询指针开启状态
+func (a *Api) IsPointerLocationOn(serial string) (bool, error) {
+	device := adb.GetDevice(serial)
+	on, err := device.IsPointerLocationOn()
+	if err != nil {
+		return false, nil
+	}
+	return on, nil
 }
 
 // 开启指针位置显示

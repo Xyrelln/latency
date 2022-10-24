@@ -32,6 +32,8 @@ export function InputSwipe(arg1:string,arg2:adb.SwipeEvent):Promise<Error>;
 
 export function IsAppReady():Promise<Error>;
 
+export function IsPointerLocationOn(arg1:string):Promise<boolean>;
+
 export function ListDevices():Promise<Array<adb.Device>>;
 
 export function ListRecords():Promise<Array<fs.RecordFile>>;

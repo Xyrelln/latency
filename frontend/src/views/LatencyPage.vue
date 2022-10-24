@@ -34,6 +34,7 @@ import {
   StartWithVideo,
   GetPhysicalSize,
   ListRecords,
+  IsPointerLocationOn,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import {
@@ -41,6 +42,7 @@ import {
   EventsOff,
   WindowReload,
 } from '../../wailsjs/runtime/runtime'
+import { stat } from 'fs'
 
 const deviceSelected = ref("")
 const sceneSelected = ref("")
@@ -247,10 +249,10 @@ function handleLoadExtVideo() {
 function handleInputSwipe() {
   const swipeEvent = adb.SwipeEvent.createFrom(
     { 
-      sx: deviceInfo.height/2,
-      sy:  deviceInfo.width/2,
-      dx: deviceInfo.height/2 + deviceInfo.height/2/2,
-      dy: deviceInfo.width/2,
+      sx: Math.trunc(deviceInfo.height/2),
+      sy: Math.trunc(deviceInfo.width/2),
+      dx: Math.trunc(deviceInfo.height/2) + Math.trunc(deviceInfo.height/2/2),
+      dy: Math.trunc( deviceInfo.width/2),
       speed: form.speed
     }
   )
@@ -260,7 +262,7 @@ function handleInputSwipe() {
 }
 
 /**
- * 启动录制
+ * 启动
  */
 async function handleStart() {
   // 设备状态检查
@@ -280,14 +282,20 @@ async function handleStart() {
     return
   }
 
+  // 重置状态，开启进度条
   handleResetStatus()
   NProgress.start()
 
-  await setPointerLocationOn()
-
-  const status = await handleGetDisplay()
+  // 查看指针开启状态
+  const pStatus = await isPointerLocationOn()
+  if (!pStatus) {
+    await setPointerLocationOn()
+  }
+  
+  // 获取屏幕分辨率
+  const status = await handleGetPhysicalSize()
   if (!status) {
-    await handleGetPhysicalSize()
+    await handleGetDisplay()
   }
 
   Start(latencyForm.serial, settingForm.timeout)
@@ -393,6 +401,16 @@ async function setPointerLocationOn():Promise<Boolean> {
   return result
 }
 
+const isPointerLocationOn = async() => {
+  let status = false 
+  IsPointerLocationOn(latencyForm.serial).then((res: boolean) => {
+    status = res
+  }).catch(err => {
+    console.log(err)
+  })
+  return status
+}
+
 function setPointerLocationOff():Boolean {
   SetPointerLocationOff(deviceSelected.value).then(res =>{ 
       ElMessage({
@@ -483,6 +501,7 @@ async function handleGetPhysicalSize() {
   await GetPhysicalSize(deviceSelected.value).then((res: adb.Display) => {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
+      status = true
   }).catch(err => {
     // deviceInfo.width = 1080
     // deviceInfo.height = 1920
