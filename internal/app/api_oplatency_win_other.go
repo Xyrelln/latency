@@ -64,3 +64,8 @@ func (a *Api) GetImage(index int) GetImageResp {
 // OpenImageInExplorer ...
 func (a *Api) OpenImageInExplorer(index int) {
 }
+
+// ListCaptureWindows ...
+func (a *Api) ListCaptureWindows() []string {
+	return nil
+}

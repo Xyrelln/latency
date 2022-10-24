@@ -10,8 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	// "runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -28,11 +26,21 @@ type RustCapture struct {
 }
 
 // CaptureScreenshots ...
-func (rsc *RustCapture) CaptureScreenshots(frames int) (imgs []ScreenshotWithTs, err error) {
-	cmd := exec.Command(rsc.ExePath,
-		"-f", fmt.Sprintf("%d", frames),
-		"-o", rsc.OutputDir,
-	)
+func (rsc *RustCapture) CaptureScreenshots(frames int, windowName string) (imgs []ScreenshotWithTs, err error) {
+	var cmd *exec.Cmd
+	if windowName == "" {
+		cmd = exec.Command(rsc.ExePath,
+			"-f", fmt.Sprintf("%d", frames),
+			"-o", rsc.OutputDir,
+		)
+	} else {
+		cmd = exec.Command(rsc.ExePath,
+			"-f", fmt.Sprintf("%d", frames),
+			"-o", rsc.OutputDir,
+			"-w", windowName,
+		)
+	}
+
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
@@ -43,6 +51,21 @@ func (rsc *RustCapture) CaptureScreenshots(frames int) (imgs []ScreenshotWithTs,
 		return
 	}
 	return rsc.loadScreenshotsResult()
+}
+
+// ListCapturableWindows ...
+func (rsc *RustCapture) ListCapturableWindows() (windowNames []string, err error) {
+	cmd := exec.Command(rsc.ExePath, "-l")
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+
+	rsc.startTime = time.Now()
+	b, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	out := strings.TrimSpace(string(b))
+	lines := strings.Split(out, "\n")
+	return lines, nil
 }
 
 // type readImgJob struct {

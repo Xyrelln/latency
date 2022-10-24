@@ -8,7 +8,9 @@ import (
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/fs"
 	latencywin "op-latency-mobile/internal/latency_win"
+	"op-latency-mobile/internal/latency_win/capture"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -156,4 +158,21 @@ func (a *Api) OpenImageInExplorer(index int) {
 	screenshot := a.latencyWinManager.GetScreenshotByIndex(index)
 	cmd := exec.Command("explorer.exe", "/select,", screenshot.FilePath)
 	cmd.Start()
+}
+
+// ListCaptureWindows ...
+func (a *Api) ListCaptureWindows() []string {
+	exeRoot, err := fs.GetExecuteRoot()
+	if err != nil {
+		log.Errorf("get exe root error: %v", err)
+		return nil
+	}
+
+	rscap := capture.RustCapture{ExePath: filepath.Join(exeRoot, "lib", "rscapture", "rscapture.exe")}
+	winList, err := rscap.ListCapturableWindows()
+	if err != nil {
+		log.Errorf("get capture windows error: %v", err)
+		return nil
+	}
+	return winList
 }
