@@ -206,6 +206,12 @@ func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
 	return device.InputSwipe(sw)
 }
 
+// 发送点击事件
+func (a *Api) InputTap(serial string, tap adb.TapEvent) error {
+	device := adb.GetDevice(serial)
+	return device.InputTap(tap)
+}
+
 func (a *Api) SetAutoSwipeOff() error {
 	autorun = false
 	return nil

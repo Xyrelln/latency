@@ -30,6 +30,8 @@ export function GetVersionInfo():Promise<app.VersionInfo>;
 
 export function InputSwipe(arg1:string,arg2:adb.SwipeEvent):Promise<Error>;
 
+export function InputTap(arg1:string,arg2:adb.TapEvent):Promise<Error>;
+
 export function IsAppReady():Promise<Error>;
 
 export function IsPointerLocationOn(arg1:string):Promise<boolean>;

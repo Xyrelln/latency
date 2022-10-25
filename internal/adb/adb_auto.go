@@ -18,6 +18,11 @@ type SwipeEvent struct {
 	Speed int `json:"speed"`
 }
 
+type TapEvent struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
 type Display struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
@@ -36,6 +41,17 @@ func (d *Device) AutoSwipe(se SwipeEvent) error {
 
 func (d *Device) InputSwipe(se SwipeEvent) error {
 	cmd := d.Command(fmt.Sprintf("input swipe %d %d %d %d %d", se.Sx, se.Sy, se.Dx, se.Dy, se.Speed))
+	err := cmd.Run()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *Device) InputTap(tap TapEvent) error {
+	cmd := d.Command(fmt.Sprintf("input tap %d %d", tap.X, tap.Y))
 	err := cmd.Run()
 	if err != nil {
 		log.Error(err)

@@ -19,6 +19,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+
 // element refs
 const selectBoxRef = ref()
 const previewImgRef = ref()
@@ -27,9 +28,10 @@ const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
 const previewImgDivRef = ref()
-const previousPageRef = ref()
-const nextPageRef = ref()
-const isPaged = ref(true)
+// const previousPageRef = ref()
+// const nextPageRef = ref()
+// const isPaged = ref(true)
+
 
 const paginationDisabled = ref(false)
 const defaultImageHolder = './assets/images/placeholder.png'
@@ -45,6 +47,9 @@ const location = reactive({
   w: 0,
   h: 0,
 })
+
+// 限制对比区域最小宽高
+const minCropBox = { width: 20, height: 20}
 
 /**
  * 鼠标点击事件处理
@@ -79,8 +84,21 @@ const mouseMoveHandler = function (e: any) {
   const dy = e.clientY - location.y;
 
   // Adjust the dimension of element
-  selectBoxStyle.width = `${location.w + dx}px`;
-  selectBoxStyle.height = `${location.h + dy}px`;
+  const width = location.w + dx
+  const height = location.h + dy
+
+  // limit min box width and height
+  if (width < minCropBox.width) {
+    selectBoxStyle.width = `${minCropBox.width}px`;
+  } else {
+    selectBoxStyle.width = `${width}px`;
+  }
+
+  if (height < minCropBox.height) {
+    selectBoxStyle.height = `${minCropBox.height}px`;
+  } else {
+    selectBoxStyle.height = `${height}px`;
+  }
 };
 
 /**
@@ -260,7 +278,7 @@ defineExpose({
       <el-col :span="6"><span>width: </span></el-col>
       <el-col :span="6"><span>height: </span></el-col>
     </el-row> -->
-    <el-row v-if="isPaged" justify="center">
+    <el-row v-if="props.pageInfo.total > 1" justify="center">
         <el-pagination
           :currentPage="props.pageInfo.currentPage"
           :page-size="1"
@@ -367,6 +385,8 @@ img {
 .resizer {
     /* All resizers are positioned absolutely inside the element */
     position: absolute;
+    background-color: rgb(246,77,62);
+    /* height: 3px; */
 }
 
 /* Placed at the right side */
@@ -375,7 +395,7 @@ img {
     height: 100%;
     right: 0;
     top: 0;
-    width: 5px;
+    width: 3px;
 }
 
 .resizer-l {
@@ -383,7 +403,7 @@ img {
     height: 100%;
     left: 0;
     top: 0;
-    width: 5px;
+    width: 3px;
 }
 
 
@@ -391,7 +411,7 @@ img {
 .resizer-b {
     bottom: 0;
     cursor: row-resize;
-    height: 5px;
+    height: 3px;
     left: 0;
     width: 100%;
 }
@@ -399,7 +419,7 @@ img {
 .resizer-t {
     top: 0;
     cursor: row-resize;
-    height: 5px;
+    height: 3px;
     left: 0;
     width: 100%;
 }

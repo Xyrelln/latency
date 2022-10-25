@@ -6,11 +6,6 @@ import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-// import ImagePreview from '../components/ImagePreview.vue';
-// import FileRecord from '../components/FileRecord.vue';
-// import Automation from '../components/Automation.vue';
-// import AboutPage from '../components/AboutPage.vue';
-// import HelpPage from '../components/HelpPage.vue';
 import ScreenPreview from '../components/ScreenPreview.vue';
 
 import { isWailsRun } from '@/utils/utils'
@@ -35,6 +30,7 @@ import {
   GetPhysicalSize,
   ListRecords,
   IsPointerLocationOn,
+  InputTap,
 } from '../../wailsjs/go/app/Api'
 import {adb, core} from '../../wailsjs/go/models'
 import {

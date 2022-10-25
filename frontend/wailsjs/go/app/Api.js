@@ -50,6 +50,10 @@ export function InputSwipe(arg1, arg2) {
   return window['go']['app']['Api']['InputSwipe'](arg1, arg2);
 }
 
+export function InputTap(arg1, arg2) {
+  return window['go']['app']['Api']['InputTap'](arg1, arg2);
+}
+
 export function IsAppReady() {
   return window['go']['app']['Api']['IsAppReady']();
 }
