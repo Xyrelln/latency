@@ -40,19 +40,11 @@ import {
 } from '../../wailsjs/runtime/runtime'
 import { stat } from 'fs'
 
-const deviceSelected = ref("")
 const sceneSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
 
-// const topTabName = ref('latency')
-const latencyTabName = ref('list')
-const placeholder = "./src/assets/images/placeholder.png"
-
-const fileRecordRef = ref()
-
-// const status = ref(false)
 const form = reactive({
   device: '',
   sx: 0,
@@ -135,16 +127,6 @@ const realUserAction = computed(() => {
   }
 })
 
-// const realUserAction = reactive({
-//   type: 'click',
-//   x: 0,
-//   y: 0,
-//   tx: 0,
-//   ty:0,
-//   speed: 0,
-// })
-
-
 
 const imagePageInfo:ImagePage = reactive({
   size: 1,
@@ -161,11 +143,6 @@ const settingForm = reactive({
   develop: false,
   autoUpload: false
 })
-
-
-
-provide('threshold', settingForm.diffScore)
-
 
 const rules =  {
   touchScore: [
@@ -273,100 +250,36 @@ function getSelectDeviceState(){
   }
 }
 
-// const deviceStateCheck = () => {
-  
+
+// function handleLoadExtVideo() {
+//   handleResetStatus()
+//   NProgress.start()
+//   StartWithVideo(externalVideoPath.value)
 // }
 
-function handleLoadExtVideo() {
-  handleResetStatus()
-  NProgress.start()
-  StartWithVideo(externalVideoPath.value)
-}
 
 /**
- * 发送拖动事件
+ * 发送操作事件
  */
-function handleInputSwipe() {
-  const swipeEvent = adb.SwipeEvent.createFrom(
-    { 
-      sx: Math.trunc(deviceInfo.height/2),
-      sy: Math.trunc(deviceInfo.width/2),
-      dx: Math.trunc(deviceInfo.height/2) + Math.trunc(deviceInfo.height/2/2),
-      dy: Math.trunc( deviceInfo.width/2),
-      speed: form.speed
-    }
-  )
-  // const interval = 2
-  console.log(swipeEvent)
-  InputSwipe(deviceSelected.value, swipeEvent)
-}
-
-/**
- * 启动
- */
-async function handleStart() {
-  // 设备状态检查
-  const state = getSelectDeviceState()
-  if (state == 0) {
-    ElMessage({
-      type: 'error',
-      message: '设备已离线，请检查设备'
+ function handleInput() {
+  if (userAction.type === 'swipe') {
+    const swipeEvent = adb.SwipeEvent.createFrom({ 
+      sx: userAction.x,
+      sy: userAction.y,
+      dx: userAction.tx,
+      dy: userAction.ty,
+      speed: userAction.speed
+    })  
+    InputSwipe(latencyForm.serial, swipeEvent)
+  } else {
+    const tapEvent = adb.TapEvent.createFrom({
+      x: userAction.x,
+      y: userAction.y
     })
-    return
-  }
-  else if (state == 2) {
-    ElMessage({
-      type: 'error',
-      message: '设备未授权，请检查设备'
-    })
-    return
-  }
-
-  // 重置状态，开启进度条
-  handleResetStatus()
-  NProgress.start()
-
-  // 查看指针开启状态
-  const pStatus = await isPointerLocationOn()
-  if (!pStatus) {
-    await setPointerLocationOn()
-  }
-  
-  // 获取屏幕分辨率
-  const status = await handleGetPhysicalSize()
-  if (!status) {
-    await handleGetDisplay()
-  }
-
-  Start(latencyForm.serial, settingForm.timeout)
-
-  // 1s 后拖动
-  // doSwipe()
-
-  // add stop count down
-  processStatus.value = 2
-  runUntilCountDown(settingForm.timeout)
-
-  if (latencyForm.auto === true) {
-    setTimeout(() => {
-      handleInputSwipe()
-    }, 1500);
+    InputTap(latencyForm.serial, tapEvent).then().catch(err => { console.log(err)})
   }
 }
 
-function handleStopRecord() {
-}
-
-function handleToImage() {
-  StartTransform()
-}
-
-function clearCurrentInterval() {
-  if (interval.value != null) {
-    clearInterval(interval.value)
-    interval.value = null
-  }
-}
 
 const handleCropChange = (res: CropInfo)=> {
   cropInfo.left = res.left
@@ -402,221 +315,64 @@ const handleUserAction = (action: any) => {
 }
 
 const handleLoadImage = (val: number) => {}
-const handleCalc = () => {}
 const handleCalcWithCurrent = () => {}
 
+// function runUntilCountDown(second: number, callback?: Function){
+//   countDownSecond.value = second
+//   function countDown() {
+//     // 启动需要时间，提前1s启动
+//     if (countDownSecond.value  == 1) {
+//       if (callback) { callback() }
+//     }
+//     if (countDownSecond.value  > 0) {
+//       countDownSecond.value  --
+//     }
 
-function runUntilCountDown(second: number, callback?: Function){
-  countDownSecond.value = second
-  function countDown() {
-    // 启动需要时间，提前1s启动
-    if (countDownSecond.value  == 1) {
-      if (callback) { callback() }
-    }
-    if (countDownSecond.value  > 0) {
-      countDownSecond.value  --
-    }
+//   }
 
-  }
-
-  clearCurrentInterval()
-  interval.value = setInterval(countDown, 1000)
-}
+//   clearCurrentInterval()
+//   interval.value = setInterval(countDown, 1000)
+// }
 
 /**
  * 配置默认状态
  */
-function handleResetStatus() {
-  if (NProgress.isStarted()) {
-    NProgress.done()
-  }
-  imagePreviewRef.value.setCalcButtonDisable(true)
-  imagePreviewRef.value.setImagePlaceHolder()
-  imagePreviewRef.value.setDefaultTime()
-}
+// function handleResetStatus() {
+//   if (NProgress.isStarted()) {
+//     NProgress.done()
+//   }
+//   imagePreviewRef.value.setCalcButtonDisable(true)
+//   imagePreviewRef.value.setImagePlaceHolder()
+//   imagePreviewRef.value.setDefaultTime()
+// }
 
 
-/**
- * 开启指针显示
- */
-async function setPointerLocationOn():Promise<Boolean> {
-  let result = false
-  await SetPointerLocationOn(deviceSelected.value).then(res =>{ 
-    ElMessage({
-      type: 'success',
-      message: '开启指针成功'
-    })
-     result = true
-    }
-  ).catch(err => {
-    ElMessage({
-      type: 'warning',
-      message: '开启指针失败, 请确定已手工开启'
-    })
-    result = false
-  })
-  return result
-}
-
-const isPointerLocationOn = async() => {
-  let status = false 
-  IsPointerLocationOn(latencyForm.serial).then((res: boolean) => {
-    status = res
-  }).catch(err => {
-    console.log(err)
-  })
-  return status
-}
-
-function setPointerLocationOff():Boolean {
-  SetPointerLocationOff(deviceSelected.value).then(res =>{ 
-      ElMessage({
-        type: 'success',
-        message: '关闭指针成功'
-      })
-      return true
-  }).catch(err => {
-    ElMessage({
-      type: 'warning',
-      message: '关闭指针失败'
-    })
-  })
-  return false
-}
-
-/**
- * 绑定监听
- */
-async function addEventLister() {
-  EventsOn("latency:record_start", ()=>{
-    console.log("record_start")
-    ElNotification({
-      title: '进度提示: 1/3',
-      type: 'info',
-      message: "开始录制",
-    })
-  })
-  EventsOn("latency:record_filish", ()=>{
-    setPointerLocationOff()
-    processStatus.value = 0
-    ElNotification({
-      title: '进度提示: 1/3',
-      type: 'success',
-      message: "录制成功",
-    })
-  })
-  EventsOn("latency:transform_start", ()=>{
-    ElNotification({
-      title: '进度提示: 2/3',
-      type: 'success',
-      message: "数据预处理中，请稍后...",
-      duration: 6000,
-    })
-    NProgress.done()
-  })
-  EventsOn("latency:transform_start_error", ()=>{
-    ElNotification({
-      title: '进度提示: 2/3',
-      type: 'error',
-      message: "数据预处理失败，请重试",
-      duration: 0,
-    })
-    NProgress.done()
-  })
-  EventsOn("latency:record_start_error", ()=>{
-    ElNotification({
-      title: '进度提示: 2/3',
-      type: 'error',
-      message: "录制失败，请重试",
-      duration: 0,
-    })
-    NProgress.done()
-  })
-  EventsOn("latency:transform_filish", ()=>{
-    ElNotification({
-      title: '进度提示: 2/3',
-      type: 'success',
-      message: "数据预处理完成，加载首帧画面",
-    })
-    getFirstImage()
-    NProgress.done()
-  })
-}
-
-function getFirstImage(){
-  GetFirstImageInfo().then((res: core.ImageInfo) => {
-    imageInfo.path = res.path
-    imageInfo.width = res.width
-    imageInfo.height = res.height
-    imagePreviewRef.value.loadNewImage(res)
-    imagePreviewRef.value.enableCalcButton()
-  })
-}
-
-async function handleGetPhysicalSize() {
-  let status = false
-  await GetPhysicalSize(deviceSelected.value).then((res: adb.Display) => {
-      deviceInfo.width = res.width
-      deviceInfo.height = res.height
-      status = true
-  }).catch(err => {
-    console.log(err)
-  })
-  return status
-}
+// function getFirstImage(){
+//   GetFirstImageInfo().then((res: core.ImageInfo) => {
+//     imageInfo.path = res.path
+//     imageInfo.width = res.width
+//     imageInfo.height = res.height
+//     imagePreviewRef.value.loadNewImage(res)
+//     imagePreviewRef.value.enableCalcButton()
+//   })
+// }
 
 
-async function handleGetDisplay() {
-  let status = false
-  await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
-      deviceInfo.width = res.width
-      deviceInfo.height = res.height
-      status = true
-  }).catch(err => {
-    console.log(err)
-  })
-  return status
-}
+// function handleClearCache() {
+//   ClearCacheData()
+// }
 
-async function removeEventLister() {
-  EventsOff("latency:record_start")
-  EventsOff("latency:record_filish")
-  EventsOff("latency:transform_start")
-  EventsOff("latency:transform_start_error")
-  EventsOff("latency:record_start_error")
-  EventsOff("latency:transform_filish")
-}
+// function handleReload() {
+//   WindowReload();
+// }
 
-/**
- * 环境检查
- */
-async function initCheck() {
-  IsAppReady().then(res => {
-  }).catch(err => {
-    ElNotification({
-      title: '环境检查',
-      type: 'error',
-      message: err,
-      duration: 0,
-    })
-  })
-}
+// function handleStopProcessing() {
 
-function handleClearCache() {
-  ClearCacheData()
-}
+// }
 
-function handleReload() {
-  WindowReload();
-}
-
-function handleStopProcessing() {
-
-}
-
-function handleGetImage() {
-  imagePreviewRef.value.handleGetImage()
-}
+// function handleGetImage() {
+//   imagePreviewRef.value.handleGetImage()
+// }
 
 
 watch(imageInfo, (val: any) => {
@@ -628,15 +384,15 @@ watch(imageInfo, (val: any) => {
 onMounted(()=> {
   // 如果是在 wails 运行环境则运行环境检查及事件监听
   if (isWailsRun()) {
-    initCheck()
-    addEventLister()
-    fileRecordRef.value.handleLoadCacheFiles()
+    // initCheck()
+    // addEventLister()
+    // fileRecordRef.value.handleLoadCacheFiles()
   }
 })
 
 onUnmounted(()=>{
   if (isWailsRun()) {
-    removeEventLister()
+    // removeEventLister()
   }
 })
 
@@ -715,42 +471,8 @@ onUnmounted(()=>{
               </el-form>
             </el-row>
             <el-row class="row-item">
-            <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStart" >开始</el-button>
-            <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
             </el-row>
-            <!-- <el-tabs 
-                v-model="latencyTabName" 
-                class="platform-tabs">
-                <el-tab-pane label="记录" name="list">
-                  <FileRecord ref="fileRecordRef"/>
-                </el-tab-pane>
-            
-                <el-tab-pane label="设置" name="setting">
-                  <el-row>
-                    <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
-                      <el-form-item label="触控阈值" prop="touchScore">
-                        <el-input v-model.number="settingForm.touchScore"/>
-                      </el-form-item>
-                      <el-form-item label="区域阈值" prop="diffScore">
-                        <el-input v-model.number="settingForm.diffScore"/>
-                      </el-form-item>
-                        <el-form-item label="录制时长" prop="timeout">
-                      <el-input v-model.number="settingForm.timeout"/>
-                      </el-form-item>
-                      <el-form-item label="场景时间" prop="sceneStart">
-                        <el-input v-model.number="settingForm.sceneStart"/>
-                      </el-form-item>
-                      <el-form-item label="自动上传">
-                        <el-switch v-model="settingForm.autoUpload" />
-                      </el-form-item>
-                      <el-form-item label="调式">
-                        <el-button @click="handleReload">重载页面</el-button>
-                      </el-form-item>
-                    </el-form>
-                  </el-row>
-                </el-tab-pane>
-            </el-tabs> -->
-            <el-button @click="handleReload">重载页面</el-button>
+            <!-- <el-button @click="handleReload">重载页面</el-button> -->
         </el-aside>
         <el-main class="main-content">
           <div>
@@ -786,7 +508,7 @@ onUnmounted(()=>{
               </el-col>
             </el-row>
             <el-row justify="center" class="button-row">
-              <el-button type="success" @click="handleCalc" :icon="VideoPlay">
+              <el-button type="success" @click="handleInput" :icon="VideoPlay">
                 执行动作
               </el-button>
               <el-button @click="handleCalcWithCurrent">

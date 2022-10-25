@@ -1,21 +1,5 @@
 export namespace app {
 	
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
 	export class WinOpLatencyResult {
 	    latency: number;
 	    responseIndex: number;
@@ -68,6 +52,22 @@ export namespace app {
 	        this.imageFilePath = source["imageFilePath"];
 	        this.imageWidth = source["imageWidth"];
 	        this.imageHeight = source["imageHeight"];
+	    }
+	}
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
 	    }
 	}
 
@@ -124,36 +124,6 @@ export namespace core {
 
 export namespace adb {
 	
-	export class TapEvent {
-	    x: number;
-	    y: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new TapEvent(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.x = source["x"];
-	        this.y = source["y"];
-	    }
-	}
-	export class Device {
-	    Serial: string;
-	    State: number;
-	    abi: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Device(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Serial = source["Serial"];
-	        this.State = source["State"];
-	        this.abi = source["abi"];
-	    }
-	}
 	export class Display {
 	    width: number;
 	    height: number;
@@ -186,6 +156,36 @@ export namespace adb {
 	        this.dx = source["dx"];
 	        this.dy = source["dy"];
 	        this.speed = source["speed"];
+	    }
+	}
+	export class TapEvent {
+	    x: number;
+	    y: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TapEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.x = source["x"];
+	        this.y = source["y"];
+	    }
+	}
+	export class Device {
+	    Serial: string;
+	    State: number;
+	    abi: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Device(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Serial = source["Serial"];
+	        this.State = source["State"];
+	        this.abi = source["abi"];
 	    }
 	}
 
