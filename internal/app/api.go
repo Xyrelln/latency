@@ -38,6 +38,7 @@ const (
 	defaultWorkspaceKey      = "wksp_default"
 	recordFile               = "rec.mp4"
 	firstImageFile           = "0001.png"
+	sceneKeyPrefix           = "scene_"
 )
 
 var autorun = true
@@ -129,6 +130,61 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 	return devices, nil
 }
 
+type UserAction struct {
+	Type  string `json:"type"`
+	X     int    `json:"x"`
+	Y     int    `json:"y"`
+	Tx    int    `json:"tx"`
+	Ty    int    `json:"ty"`
+	Speed int    `json:"speed"`
+}
+
+type CropInfo struct {
+	Top    int `json:"top"`
+	Left   int `json:"left"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type UserScene struct {
+	Name           string     `json:"name"`
+	CropCoordinate CropInfo   `json:"crop_coordinate"`
+	Action         UserAction `json:"action"`
+}
+
+// 获取设备列表
+func (a *Api) ListScens() ([]UserScene, error) {
+	var userScenes []UserScene
+
+	items, err := a.store.list([]byte(sceneKeyPrefix))
+	if err != nil {
+		log.Errorf("failed to get scenes from store: %v", err)
+		return nil, err
+	}
+
+	for _, val := range items {
+		scene := UserScene{}
+		dec := gob.NewDecoder(bytes.NewBuffer(val))
+		if err = dec.Decode(&scene); err != nil {
+			return userScenes, err
+		}
+		userScenes = append(userScenes, scene)
+	}
+
+	return userScenes, nil
+}
+
+func (a *Api) SetScene(name string, userScene UserScene) {
+	var val bytes.Buffer
+	enc := gob.NewEncoder(&val)
+	enc.Encode(userScene)
+	a.store.set([]byte(sceneKeyPrefix+name), val.Bytes())
+}
+
+func (a *Api) DeleteScene(key string) {
+	a.store.del([]byte(key))
+}
+
 // 检查 app 依赖包环境信息
 func (a *Api) IsAppReady() error {
 	p, err := adb.IsAdbReady()
@@ -210,6 +266,36 @@ func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
 func (a *Api) InputTap(serial string, tap adb.TapEvent) error {
 	device := adb.GetDevice(serial)
 	return device.InputTap(tap)
+}
+
+// 发送点击事件
+func (a *Api) LoadScreenshot(serial string) (core.ImageInfo, error) {
+	var img core.ImageInfo
+	device := adb.GetDevice(serial)
+	imgPath, err := device.GetScreenshot()
+	if err != nil {
+		return img, err
+	}
+	screenshotDir, err := fs.GetScreenshotDir()
+	if err != nil {
+		log.Errorf("get screenshot dir err %v", err)
+		return img, err
+	}
+	localPath := filepath.Join(screenshotDir, "screenshot.png")
+	err = device.Pull(imgPath, localPath)
+	if err != nil {
+		return img, err
+	}
+
+	mInfo, err := core.GetImageInfo(localPath)
+	if err != nil {
+		return mInfo, err
+	}
+	// path to uri format for FileLoader on win
+	if fs.IsWindowsDrivePath(mInfo.Path) {
+		mInfo.Path = "/" + strings.ReplaceAll(mInfo.Path, "\\", "/")
+	}
+	return mInfo, nil
 }
 
 func (a *Api) SetAutoSwipeOff() error {

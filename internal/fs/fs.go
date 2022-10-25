@@ -35,7 +35,7 @@ func GetExecuteRoot() (string, error) {
 func CreateWorkDir() (string, string) {
 	root, _ := GetExecuteRoot()
 	timestamp := GetTimeStamp()
-	workDir := filepath.Join(root, "cache", timestamp)
+	workDir := filepath.Join(root, "cache", "mobile", timestamp)
 	videoDir := filepath.Join(workDir, "video")
 	imagesDir := filepath.Join(workDir, "images")
 
@@ -56,9 +56,23 @@ func CreateWorkDir() (string, string) {
 	return videoDir, imagesDir
 }
 
+func GetScreenshotDir() (string, error) {
+	root, _ := GetExecuteRoot()
+	timestamp := GetTimeStamp()
+	dir := filepath.Join(root, "cache", "mobile", timestamp)
+	if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			log.Error(err)
+			return "", err
+		}
+	}
+	return dir, nil
+}
+
 func ClearCacheDir() {
 	root, _ := GetExecuteRoot()
-	workDir := filepath.Join(root, "cache")
+	workDir := filepath.Join(root, "cache", "mobile")
 	go os.RemoveAll(workDir)
 }
 

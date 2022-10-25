@@ -18,6 +18,10 @@ export function ClearCacheData() {
   return window['go']['app']['Api']['ClearCacheData']();
 }
 
+export function DeleteScene(arg1) {
+  return window['go']['app']['Api']['DeleteScene'](arg1);
+}
+
 export function DoUpdate(arg1) {
   return window['go']['app']['Api']['DoUpdate'](arg1);
 }
@@ -74,6 +78,14 @@ export function ListRecords() {
   return window['go']['app']['Api']['ListRecords']();
 }
 
+export function ListScens() {
+  return window['go']['app']['Api']['ListScens']();
+}
+
+export function LoadScreenshot(arg1) {
+  return window['go']['app']['Api']['LoadScreenshot'](arg1);
+}
+
 export function OpenImageInExplorer(arg1) {
   return window['go']['app']['Api']['OpenImageInExplorer'](arg1);
 }
@@ -92,6 +104,10 @@ export function SetPointerLocationOff(arg1) {
 
 export function SetPointerLocationOn(arg1) {
   return window['go']['app']['Api']['SetPointerLocationOn'](arg1);
+}
+
+export function SetScene(arg1, arg2) {
+  return window['go']['app']['Api']['SetScene'](arg1, arg2);
 }
 
 export function Start(arg1, arg2) {

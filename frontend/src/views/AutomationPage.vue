@@ -12,33 +12,14 @@ import { isWailsRun } from '@/utils/utils'
 
 import { 
   ListDevices,
-  Start,
-  StartRecord,
-  StartTransform,
-  StartAnalyse,
-  SetPointerLocationOff,
-  SetPointerLocationOn,
-  GetFirstImageInfo,
-  ClearCacheData,
-  SetAutoSwipeOn,
-  SetAutoSwipeOff,
-  GetDisplay,
-  GetImageFiles,
   InputSwipe,
-  IsAppReady,
-  StartWithVideo,
-  GetPhysicalSize,
-  ListRecords,
-  IsPointerLocationOn,
   InputTap,
+  LoadScreenshot,
+  ListScens,
+  SetScene,
+  DeleteScene,
 } from '../../wailsjs/go/app/Api'
-import {adb, core} from '../../wailsjs/go/models'
-import {
-  EventsOn,
-  EventsOff,
-  WindowReload,
-} from '../../wailsjs/runtime/runtime'
-import { stat } from 'fs'
+import {adb, app, core} from '../../wailsjs/go/models'
 
 const sceneSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
@@ -60,14 +41,15 @@ const form = reactive({
 const latencyForm = reactive({
   serial: '',
   auto: true,
-  scene: ''
+  scene: '',
+  scenes: []
 })
 
-const interval = ref()
-const processStatus = ref(0)
-const countDownSecond = ref(0)
+// const interval = ref()
+// const processStatus = ref(0)
+// const countDownSecond = ref(0)
 const imagePreviewRef = ref()
-const externalVideoPath = ref('')
+// const externalVideoPath = ref('')
 const deviceInfo = reactive({
   width: 1080,
   height: 1920,
@@ -109,21 +91,21 @@ const userAction = reactive({
 
 const realCropInfo:Ref<CropArea> = computed(()=> {
   return {
-    top: cropInfo.top * imageZoom.value,
-    left: cropInfo.left * imageZoom.value,
-    width: cropInfo.width * imageZoom.value,
-    height: cropInfo.height * imageZoom.value,
+    top: Math.trunc(cropInfo.top * imageZoom.value),
+    left: Math.trunc(cropInfo.left * imageZoom.value),
+    width: Math.trunc(cropInfo.width * imageZoom.value),
+    height: Math.trunc(cropInfo.height * imageZoom.value),
   }
 })
 
 const realUserAction = computed(() => {
   return {
-    type: 'click',
-    x: userAction.x * imageZoom.value,
-    y: userAction.y * imageZoom.value,
-    tx: userAction.tx * imageZoom.value,
-    ty: userAction.ty * imageZoom.value,
-    speed: userAction.speed,
+    // type: 'click',
+    x: Math.trunc(userAction.x * imageZoom.value),
+    y: Math.trunc(userAction.y * imageZoom.value),
+    tx: Math.trunc(userAction.tx * imageZoom.value),
+    ty: Math.trunc(userAction.ty * imageZoom.value),
+    // speed: userAction.speed,
   }
 })
 
@@ -191,6 +173,10 @@ const rules =  {
   ],
 }
 
+const userScenes: {scens: Array<app.UserScene>} = reactive({
+  scens: [],
+})
+
 const scenes = ref([
   {
     name: "第五人格-视角移动",
@@ -250,31 +236,23 @@ function getSelectDeviceState(){
   }
 }
 
-
-// function handleLoadExtVideo() {
-//   handleResetStatus()
-//   NProgress.start()
-//   StartWithVideo(externalVideoPath.value)
-// }
-
-
 /**
  * 发送操作事件
  */
  function handleInput() {
   if (userAction.type === 'swipe') {
     const swipeEvent = adb.SwipeEvent.createFrom({ 
-      sx: userAction.x,
-      sy: userAction.y,
-      dx: userAction.tx,
-      dy: userAction.ty,
+      sx: realUserAction.value.x,
+      sy: realUserAction.value.y,
+      dx: realUserAction.value.tx,
+      dy: realUserAction.value.ty,
       speed: userAction.speed
     })  
     InputSwipe(latencyForm.serial, swipeEvent)
   } else {
     const tapEvent = adb.TapEvent.createFrom({
-      x: userAction.x,
-      y: userAction.y
+      x: realUserAction.value.x,
+      y: realUserAction.value.y
     })
     InputTap(latencyForm.serial, tapEvent).then().catch(err => { console.log(err)})
   }
@@ -298,8 +276,7 @@ const handleOpenFolder = (val: number) => {
 }
 
 const handleUserAction = (action: any) => {
-  console.log(action)
-
+  // console.log(action)
   if (action.type === 'click') {
     userAction.type = action.type
     userAction.x = action.x
@@ -317,82 +294,78 @@ const handleUserAction = (action: any) => {
 const handleLoadImage = (val: number) => {}
 const handleCalcWithCurrent = () => {}
 
-// function runUntilCountDown(second: number, callback?: Function){
-//   countDownSecond.value = second
-//   function countDown() {
-//     // 启动需要时间，提前1s启动
-//     if (countDownSecond.value  == 1) {
-//       if (callback) { callback() }
-//     }
-//     if (countDownSecond.value  > 0) {
-//       countDownSecond.value  --
-//     }
+const handleLoadScreenshot = () => {
+  LoadScreenshot(latencyForm.serial).then((res:core.ImageInfo) => {
+    imageInfo.path = res.path
+    imageInfo.width = res.width
+    imageInfo.height = res.height
 
-//   }
-
-//   clearCurrentInterval()
-//   interval.value = setInterval(countDown, 1000)
-// }
-
-/**
- * 配置默认状态
- */
-// function handleResetStatus() {
-//   if (NProgress.isStarted()) {
-//     NProgress.done()
-//   }
-//   imagePreviewRef.value.setCalcButtonDisable(true)
-//   imagePreviewRef.value.setImagePlaceHolder()
-//   imagePreviewRef.value.setDefaultTime()
-// }
+    const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+    imageZoom.value = imageInfo.width / pImgSize.width
+    console.log(pImgSize)
+    console.log(imageZoom.value)
+    // imageInfo.path = res
+  }).catch(err => {
+    console.log(err)
+  })
+}
 
 
-// function getFirstImage(){
-//   GetFirstImageInfo().then((res: core.ImageInfo) => {
-//     imageInfo.path = res.path
-//     imageInfo.width = res.width
-//     imageInfo.height = res.height
-//     imagePreviewRef.value.loadNewImage(res)
-//     imagePreviewRef.value.enableCalcButton()
-//   })
-// }
+const handleGetScenes = () => {
+  ListScens().then((res: Array<app.UserScene>) => {
+    userScenes.scens = res
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+const handleSetScene = () => {
+  const key = 'abc'
+  const name = 'dwrg'
+  const cropInfo = app.CropInfo.createFrom({
+    top: realCropInfo.value.top,
+    left: realCropInfo.value.left,
+    width: realCropInfo.value.width,
+    height: realCropInfo.value.height,
+  })
+  const action = app.UserAction.createFrom({
+    x: realUserAction.value.x,
+    y: realUserAction.value.y,
+    tx: realUserAction.value.tx,
+    ty: realUserAction.value.ty,
+    speed: userAction.speed,
+    type: userAction.type,
+  })
+  const userScene = app.UserScene.createFrom({
+    name: name,
+    crop_coordinate: cropInfo,
+    action: action
+  })
+  SetScene(key, userScene).then().catch(err => { console.log(err) })
+}
+
+const handleDelScene = () => {
+  const name = ''
+  DeleteScene(name).then().catch(err => { console.log(err)})
+}
 
 
-// function handleClearCache() {
-//   ClearCacheData()
-// }
-
-// function handleReload() {
-//   WindowReload();
-// }
-
-// function handleStopProcessing() {
-
-// }
-
-// function handleGetImage() {
-//   imagePreviewRef.value.handleGetImage()
-// }
-
-
-watch(imageInfo, (val: any) => {
-  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
-  imageZoom.value = imageInfo.width / pImgSize.width
-})
+// watch(imageInfo, (val: any) => {
+//   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+//   imageZoom.value = imageInfo.width / pImgSize.width
+//   console.log(pImgSize)
+//   console.log(imageZoom.value)
+// })
 
 
 onMounted(()=> {
   // 如果是在 wails 运行环境则运行环境检查及事件监听
   if (isWailsRun()) {
-    // initCheck()
-    // addEventLister()
-    // fileRecordRef.value.handleLoadCacheFiles()
   }
 })
 
 onUnmounted(()=>{
   if (isWailsRun()) {
-    // removeEventLister()
   }
 })
 
@@ -435,21 +408,19 @@ onUnmounted(()=>{
                   </el-tooltip>
                 </el-col>
                 </el-form-item>
-                <el-form-item label="自动">
-                  <el-switch v-model="latencyForm.auto" />
-                </el-form-item>
                 <el-form-item v-if="latencyForm.auto===true" label="场景">
                   <el-col :span="20">
                     <el-select
                       v-model="latencyForm.scene"
                       filterable
                       placeholder="请选择场景"
+                      @focus="handleGetScenes"
                       style="width:100%">
                       <el-option
-                          v-for="item in scenes"
-                          :key="item.value"
+                          v-for="item in userScenes.scens"
+                          :key="item.name"
                           :label="item.name"
-                          :value="item.value"
+                          :value="item"
                       >
                       </el-option>
                     </el-select>
@@ -468,6 +439,7 @@ onUnmounted(()=>{
 
                   </el-col>
                 </el-form-item>
+                <el-button @click="handleLoadScreenshot">加载截图</el-button>
               </el-form>
             </el-row>
             <el-row class="row-item">
@@ -496,7 +468,7 @@ onUnmounted(()=>{
               </el-col>
               <el-col :span="8" class="info-line">
                 <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
-                <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ realUserAction.speed }}</span>
+                <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ userAction.speed }}</span>
               </el-col>
             </el-row>
             <el-row justify="center" class="result-row">
@@ -511,7 +483,7 @@ onUnmounted(()=>{
               <el-button type="success" @click="handleInput" :icon="VideoPlay">
                 执行动作
               </el-button>
-              <el-button @click="handleCalcWithCurrent">
+              <el-button @click="handleSetScene">
                 <i class="el-icon button-icon">
                   <svg t="1666605626827" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4819" width="200" height="200"><path d="M665.6 332.8 665.6 128C665.6 113.86151 654.13849 102.4 640 102.4 625.86151 102.4 614.4 113.86151 614.4 128L614.4 332.8C614.4 346.93849 625.86151 358.4 640 358.4 654.13849 358.4 665.6 346.93849 665.6 332.8L665.6 332.8ZM640 51.2 819.2 51.2 793.6 25.6 793.6 384.133545C793.6 426.406699 759.102946 460.8 716.727898 460.8L281.672102 460.8C239.236715 460.8 204.8 426.413438 204.8 384.133545L204.8 25.6C204.8 11.46151 193.33849 0 179.2 0 165.06151 0 153.6 11.46151 153.6 25.6L153.6 384.133545C153.6 454.707134 210.976425 512 281.672102 512L716.727898 512C787.345461 512 844.8 454.718257 844.8 384.133545L844.8 25.6 844.8 0 819.2 0 640 0C625.86151 0 614.4 11.46151 614.4 25.6 614.4 39.73849 625.86151 51.2 640 51.2L640 51.2Z" p-id="4820" fill="#8a8a8a"></path><path d="M844.8 972.8 128.081132 972.8C85.544157 972.8 51.2 938.575806 51.2 896.163853L51.2 100.711064 51.2 25.6 25.6 51.2 102.4 51.2 896.233363 51.2C938.580175 51.2 972.8 85.414085 972.8 127.868001L972.8 998.4C972.8 1012.53849 984.26151 1024 998.4 1024 1012.53849 1024 1024 1012.53849 1024 998.4L1024 127.868001C1024 57.135182 966.85523 0 896.233363 0L102.4 0 25.6 0 0 0 0 25.6 0 100.711064 0 896.163853C0 966.892966 57.307204 1024 128.081132 1024L844.8 1024C858.93849 1024 870.4 1012.53849 870.4 998.4 870.4 984.26151 858.93849 972.8 844.8 972.8L844.8 972.8Z" p-id="4821" fill="#8a8a8a"></path></svg>
                 </i>

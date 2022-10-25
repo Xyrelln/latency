@@ -14,6 +14,8 @@ export function CheckUpdate():Promise<app.UpdateInfo>;
 
 export function ClearCacheData():Promise<void>;
 
+export function DeleteScene(arg1:string):Promise<void>;
+
 export function DoUpdate(arg1:string):Promise<void>;
 
 export function GetDisplay(arg1:string):Promise<adb.Display>;
@@ -42,6 +44,10 @@ export function ListDevices():Promise<Array<adb.Device>>;
 
 export function ListRecords():Promise<Array<fs.RecordFile>>;
 
+export function ListScens():Promise<Array<app.UserScene>>;
+
+export function LoadScreenshot(arg1:string):Promise<core.ImageInfo>;
+
 export function OpenImageInExplorer(arg1:number):Promise<void>;
 
 export function SetAutoSwipeOff():Promise<Error>;
@@ -51,6 +57,8 @@ export function SetAutoSwipeOn(arg1:adb.SwipeEvent,arg2:number):Promise<Error>;
 export function SetPointerLocationOff(arg1:string):Promise<Error>;
 
 export function SetPointerLocationOn(arg1:string):Promise<Error>;
+
+export function SetScene(arg1:string,arg2:app.UserScene):Promise<void>;
 
 export function Start(arg1:string,arg2:number):Promise<Error>;
 
