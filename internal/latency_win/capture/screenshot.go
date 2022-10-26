@@ -67,19 +67,3 @@ func (seq ScreenshotSeq) FindImageHashResponseTime(diffArea image.Rectangle, dif
 	}
 	return 0, fmt.Errorf("find response time failed")
 }
-
-// SaveFiles ...
-// func (seq ScreenshotSeq) SaveFiles(dir string) error {
-// 	for i := 0; i < len(seq); i++ {
-// 		f, err := os.OpenFile(fmt.Sprintf("%s/%d.jpg", dir, seq[i].Time.UnixMilli()), os.O_CREATE, 0666)
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		err = jpeg.Encode(f, seq[i].Img, &jpeg.Options{Quality: 75})
-// 		if err != nil {
-// 			return err
-// 		}
-// 		f.Close()
-// 	}
-// 	return nil
-// }

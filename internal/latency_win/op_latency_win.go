@@ -89,7 +89,7 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 
 	rsCap := capture.RustCapture{
 		ExePath:   filepath.Join(workdir, "lib", "rscapture", "rscapture.exe"),
-		OutputDir: filepath.Join(workdir, "cache", "pc", "screenshots"),
+		OutputDir: filepath.Join(workdir, "cache", "pc", fmt.Sprintf("screenshots-%d", time.Now().UnixMilli())),
 		PrintFunc: printFunc,
 	}
 	screenshotC := make(chan capture.ScreenshotSeq, 1)

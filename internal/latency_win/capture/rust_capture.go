@@ -22,12 +22,12 @@ type RustCapture struct {
 	ExePath   string
 	OutputDir string
 	PrintFunc func(string)
-	startTime time.Time
 }
 
 // CaptureScreenshots ...
 func (rsc *RustCapture) CaptureScreenshots(frames int, windowName string) (imgs []ScreenshotWithTs, err error) {
 	var cmd *exec.Cmd
+	// screenshotDir := filepath.Join(rsc.OutputDir, time.Now().Format(time.RFC3339))
 	if windowName == "" {
 		cmd = exec.Command(rsc.ExePath,
 			"-f", fmt.Sprintf("%d", frames),
@@ -45,12 +45,11 @@ func (rsc *RustCapture) CaptureScreenshots(frames int, windowName string) (imgs 
 	// cmd.Stdout = os.Stdout
 	// cmd.Stderr = os.Stderr
 
-	rsc.startTime = time.Now()
 	err = cmd.Run()
 	if err != nil {
 		return
 	}
-	return rsc.loadScreenshotsResult()
+	return rsc.loadScreenshotsResult(rsc.OutputDir)
 }
 
 // ListCapturableWindows ...
@@ -58,7 +57,6 @@ func (rsc *RustCapture) ListCapturableWindows() (windowNames []string, err error
 	cmd := exec.Command(rsc.ExePath, "-l")
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 
-	rsc.startTime = time.Now()
 	b, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -68,18 +66,8 @@ func (rsc *RustCapture) ListCapturableWindows() (windowNames []string, err error
 	return lines, nil
 }
 
-// type readImgJob struct {
-// 	path string
-// 	t    time.Time
-// }
-
-// type readImgResult struct {
-// 	screenshotWithTs *ScreenshotWithTs
-// 	err              error
-// }
-
-func (rsc *RustCapture) loadScreenshotsResult() (imgs []ScreenshotWithTs, err error) {
-	fentries, err := os.ReadDir(rsc.OutputDir)
+func (rsc *RustCapture) loadScreenshotsResult(dir string) (imgs []ScreenshotWithTs, err error) {
+	fentries, err := os.ReadDir(dir)
 	if err != nil {
 		return
 	}
@@ -95,51 +83,11 @@ func (rsc *RustCapture) loadScreenshotsResult() (imgs []ScreenshotWithTs, err er
 			continue
 		}
 		screenshotTime := time.UnixMilli(i)
-		if !screenshotTime.After(rsc.startTime) {
-			continue
-		}
 
-		imgFilePath := filepath.Join(rsc.OutputDir, f.Name())
+		imgFilePath := filepath.Join(dir, f.Name())
 		imgs = append(imgs, ScreenshotWithTs{FilePath: imgFilePath, Time: screenshotTime})
 	}
 	rsc.PrintFunc(fmt.Sprintf("已完成截图，截图数量: %d", len(imgs)))
-
-	// resultCh := make(chan readImgResult, len(jobs))
-	// jobCh := make(chan readImgJob, len(jobs))
-
-	// wnum := runtime.NumCPU() - 1
-	// for w := 0; w < wnum; w++ {
-	// 	go func() {
-	// 		for j := range jobCh {
-	// 			imgf, err := os.Open(j.path)
-	// 			if err != nil {
-	// 				resultCh <- readImgResult{err: err}
-	// 				return
-	// 			}
-	// 			defer imgf.Close()
-
-	// 			img, _, err := image.Decode(imgf)
-	// 			if err != nil {
-	// 				resultCh <- readImgResult{err: err}
-	// 				return
-	// 			}
-	// 			resultCh <- readImgResult{screenshotWithTs: &ScreenshotWithTs{Img: img, Time: j.t, FilePath: j.path}}
-	// 		}
-	// 	}()
-	// }
-
-	// for _, job := range jobs {
-	// 	jobCh <- job
-	// }
-	// close(jobCh)
-
-	// rsc.PrintFunc("正在加载截图...")
-	// for i := 0; i < len(jobs); i++ {
-	// 	r := <-resultCh
-	// 	if r.screenshotWithTs != nil && r.err == nil {
-	// 		imgs = append(imgs, *r.screenshotWithTs)
-	// 	}
-	// }
 
 	sort.Slice(imgs, func(i, j int) bool { return imgs[i].Time.Before(imgs[j].Time) })
 	return
