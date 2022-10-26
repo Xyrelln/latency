@@ -12,7 +12,9 @@ export function CalculateLatencyByImageDiff(arg1:core.ImageRectInfo,arg2:number)
 
 export function CheckUpdate():Promise<app.UpdateInfo>;
 
-export function ClearCacheData():Promise<void>;
+export function ClearMobleCache():Promise<void>;
+
+export function ClearPCCache():Promise<void>;
 
 export function DeleteScene(arg1:string):Promise<void>;
 

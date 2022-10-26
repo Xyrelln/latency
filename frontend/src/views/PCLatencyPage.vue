@@ -12,7 +12,7 @@ import HelpPage from '../components/HelpPage.vue';
 import { isWailsRun } from '@/utils/utils'
 
 import { 
-  ClearCacheData,
+  ClearPCCache,
   IsAppReady,
   StartWinOpLatency,
   CalculateLatencyByImageDiff,
@@ -29,8 +29,7 @@ import {
 } from '../../wailsjs/runtime/runtime'
 
 
-const latencyTabName = ref('list')
-const fileRecordRef = ref()
+const latencyTabName = ref('setting')
 const isRunning = ref(false)
 
 const latencyForm = reactive({
@@ -276,6 +275,10 @@ function handleReload() {
   WindowReload();
 }
 
+const handleClearCache = () => {
+  ClearPCCache()
+}
+
 
 const handleCropChange = (res: CropInfo)=> {
   cropInfo.left = res.left
@@ -426,10 +429,9 @@ onUnmounted(()=>{
             <el-tabs 
                 v-model="latencyTabName" 
                 class="platform-tabs">
-                <el-tab-pane label="记录" name="list">
-                <FileRecord ref="fileRecordRef"/>
-
-                </el-tab-pane>
+                <!-- <el-tab-pane label="记录" name="list">
+                  <FileRecord ref="fileRecordRef"/>
+                </el-tab-pane> -->
             
                 <el-tab-pane label="设置" name="setting">
                 <!-- <el-scrollbar style="height:60vh"> -->
@@ -446,6 +448,9 @@ onUnmounted(()=>{
                         </el-form-item>
                         <el-form-item label="调式">
                           <el-button @click="handleReload">重载页面</el-button>
+                        </el-form-item>
+                        <el-form-item label="缓存">
+                          <el-button @click="handleClearCache">清理数据</el-button>
                         </el-form-item>
                     </el-form>
                     </el-row>

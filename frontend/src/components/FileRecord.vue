@@ -14,7 +14,7 @@ import {
   SetPointerLocationOff,
   SetPointerLocationOn,
   GetFirstImageInfo,
-  ClearCacheData,
+  ClearMobleCache,
   SetAutoSwipeOn,
   SetAutoSwipeOff,
   GetDisplay,
@@ -41,7 +41,7 @@ const data = ref<Array<fs.RecordFile>>([])
  * 清理所有缓存数据
  */
 const handleClearCacheData = ()=> {
-  ClearCacheData().then(res => {
+  ClearMobleCache().then(res => {
     ElMessage({
       type: 'success',
       message: '清理成功'

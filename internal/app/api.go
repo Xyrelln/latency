@@ -146,14 +146,22 @@ type CropInfo struct {
 	Height int `json:"height"`
 }
 
+type DeviceInfo struct {
+	DeviceName   string `json:"device_name"`
+	ScreenWidth  int    `json:"screen_width"`
+	ScreenHeight int    `json:"screen_height"`
+}
+
 type UserScene struct {
 	Name           string     `json:"name"`
+	Device         DeviceInfo `json:"device"`
 	CropCoordinate CropInfo   `json:"crop_coordinate"`
 	Action         UserAction `json:"action"`
 }
 
 // 获取设备列表
 func (a *Api) ListScens() ([]UserScene, error) {
+	log.Infof("list scenes")
 	var userScenes []UserScene
 
 	items, err := a.store.list([]byte(sceneKeyPrefix))
@@ -171,10 +179,12 @@ func (a *Api) ListScens() ([]UserScene, error) {
 		userScenes = append(userScenes, scene)
 	}
 
+	log.Infof("scenes content: %v", userScenes)
 	return userScenes, nil
 }
 
 func (a *Api) SetScene(name string, userScene UserScene) {
+	log.Infof("set scene name: %s, content: %v", name, userScene)
 	var val bytes.Buffer
 	enc := gob.NewEncoder(&val)
 	enc.Encode(userScene)
@@ -182,6 +192,7 @@ func (a *Api) SetScene(name string, userScene UserScene) {
 }
 
 func (a *Api) DeleteScene(key string) {
+	log.Infof("delete scene name: %s", key)
 	a.store.del([]byte(key))
 }
 
@@ -603,6 +614,10 @@ func (a *Api) DoUpdate(version string) {
 	}()
 }
 
-func (a *Api) ClearCacheData() {
-	fs.ClearCacheDir()
+func (a *Api) ClearMobleCache() {
+	fs.ClearCacheDir("mobile")
+}
+
+func (a *Api) ClearPCCache() {
+	fs.ClearCacheDir("pc")
 }

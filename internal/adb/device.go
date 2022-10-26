@@ -37,9 +37,14 @@ var ErrDeviceNotRooted = errors.New("Device is not rooted")
 
 // Device represents an attached Android device.
 type Device struct {
-	Serial string      `json:"Serial"`
-	State  DeviceState `json:"State"`
-	abi    string      `json:"abi"`
+	Serial      string      `json:"serial"`
+	State       DeviceState `json:"state"`
+	abi         string      `json:"abi,omitempty"`
+	usb         string      `json:"usb,omitempty"`
+	Product     string      `json:"product"`
+	Model       string      `json:"model"`
+	Device      string      `json:"device"`
+	transportId int         `json:"transport_id"`
 }
 
 // Command returns a new Cmd that will run the command with the specified name
@@ -119,7 +124,7 @@ func Devices() ([]*Device, error) {
 	if adb == "" {
 		return nil, ErrADBNotFound
 	}
-	cmd := Cmd{Args: []string{"devices"}}
+	cmd := Cmd{Args: []string{"devices", "-l"}}
 	if out, err := cmd.Call(); err == nil {
 		return parseDevices(out)
 	} else {
@@ -146,6 +151,29 @@ func parseDevices(out string) ([]*Device, error) {
 			device := &Device{
 				Serial: fields[0],
 				State:  state,
+			}
+			devices = append(devices, device)
+		case 7:
+			state := DeviceState(0)
+			if err := state.Parse(fields[1]); err != nil {
+				return nil, err
+			}
+
+			productStrs := strings.Split(fields[3], ":")
+			product := productStrs[len(productStrs)-1]
+
+			modelStrs := strings.Split(fields[4], ":")
+			model := modelStrs[len(modelStrs)-1]
+
+			deviceStrs := strings.Split(fields[5], ":")
+			deviceName := deviceStrs[len(deviceStrs)-1]
+
+			device := &Device{
+				Serial:  fields[0],
+				State:   state,
+				Product: product,
+				Model:   model,
+				Device:  deviceName,
 			}
 			devices = append(devices, device)
 		default:

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import {reactive, ref, h, inject, Ref, provide, onMounted, computed, watch, onUnmounted} from 'vue'
-import { UserFilled } from '@element-plus/icons-vue'
+// import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-import ImagePreview from '../components/ImagePreview.vue';
+// import ImagePreview from '../components/ImagePreview.vue';
 import FileRecord from '../components/FileRecord.vue';
-import Automation from '../components/Automation.vue';
-import AboutPage from '../components/AboutPage.vue';
-import HelpPage from '../components/HelpPage.vue';
+// import Automation from '../components/Automation.vue';
+// import AboutPage from '../components/AboutPage.vue';
+// import HelpPage from '../components/HelpPage.vue';
 import ScreenPreview from '../components/ScreenPreview.vue';
 
 import { isWailsRun } from '@/utils/utils'
@@ -24,7 +24,7 @@ import {
   SetPointerLocationOff,
   SetPointerLocationOn,
   GetFirstImageInfo,
-  ClearCacheData,
+  ClearMobleCache,
   SetAutoSwipeOn,
   SetAutoSwipeOff,
   GetDisplay,
@@ -35,8 +35,10 @@ import {
   GetPhysicalSize,
   ListRecords,
   IsPointerLocationOn,
+  ListScens,
+  InputTap,
 } from '../../wailsjs/go/app/Api'
-import {adb, core} from '../../wailsjs/go/models'
+import {adb, core, app} from '../../wailsjs/go/models'
 import {
   EventsOn,
   EventsOff,
@@ -44,19 +46,16 @@ import {
 } from '../../wailsjs/runtime/runtime'
 import { stat } from 'fs'
 
+
 const deviceSelected = ref("")
-const sceneSelected = ref("")
 const data: {devices: Array<adb.Device>} = reactive({
   devices: [],
 })
 
-// const topTabName = ref('latency')
 const latencyTabName = ref('list')
-const placeholder = "./src/assets/images/placeholder.png"
 
 const fileRecordRef = ref()
 
-// const status = ref(false)
 const form = reactive({
   device: '',
   sx: 0,
@@ -70,9 +69,13 @@ const form = reactive({
 })
 
 const latencyForm = reactive({
-  serial: '',
   auto: true,
-  scene: ''
+  scene: {},
+  device: {
+    serial: '',
+    state: 0,
+    deviceName: '',
+  }
 })
 
 const interval = ref()
@@ -80,6 +83,7 @@ const processStatus = ref(0)
 const countDownSecond = ref(0)
 const imagePreviewRef = ref()
 const externalVideoPath = ref('')
+const calcButtonDisable = ref(false)
 const deviceInfo = reactive({
   width: 1080,
   height: 1920,
@@ -105,6 +109,23 @@ const cropInfo:CropArea = reactive({
   left: 50,
   width: 90,
   height: 90,
+})
+
+const userScenes: {scens: Array<app.UserScene>} = reactive({
+  scens: [],
+})
+
+// @ts-ignore:  default value
+const userScene:app.UserScene = reactive({
+  name: '',
+  device: {},
+  crop_coordinate: {
+    top: 50,
+    left: 50,
+    width: 50,
+    height: 50,
+  },
+  action: {},
 })
 
 const imagePageInfo:ImagePage = reactive({
@@ -222,14 +243,53 @@ function getDeviceList (value: any) {``
 }
 
 /**
+ * 设备选中时检测设备状态
+ */
+const handleDeviceChange = () => {
+  const state = latencyForm.device.state
+  if (state == 0) {
+    ElMessage({
+      type: 'error',
+      message: '设备已离线，请检查设备'
+    })
+    return
+  }
+  else if (state == 2) {
+    ElMessage({
+      type: 'error',
+      message: '设备未授权，请检查设备'
+    })
+    return
+  }
+}
+
+/**
  * 获取选中设备状态
  */
-function getSelectDeviceState(){
-  for(let d of data.devices) {
-    if (d.Serial == latencyForm.serial) {
-      return d.State
-    }
-  }
+// function getSelectDeviceState(){
+//   for(let d of data.devices) {
+//     if (d.serial == latencyForm.serial) {
+//       return d.state
+//     }
+//   }
+// }
+
+const handleGetScenes = () => {
+  ListScens().then((res: Array<app.UserScene>) => {
+    console.log(res)
+    userScenes.scens = res
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+
+
+const handleSceneChange = (val: app.UserScene) => {
+  userScene.name = val.name
+  userScene.device = val.device
+  userScene.crop_coordinate = val.crop_coordinate
+  userScene.action = val.action
 }
 
 // const deviceStateCheck = () => {
@@ -257,29 +317,37 @@ function handleInputSwipe() {
   )
   // const interval = 2
   console.log(swipeEvent)
-  InputSwipe(deviceSelected.value, swipeEvent)
+  InputSwipe(latencyForm.device.serial, swipeEvent)
 }
+
+/**
+ * 发送操作事件
+ */
+ function handleAutoInput() {
+  if (userScene.action.type === 'swipe') {
+    const swipeEvent = adb.SwipeEvent.createFrom({ 
+      sx: userScene.action.x,
+      sy: userScene.action.y,
+      dx: userScene.action.tx,
+      dy: userScene.action.ty,
+      speed: userScene.action.speed
+    })  
+    InputSwipe(latencyForm.device.serial, swipeEvent)
+  } else {
+    const tapEvent = adb.TapEvent.createFrom({
+      x: userScene.action.x,
+      y: userScene.action.y
+    })
+    InputTap(latencyForm.device.serial, tapEvent).then().catch(err => { console.log(err)})
+  }
+}
+
 
 /**
  * 启动
  */
 async function handleStart() {
   // 设备状态检查
-  const state = getSelectDeviceState()
-  if (state == 0) {
-    ElMessage({
-      type: 'error',
-      message: '设备已离线，请检查设备'
-    })
-    return
-  }
-  else if (state == 2) {
-    ElMessage({
-      type: 'error',
-      message: '设备未授权，请检查设备'
-    })
-    return
-  }
 
   // 重置状态，开启进度条
   handleResetStatus()
@@ -292,12 +360,12 @@ async function handleStart() {
   }
   
   // 获取屏幕分辨率
-  const status = await handleGetPhysicalSize()
-  if (!status) {
-    await handleGetDisplay()
-  }
+  // const status = await handleGetPhysicalSize()
+  // if (!status) {
+  //   await handleGetDisplay()
+  // }
 
-  Start(latencyForm.serial, settingForm.timeout)
+  Start(latencyForm.device.serial, settingForm.timeout)
 
   // 1s 后拖动
   // doSwipe()
@@ -308,7 +376,8 @@ async function handleStart() {
 
   if (latencyForm.auto === true) {
     setTimeout(() => {
-      handleInputSwipe()
+      handleAutoInput()
+      // handleInputSwipe()
     }, 1500);
   }
 }
@@ -344,7 +413,24 @@ const handleOpenFolder = (val: number) => {
 }
 
 const handleLoadImage = (val: number) => {}
-const handleCalc = () => {}
+const handleCalc = () => {
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  const rectinfo = core.ImageRectInfo.createFrom({
+    x: userScene.crop_coordinate.left,
+    y: userScene.crop_coordinate.top,
+    w: userScene.crop_coordinate.width,
+    h: userScene.crop_coordinate.height,
+    preview_width: pImgSize.width,
+    preview_height: pImgSize.height,
+    source_width: imageInfo.width,
+    source_height: imageInfo.height,
+  })
+  const threshold = 20
+  StartAnalyse(rectinfo, threshold)
+  NProgress.start()
+  // delayTimes.value = 0 
+  // calcButtonDisable.value = true
+}
 const handleCalcWithCurrent = () => {}
 
 
@@ -372,9 +458,9 @@ function handleResetStatus() {
   if (NProgress.isStarted()) {
     NProgress.done()
   }
-  imagePreviewRef.value.setCalcButtonDisable(true)
-  imagePreviewRef.value.setImagePlaceHolder()
-  imagePreviewRef.value.setDefaultTime()
+  // imagePreviewRef.value.setCalcButtonDisable(true)
+  // imagePreviewRef.value.setImagePlaceHolder()
+  // imagePreviewRef.value.setDefaultTime()
 }
 
 
@@ -383,7 +469,7 @@ function handleResetStatus() {
  */
 async function setPointerLocationOn():Promise<Boolean> {
   let result = false
-  await SetPointerLocationOn(deviceSelected.value).then(res =>{ 
+  await SetPointerLocationOn(latencyForm.device.serial).then(res =>{ 
     ElMessage({
       type: 'success',
       message: '开启指针成功'
@@ -402,7 +488,7 @@ async function setPointerLocationOn():Promise<Boolean> {
 
 const isPointerLocationOn = async() => {
   let status = false 
-  IsPointerLocationOn(latencyForm.serial).then((res: boolean) => {
+  IsPointerLocationOn(latencyForm.device.serial).then((res: boolean) => {
     status = res
   }).catch(err => {
     console.log(err)
@@ -411,7 +497,7 @@ const isPointerLocationOn = async() => {
 }
 
 function setPointerLocationOff():Boolean {
-  SetPointerLocationOff(deviceSelected.value).then(res =>{ 
+  SetPointerLocationOff(latencyForm.device.serial).then(res =>{ 
       ElMessage({
         type: 'success',
         message: '关闭指针成功'
@@ -483,6 +569,41 @@ async function addEventLister() {
     getFirstImage()
     NProgress.done()
   })
+  EventsOn("latency:analyse_start", ()=>{
+    ElNotification({
+      title: '进度提示',
+      type: 'info',
+      message: "数据分析中， 请稍后...",
+    })
+  })
+  EventsOn("latency:analyse_filish", (res: number)=>{
+    if (res) {
+      result.latency =  Math.floor(res * 100)/100
+      ElNotification({
+        title: '进度提示: 3/3',
+        type: 'success',
+        message: "数据处理完成",
+      })
+      NProgress.done()
+      calcButtonDisable.value = false
+      if (result.latency <= 50 || result.latency >= 1000 ) {
+        ElNotification({
+          title: '数值异常',
+          type: 'error',
+          message: "当前数值不在串流延迟正常范围内，建议重试",
+          duration: 0,
+        })
+      }
+    } else {
+      ElNotification({
+        title: '进度提示: 3/3',
+        type: 'error',
+        message: "数据分析异常，请确认是否在指定业务场景下操作，建议重试",
+      })
+      NProgress.done()
+      calcButtonDisable.value = false
+    }
+  })
 }
 
 function getFirstImage(){
@@ -490,14 +611,14 @@ function getFirstImage(){
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
-    imagePreviewRef.value.loadNewImage(res)
-    imagePreviewRef.value.enableCalcButton()
+    // imagePreviewRef.value.loadNewImage(res)
+    // imagePreviewRef.value.enableCalcButton()
   })
 }
 
 async function handleGetPhysicalSize() {
   let status = false
-  await GetPhysicalSize(deviceSelected.value).then((res: adb.Display) => {
+  await GetPhysicalSize(latencyForm.device.serial).then((res: adb.Display) => {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
       status = true
@@ -510,7 +631,7 @@ async function handleGetPhysicalSize() {
 
 async function handleGetDisplay() {
   let status = false
-  await GetDisplay(deviceSelected.value).then((res: adb.Display) => {
+  await GetDisplay(latencyForm.device.serial).then((res: adb.Display) => {
       deviceInfo.width = res.width
       deviceInfo.height = res.height
       status = true
@@ -545,7 +666,7 @@ async function initCheck() {
 }
 
 function handleClearCache() {
-  ClearCacheData()
+  ClearMobleCache()
 }
 
 function handleReload() {
@@ -588,16 +709,17 @@ onUnmounted(()=>{
                 <el-form-item label="设备">
                   <el-col :span="20">
                   <el-select
-                    v-model="latencyForm.serial"
+                    v-model="latencyForm.device"
                     @focus="getDeviceList"
+                    @change="handleDeviceChange"
                     filterable
                     placeholder="请选择设备"
                     style="width:100%">
                     <el-option
-                        v-for="item in data.devices"
-                        :key="item.Serial"
-                        :label="item.Serial"
-                        :value="item.Serial"
+                      v-for="item in data.devices"
+                      :key="item.serial"
+                      :label="item.device + '(' + item.serial + ')'"
+                      :value="item"
                     >
                     </el-option>
                   </el-select>
@@ -624,12 +746,14 @@ onUnmounted(()=>{
                       v-model="latencyForm.scene"
                       filterable
                       placeholder="请选择场景"
+                      @focus="handleGetScenes"
+                      @change="handleSceneChange"
                       style="width:100%">
                       <el-option
-                          v-for="item in scenes"
-                          :key="item.value"
-                          :label="item.name"
-                          :value="item.value"
+                        v-for="item in userScenes.scens"
+                        :key="item.name"
+                        :label="item.name + '(' + item.device.device_name + ')'"
+                        :value="item"
                       >
                       </el-option>
                     </el-select>
@@ -651,7 +775,7 @@ onUnmounted(()=>{
               </el-form>
             </el-row>
             <el-row class="row-item">
-            <el-button class="operation-button" v-if="processStatus===0" :disabled="deviceSelected===''" type="primary" @click="handleStart" >开始</el-button>
+            <el-button class="operation-button" v-if="processStatus===0" :disabled="latencyForm.device.serial===''" type="primary" @click="handleStart" >开始</el-button>
             <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
             </el-row>
             <el-tabs 
@@ -695,7 +819,7 @@ onUnmounted(()=>{
               <ScreenPreview
                 ref="imagePreviewRef"
                 :imageInfo="imageInfo"
-                :cropInfo="cropInfo"
+                :cropInfo="userScene.crop_coordinate"
                 :pageInfo="imagePageInfo"
                 @crop-change="handleCropChange"
                 @page-change="handlePageChange"
@@ -703,13 +827,13 @@ onUnmounted(()=>{
                 />
             </div>
             <el-row justify="center" class="button-row">
-              <el-button type="success" @click="handleCalc">
+              <el-button type="success" :disabled="calcButtonDisable" @click="handleCalc">
                 <i class="el-icon button-icon">
                   <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
                 </i>
                 计算延迟
               </el-button>
-              <el-button @click="handleCalcWithCurrent">
+              <el-button :disabled="calcButtonDisable"  @click="handleCalcWithCurrent">
                 <i class="el-icon button-icon">
                   <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
                 </i>

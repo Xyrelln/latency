@@ -39,17 +39,17 @@ const form = reactive({
 })
 
 const latencyForm = reactive({
-  serial: '',
+  // serial: '',
   auto: true,
   scene: '',
-  scenes: []
+  scenes: [],
+  device: {
+    serial: '',
+    device: '',
+  },
 })
 
-// const interval = ref()
-// const processStatus = ref(0)
-// const countDownSecond = ref(0)
 const imagePreviewRef = ref()
-// const externalVideoPath = ref('')
 const deviceInfo = reactive({
   width: 1080,
   height: 1920,
@@ -230,8 +230,8 @@ function getDeviceList (value: any) {``
  */
 function getSelectDeviceState(){
   for(let d of data.devices) {
-    if (d.Serial == latencyForm.serial) {
-      return d.State
+    if (d.serial == latencyForm.device.serial) {
+      return d.state
     }
   }
 }
@@ -248,13 +248,13 @@ function getSelectDeviceState(){
       dy: realUserAction.value.ty,
       speed: userAction.speed
     })  
-    InputSwipe(latencyForm.serial, swipeEvent)
+    InputSwipe(latencyForm.device.serial, swipeEvent)
   } else {
     const tapEvent = adb.TapEvent.createFrom({
       x: realUserAction.value.x,
       y: realUserAction.value.y
     })
-    InputTap(latencyForm.serial, tapEvent).then().catch(err => { console.log(err)})
+    InputTap(latencyForm.device.serial, tapEvent).then().catch(err => { console.log(err)})
   }
 }
 
@@ -295,7 +295,7 @@ const handleLoadImage = (val: number) => {}
 const handleCalcWithCurrent = () => {}
 
 const handleLoadScreenshot = () => {
-  LoadScreenshot(latencyForm.serial).then((res:core.ImageInfo) => {
+  LoadScreenshot(latencyForm.device.serial).then((res:core.ImageInfo) => {
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
@@ -313,15 +313,25 @@ const handleLoadScreenshot = () => {
 
 const handleGetScenes = () => {
   ListScens().then((res: Array<app.UserScene>) => {
+    console.log(res)
     userScenes.scens = res
   }).catch(err => {
     console.log(err)
   })
 }
 
+const handleSceneChange = (val:app.UserScene) => {
+}
+
 const handleSetScene = () => {
   const key = 'abc'
   const name = 'dwrg'
+
+  const deviceInfo = app.DeviceInfo.createFrom({
+    device_name:  latencyForm.device.device,
+    screen_width: imageInfo.width,
+    screen_height: imageInfo.height,
+  })
   const cropInfo = app.CropInfo.createFrom({
     top: realCropInfo.value.top,
     left: realCropInfo.value.left,
@@ -338,6 +348,7 @@ const handleSetScene = () => {
   })
   const userScene = app.UserScene.createFrom({
     name: name,
+    device: deviceInfo,
     crop_coordinate: cropInfo,
     action: action
   })
@@ -350,24 +361,17 @@ const handleDelScene = () => {
 }
 
 
-// watch(imageInfo, (val: any) => {
-//   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
-//   imageZoom.value = imageInfo.width / pImgSize.width
-//   console.log(pImgSize)
-//   console.log(imageZoom.value)
+
+// onMounted(()=> {
+//   // 如果是在 wails 运行环境则运行环境检查及事件监听
+//   if (isWailsRun()) {
+//   }
 // })
 
-
-onMounted(()=> {
-  // 如果是在 wails 运行环境则运行环境检查及事件监听
-  if (isWailsRun()) {
-  }
-})
-
-onUnmounted(()=>{
-  if (isWailsRun()) {
-  }
-})
+// onUnmounted(()=>{
+//   if (isWailsRun()) {
+//   }
+// })
 
 
 </script>
@@ -381,16 +385,16 @@ onUnmounted(()=>{
                 <el-form-item label="设备">
                   <el-col :span="20">
                   <el-select
-                    v-model="latencyForm.serial"
+                    v-model="latencyForm.device"
                     @focus="getDeviceList"
                     filterable
                     placeholder="请选择设备"
                     style="width:100%">
                     <el-option
                         v-for="item in data.devices"
-                        :key="item.Serial"
-                        :label="item.Serial"
-                        :value="item.Serial"
+                        :key="item.serial"
+                        :label="item.device + '(' + item.serial + ')'"
+                        :value="item"
                     >
                     </el-option>
                   </el-select>
@@ -415,12 +419,13 @@ onUnmounted(()=>{
                       filterable
                       placeholder="请选择场景"
                       @focus="handleGetScenes"
+                      @change="handleSceneChange"
                       style="width:100%">
                       <el-option
-                          v-for="item in userScenes.scens"
-                          :key="item.name"
-                          :label="item.name"
-                          :value="item"
+                        v-for="item in userScenes.scens"
+                        :key="item.name"
+                        :label="item.name + '(' + item.device.device_name + ')'"
+                        :value="item"
                       >
                       </el-option>
                     </el-select>

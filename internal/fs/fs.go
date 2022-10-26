@@ -70,9 +70,15 @@ func GetScreenshotDir() (string, error) {
 	return dir, nil
 }
 
-func ClearCacheDir() {
+func ClearCacheDir(parentDir string) {
+	var workDir string
 	root, _ := GetExecuteRoot()
-	workDir := filepath.Join(root, "cache", "mobile")
+
+	if parentDir == "mobile" {
+		workDir = filepath.Join(root, "cache", "mobile")
+	} else if parentDir == "pc" {
+		workDir = filepath.Join(root, "cache", "pc")
+	}
 	go os.RemoveAll(workDir)
 }
 

@@ -14,8 +14,12 @@ export function CheckUpdate() {
   return window['go']['app']['Api']['CheckUpdate']();
 }
 
-export function ClearCacheData() {
-  return window['go']['app']['Api']['ClearCacheData']();
+export function ClearMobleCache() {
+  return window['go']['app']['Api']['ClearMobleCache']();
+}
+
+export function ClearPCCache() {
+  return window['go']['app']['Api']['ClearPCCache']();
 }
 
 export function DeleteScene(arg1) {
