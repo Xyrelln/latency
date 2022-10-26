@@ -49,6 +49,7 @@ const latencyForm = reactive({
   },
 })
 
+const tabName = ref('record')
 const imagePreviewRef = ref()
 const deviceInfo = reactive({
   width: 1080,
@@ -378,54 +379,29 @@ const handleDelScene = () => {
 
 <template>
     <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
-        <el-container>
-        <el-aside class="aside-content" width="240px">
-            <el-row class="row-item">
-              <el-form :model="latencyForm">
-                <el-form-item label="设备">
-                  <el-col :span="20">
-                  <el-select
-                    v-model="latencyForm.device"
-                    @focus="getDeviceList"
-                    filterable
-                    placeholder="请选择设备"
-                    style="width:100%">
-                    <el-option
-                        v-for="item in data.devices"
-                        :key="item.serial"
-                        :label="item.device + '(' + item.serial + ')'"
-                        :value="item"
-                    >
-                    </el-option>
-                  </el-select>
-                </el-col>
-                <el-col :span="4">
-                  <el-tooltip
-                    class="device-question"
-                    effect="dark"
-                    content="如列表为空，请检查设备是否正常连接"
-                    placement="right"
-                    >
-                    <i class="el-icon button-icon" style="float: right;">
-                      <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
-                    </i>
-                  </el-tooltip>
-                </el-col>
-                </el-form-item>
-                <el-form-item v-if="latencyForm.auto===true" label="场景">
-                  <el-col :span="20">
+        
+          <el-tabs 
+            v-model="tabName" 
+            class="platform-tabs">
+            <el-tab-pane label="录制" name="record">
+              <el-container>
+              <el-aside class="aside-content" width="240px">
+
+              <el-row class="row-item">
+                <el-form :model="latencyForm">
+                  <el-form-item label="设备">
+                    <el-col :span="20">
                     <el-select
-                      v-model="latencyForm.scene"
+                      v-model="latencyForm.device"
+                      @focus="getDeviceList"
                       filterable
-                      placeholder="请选择场景"
-                      @focus="handleGetScenes"
-                      @change="handleSceneChange"
+                      placeholder="请选择设备"
                       style="width:100%">
                       <el-option
-                        v-for="item in userScenes.scens"
-                        :key="item.name"
-                        :label="item.name + '(' + item.device.device_name + ')'"
-                        :value="item"
+                          v-for="item in data.devices"
+                          :key="item.serial"
+                          :label="item.device + '(' + item.serial + ')'"
+                          :value="item"
                       >
                       </el-option>
                     </el-select>
@@ -434,68 +410,105 @@ const handleDelScene = () => {
                     <el-tooltip
                       class="device-question"
                       effect="dark"
-                      content="选择自动运行场景"
+                      content="如列表为空，请检查设备是否正常连接"
                       placement="right"
                       >
                       <i class="el-icon button-icon" style="float: right;">
                         <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
                       </i>
                     </el-tooltip>
-
                   </el-col>
-                </el-form-item>
-                <el-button @click="handleLoadScreenshot">加载截图</el-button>
-              </el-form>
-            </el-row>
-            <el-row class="row-item">
-            </el-row>
-            <!-- <el-button @click="handleReload">重载页面</el-button> -->
-        </el-aside>
-        <el-main class="main-content">
-          <div>
-              <ScreenPreview
-                ref="imagePreviewRef"
-                :imageInfo="imageInfo"
-                :cropInfo="cropInfo"
-                :pageInfo="imagePageInfo"
-                @crop-change="handleCropChange"
-                @page-change="handlePageChange"
-                @open-folder="handleOpenFolder"
-                @user-action="handleUserAction"
-                />
-            </div>
+                  </el-form-item>
+                  <el-form-item v-if="latencyForm.auto===true" label="场景">
+                    <el-col :span="20">
+                      <el-select
+                        v-model="latencyForm.scene"
+                        filterable
+                        placeholder="请选择场景"
+                        @focus="handleGetScenes"
+                        @change="handleSceneChange"
+                        style="width:100%">
+                        <el-option
+                          v-for="item in userScenes.scens"
+                          :key="item.name"
+                          :label="item.name + '(' + item.device.device_name + ')'"
+                          :value="item"
+                        >
+                        </el-option>
+                      </el-select>
+                    </el-col>
+                    <el-col :span="4">
+                      <el-tooltip
+                        class="device-question"
+                        effect="dark"
+                        content="选择自动运行场景"
+                        placement="right"
+                        >
+                        <i class="el-icon button-icon" style="float: right;">
+                          <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                        </i>
+                      </el-tooltip>
 
-            <el-row justify="center" class="result-row">
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>动作</span>
-              </el-col>
-              <el-col :span="8" class="info-line">
-                <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
-                <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ userAction.speed }}</span>
-              </el-col>
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>观察区域</span>
-              </el-col>
-              <el-col :span="8" class="info-line">
-                left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
-              </el-col>
-            </el-row>
-            <el-row justify="center" class="button-row">
-              <el-button type="success" @click="handleInput" :icon="VideoPlay">
-                执行动作
-              </el-button>
-              <el-button @click="handleSetScene">
-                <i class="el-icon button-icon">
-                  <svg t="1666605626827" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4819" width="200" height="200"><path d="M665.6 332.8 665.6 128C665.6 113.86151 654.13849 102.4 640 102.4 625.86151 102.4 614.4 113.86151 614.4 128L614.4 332.8C614.4 346.93849 625.86151 358.4 640 358.4 654.13849 358.4 665.6 346.93849 665.6 332.8L665.6 332.8ZM640 51.2 819.2 51.2 793.6 25.6 793.6 384.133545C793.6 426.406699 759.102946 460.8 716.727898 460.8L281.672102 460.8C239.236715 460.8 204.8 426.413438 204.8 384.133545L204.8 25.6C204.8 11.46151 193.33849 0 179.2 0 165.06151 0 153.6 11.46151 153.6 25.6L153.6 384.133545C153.6 454.707134 210.976425 512 281.672102 512L716.727898 512C787.345461 512 844.8 454.718257 844.8 384.133545L844.8 25.6 844.8 0 819.2 0 640 0C625.86151 0 614.4 11.46151 614.4 25.6 614.4 39.73849 625.86151 51.2 640 51.2L640 51.2Z" p-id="4820" fill="#8a8a8a"></path><path d="M844.8 972.8 128.081132 972.8C85.544157 972.8 51.2 938.575806 51.2 896.163853L51.2 100.711064 51.2 25.6 25.6 51.2 102.4 51.2 896.233363 51.2C938.580175 51.2 972.8 85.414085 972.8 127.868001L972.8 998.4C972.8 1012.53849 984.26151 1024 998.4 1024 1012.53849 1024 1024 1012.53849 1024 998.4L1024 127.868001C1024 57.135182 966.85523 0 896.233363 0L102.4 0 25.6 0 0 0 0 25.6 0 100.711064 0 896.163853C0 966.892966 57.307204 1024 128.081132 1024L844.8 1024C858.93849 1024 870.4 1012.53849 870.4 998.4 870.4 984.26151 858.93849 972.8 844.8 972.8L844.8 972.8Z" p-id="4821" fill="#8a8a8a"></path></svg>
-                </i>
-                保存 </el-button>
-            </el-row>
-        </el-main>
-        </el-container>
+                    </el-col>
+                  </el-form-item>
+                  <el-button @click="handleLoadScreenshot">加载截图</el-button>
+                </el-form>
+              </el-row>
+              <el-row class="row-item">
+              </el-row>
+              <!-- <el-button @click="handleReload">重载页面</el-button> -->
+              </el-aside>
+              <el-main class="main-content">
+              <div>
+                <ScreenPreview
+                  ref="imagePreviewRef"
+                  :imageInfo="imageInfo"
+                  :cropInfo="cropInfo"
+                  :pageInfo="imagePageInfo"
+                  @crop-change="handleCropChange"
+                  @page-change="handlePageChange"
+                  @open-folder="handleOpenFolder"
+                  @user-action="handleUserAction"
+                  />
+              </div>
+
+              <el-row justify="center" class="result-row">
+              </el-row>
+              <el-row justify="center" class="result-row">
+                <el-col :span="4" class="info-line">
+                  <span>动作</span>
+                </el-col>
+                <el-col :span="8" class="info-line">
+                  <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
+                  <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ userAction.speed }}</span>
+                </el-col>
+              </el-row>
+              <el-row justify="center" class="result-row">
+                <el-col :span="4" class="info-line">
+                  <span>观察区域</span>
+                </el-col>
+                <el-col :span="8" class="info-line">
+                  left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
+                </el-col>
+              </el-row>
+              <el-row justify="center" class="button-row">
+                <el-button type="success" @click="handleInput" :icon="VideoPlay">
+                  执行动作
+                </el-button>
+                <el-button @click="handleSetScene">
+                  <i class="el-icon button-icon">
+                    <svg t="1666605626827" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4819" width="200" height="200"><path d="M665.6 332.8 665.6 128C665.6 113.86151 654.13849 102.4 640 102.4 625.86151 102.4 614.4 113.86151 614.4 128L614.4 332.8C614.4 346.93849 625.86151 358.4 640 358.4 654.13849 358.4 665.6 346.93849 665.6 332.8L665.6 332.8ZM640 51.2 819.2 51.2 793.6 25.6 793.6 384.133545C793.6 426.406699 759.102946 460.8 716.727898 460.8L281.672102 460.8C239.236715 460.8 204.8 426.413438 204.8 384.133545L204.8 25.6C204.8 11.46151 193.33849 0 179.2 0 165.06151 0 153.6 11.46151 153.6 25.6L153.6 384.133545C153.6 454.707134 210.976425 512 281.672102 512L716.727898 512C787.345461 512 844.8 454.718257 844.8 384.133545L844.8 25.6 844.8 0 819.2 0 640 0C625.86151 0 614.4 11.46151 614.4 25.6 614.4 39.73849 625.86151 51.2 640 51.2L640 51.2Z" p-id="4820" fill="#8a8a8a"></path><path d="M844.8 972.8 128.081132 972.8C85.544157 972.8 51.2 938.575806 51.2 896.163853L51.2 100.711064 51.2 25.6 25.6 51.2 102.4 51.2 896.233363 51.2C938.580175 51.2 972.8 85.414085 972.8 127.868001L972.8 998.4C972.8 1012.53849 984.26151 1024 998.4 1024 1012.53849 1024 1024 1012.53849 1024 998.4L1024 127.868001C1024 57.135182 966.85523 0 896.233363 0L102.4 0 25.6 0 0 0 0 25.6 0 100.711064 0 896.163853C0 966.892966 57.307204 1024 128.081132 1024L844.8 1024C858.93849 1024 870.4 1012.53849 870.4 998.4 870.4 984.26151 858.93849 972.8 844.8 972.8L844.8 972.8Z" p-id="4821" fill="#8a8a8a"></path></svg>
+                  </i>
+                  保存 </el-button>
+              </el-row>
+              </el-main>
+            </el-container>
+
+            </el-tab-pane>
+            <el-tab-pane label="管理" name="manage">
+            </el-tab-pane>
+          </el-tabs>
+  
     </el-scrollbar>
 </template>
 
