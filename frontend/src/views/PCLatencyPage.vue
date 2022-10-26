@@ -165,6 +165,7 @@ async function addEventLister() {
     console.log("handleLoadImage")
     const firstImageIndex = 0
     handleLoadImage(firstImageIndex)
+    imagePreviewRef.value.switchSelectBoxShow(true)
     // result.currentImageIndex = firstImageIndex
     imagePageInfo.currentPage = 1
   })
@@ -322,7 +323,7 @@ const handleCalc = () => {
     source_width: imageInfo.width,
     source_height: imageInfo.height,
   })
-  console.log(rectinfo)
+  // console.log(rectinfo)
   CalculateLatencyByImageDiff(rectinfo, latencyForm.diffScore).then((res:app.WinOpLatencyResult) => {
     // console.log(res)
     result.latency = res.latency

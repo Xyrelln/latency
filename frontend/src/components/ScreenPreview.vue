@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {reactive, ref, watch, onMounted} from 'vue'
+import {reactive, ref, watch, onMounted, onUpdated} from 'vue'
 import {core} from '@/../wailsjs/go/models'
 // import { ElMessage } from 'element-plus'
 
@@ -28,6 +28,7 @@ const resizeRightRef = ref()
 const resizeBottomRef = ref()
 const resizeLeftRef = ref()
 const previewImgDivRef = ref()
+const isSelectBoxShow = ref(false)
 // const previousPageRef = ref()
 // const nextPageRef = ref()
 // const isPaged = ref(true)
@@ -148,6 +149,14 @@ const actionBoxInit = () => {
   })
 }
 
+const updateSelectBoxStyle = () => {
+  console.log(props.cropInfo)
+  selectBoxRef.value.style.top = previewImgRef.value.offsetTop + props.cropInfo.top + 'px'
+  selectBoxRef.value.style.left = previewImgRef.value.offsetLeft + props.cropInfo.left + 'px'
+  selectBoxRef.value.style.width = props.cropInfo.width + 'px'
+  selectBoxRef.value.style.height = props.cropInfo.height + 'px'
+}
+
 /**
  * 初始化选择区域
  */
@@ -231,11 +240,20 @@ const handleOpenFileFolder = () => {
   emit('open-folder', props.pageInfo.currentPage)
 }
 
+const switchSelectBoxShow = (val: boolean) => {
+  isSelectBoxShow.value = val
+}
+
 onMounted(()=>{
   selectBoxInit()
   actionBoxInit()
 })
 
+// onUpdated(() => {
+//   console.log('onUpdated')
+//   console.log(props.cropInfo)
+//   updateSelectBoxStyle()
+// })
 
 // watch(props.pageInfo, (val: ImagePage) => {
 //   if (val.currentPage === 0) {
@@ -249,6 +267,8 @@ onMounted(()=>{
 
 defineExpose({
   getPreviewImgSize,
+  updateSelectBoxStyle,
+  switchSelectBoxShow,
 })
 
 </script>
@@ -263,7 +283,7 @@ defineExpose({
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
           </div>
           <!-- <span v-if="isPaged" ref="nextPageRef" @click="getNextImage"  class="page-button el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
-          <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box">
+          <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box" v-show="isSelectBoxShow">
             <div ref="resizeTopRef" class="resizer resizer-t"></div>
             <div ref="resizeRightRef" class="resizer resizer-r"></div>
             <div ref="resizeBottomRef" class="resizer resizer-b"></div>

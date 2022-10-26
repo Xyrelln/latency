@@ -29,11 +29,6 @@ import {
 } from '../../wailsjs/go/app/Api'
 import {adb, core, fs} from '../../wailsjs/go/models'
 
-// const files = reactive({value: []})
-// const count = ref(0)
-// const load = () => {
-//   count.value += 2
-// }
 
 const data = ref<Array<fs.RecordFile>>([])
 

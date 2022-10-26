@@ -83,7 +83,8 @@ const processStatus = ref(0)
 const countDownSecond = ref(0)
 const imagePreviewRef = ref()
 const externalVideoPath = ref('')
-const calcButtonDisable = ref(false)
+const calcButtonDisable = ref(true)
+const imageZoom = ref(1)
 const deviceInfo = reactive({
   width: 1080,
   height: 1920,
@@ -105,10 +106,10 @@ const result = reactive({
 })
 
 const cropInfo:CropArea = reactive({
-  top: 50,
-  left: 50,
-  width: 90,
-  height: 90,
+  top: 100,
+  left: 100,
+  width: 50,
+  height: 50,
 })
 
 const userScenes: {scens: Array<app.UserScene>} = reactive({
@@ -120,8 +121,8 @@ const userScene:app.UserScene = reactive({
   name: '',
   device: {},
   crop_coordinate: {
-    top: 50,
-    left: 50,
+    top: 100,
+    left: 100,
     width: 50,
     height: 50,
   },
@@ -290,6 +291,14 @@ const handleSceneChange = (val: app.UserScene) => {
   userScene.device = val.device
   userScene.crop_coordinate = val.crop_coordinate
   userScene.action = val.action
+
+  // imagePreviewRef.value.selectBoxInit()
+  // cropInfo.left = val.crop_coordinate.left
+  // cropInfo.top = val.crop_coordinate.top
+  // cropInfo.width = val.crop_coordinate.width
+  // cropInfo.height = val.crop_coordinate.height
+
+  console.log(userScene)
 }
 
 // const deviceStateCheck = () => {
@@ -413,6 +422,7 @@ const handleOpenFolder = (val: number) => {
 }
 
 const handleLoadImage = (val: number) => {}
+
 const handleCalc = () => {
   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
   const rectinfo = core.ImageRectInfo.createFrom({
@@ -527,11 +537,13 @@ async function addEventLister() {
   EventsOn("latency:record_filish", ()=>{
     setPointerLocationOff()
     processStatus.value = 0
+
     ElNotification({
       title: '进度提示: 1/3',
       type: 'success',
       message: "录制成功",
     })
+
   })
   EventsOn("latency:transform_start", ()=>{
     ElNotification({
@@ -576,6 +588,7 @@ async function addEventLister() {
       message: "数据分析中， 请稍后...",
     })
   })
+
   EventsOn("latency:analyse_filish", (res: number)=>{
     if (res) {
       result.latency =  Math.floor(res * 100)/100
@@ -586,6 +599,7 @@ async function addEventLister() {
       })
       NProgress.done()
       calcButtonDisable.value = false
+
       if (result.latency <= 50 || result.latency >= 1000 ) {
         ElNotification({
           title: '数值异常',
@@ -595,24 +609,44 @@ async function addEventLister() {
         })
       }
     } else {
+      NProgress.done()
+      calcButtonDisable.value = false
+
       ElNotification({
         title: '进度提示: 3/3',
         type: 'error',
         message: "数据分析异常，请确认是否在指定业务场景下操作，建议重试",
       })
-      NProgress.done()
-      calcButtonDisable.value = false
     }
   })
 }
 
+const updateCropInfo = () => {
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+    imageZoom.value = pImgSize.width / imageInfo.width 
+    // console.log(imageZoom.value)
+    
+    cropInfo.left = Math.trunc(userScene.crop_coordinate.left * imageZoom.value),
+    cropInfo.top = Math.trunc(userScene.crop_coordinate.top * imageZoom.value),
+    cropInfo.width = Math.trunc(userScene.crop_coordinate.width * imageZoom.value),
+    cropInfo.height = Math.trunc(userScene.crop_coordinate.height * imageZoom.value),
+
+    // console.log(cropInfo)
+    imagePreviewRef.value.updateSelectBoxStyle()
+    imagePreviewRef.value.switchSelectBoxShow(true)
+}
+
 function getFirstImage(){
   GetFirstImageInfo().then((res: core.ImageInfo) => {
+    console.log('getFirstImage')
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
-    // imagePreviewRef.value.loadNewImage(res)
-    // imagePreviewRef.value.enableCalcButton()
+
+    updateCropInfo()
+    
+  }).catch(err => {
+    console.log(err)
   })
 }
 
@@ -762,7 +796,7 @@ onUnmounted(()=>{
                     <el-tooltip
                       class="device-question"
                       effect="dark"
-                      content="选择自动运行场景"
+                      content="选择自动运行场景, 如列表为空，请在场景配置页签配置"
                       placement="right"
                       >
                       <i class="el-icon button-icon" style="float: right;">
@@ -819,7 +853,7 @@ onUnmounted(()=>{
               <ScreenPreview
                 ref="imagePreviewRef"
                 :imageInfo="imageInfo"
-                :cropInfo="userScene.crop_coordinate"
+                :cropInfo="cropInfo"
                 :pageInfo="imagePageInfo"
                 @crop-change="handleCropChange"
                 @page-change="handlePageChange"
@@ -839,6 +873,23 @@ onUnmounted(()=>{
                 </i>
                 计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
               <!-- <el-button>打开当前截图</el-button> -->
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <el-col :span="4" class="info-line">
+                <span>动作</span>
+              </el-col>
+              <el-col :span="12" class="info-line">
+                <span v-if="userScene.action.type==='click'">点击 x: {{ userScene.action.x}} y: {{ userScene.action.y }}</span>
+                <span v-if="userScene.action.type==='swipe'">滑动 x: {{ userScene.action.x}} y:{{ userScene.action.y}} tx: {{ userScene.action.tx }} ty:{{ userScene.action.ty }}  speed: {{ userScene.action.speed }}</span>
+              </el-col>
+            </el-row>
+            <el-row justify="center" class="result-row">
+              <el-col :span="4" class="info-line">
+                <span>观察区域</span>
+              </el-col>
+              <el-col :span="12" class="info-line">
+                left: {{ userScene.crop_coordinate.left }} top: {{ userScene.crop_coordinate.top }}  width: {{ userScene.crop_coordinate.width }}  height: {{ userScene.crop_coordinate.height }}
+              </el-col>
             </el-row>
             <el-row justify="center" class="result-row">
             </el-row>

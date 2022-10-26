@@ -111,7 +111,7 @@ onUnmounted(()=>{
       <el-tab-pane label="延迟测试-Android" name="latency">
         <AndroidLatencyPage></AndroidLatencyPage>
       </el-tab-pane>
-      <el-tab-pane label="自动场景配置-Android" name="automation">
+      <el-tab-pane label="场景配置-Android" name="automation">
         <AutomationPage></AutomationPage>
         <!-- <Automation></Automation> -->
       </el-tab-pane>
