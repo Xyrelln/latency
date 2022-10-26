@@ -30,6 +30,10 @@ export function DoUpdate(arg1) {
   return window['go']['app']['Api']['DoUpdate'](arg1);
 }
 
+export function GetCurrentVersion() {
+  return window['go']['app']['Api']['GetCurrentVersion']();
+}
+
 export function GetDisplay(arg1) {
   return window['go']['app']['Api']['GetDisplay'](arg1);
 }

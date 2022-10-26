@@ -1,224 +1,31 @@
-export namespace app {
-	
-	export class UserAction {
-	    type: string;
-	    x: number;
-	    y: number;
-	    tx: number;
-	    ty: number;
-	    speed: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserAction(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.type = source["type"];
-	        this.x = source["x"];
-	        this.y = source["y"];
-	        this.tx = source["tx"];
-	        this.ty = source["ty"];
-	        this.speed = source["speed"];
-	    }
-	}
-	export class CropInfo {
-	    top: number;
-	    left: number;
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CropInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.top = source["top"];
-	        this.left = source["left"];
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
-	export class DeviceInfo {
-	    device_name: string;
-	    screen_width: number;
-	    screen_height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new DeviceInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.device_name = source["device_name"];
-	        this.screen_width = source["screen_width"];
-	        this.screen_height = source["screen_height"];
-	    }
-	}
-	export class UserScene {
-	    name: string;
-	    device: DeviceInfo;
-	    crop_coordinate: CropInfo;
-	    action: UserAction;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserScene(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.device = this.convertValues(source["device"], DeviceInfo);
-	        this.crop_coordinate = this.convertValues(source["crop_coordinate"], CropInfo);
-	        this.action = this.convertValues(source["action"], UserAction);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	
-	
-	
-	export class WinOpLatencyResult {
-	    latency: number;
-	    responseIndex: number;
-	    responseTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new WinOpLatencyResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latency = source["latency"];
-	        this.responseIndex = source["responseIndex"];
-	        this.responseTime = source["responseTime"];
-	    }
-	}
-	export class UpdateInfo {
-	    latestVersion: string;
-	    needUpdate: boolean;
-	    err?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latestVersion = source["latestVersion"];
-	        this.needUpdate = source["needUpdate"];
-	        this.err = source["err"];
-	    }
-	}
-	export class GetImageResp {
-	    length: number;
-	    currentIndex: number;
-	    screenshotTime: string;
-	    imageFilePath: string;
-	    imageWidth: number;
-	    imageHeight: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new GetImageResp(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.length = source["length"];
-	        this.currentIndex = source["currentIndex"];
-	        this.screenshotTime = source["screenshotTime"];
-	        this.imageFilePath = source["imageFilePath"];
-	        this.imageWidth = source["imageWidth"];
-	        this.imageHeight = source["imageHeight"];
-	    }
-	}
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
-
-}
-
-export namespace core {
-	
-	export class ImageInfo {
-	    path: string;
-	    width: number;
-	    height: number;
-	    size: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new ImageInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source["path"];
-	        this.width = source["width"];
-	        this.height = source["height"];
-	        this.size = source["size"];
-	    }
-	}
-	export class ImageRectInfo {
-	    x: number;
-	    y: number;
-	    w: number;
-	    h: number;
-	    preview_width: number;
-	    preview_height: number;
-	    source_width: number;
-	    source_height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new ImageRectInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.x = source["x"];
-	        this.y = source["y"];
-	        this.w = source["w"];
-	        this.h = source["h"];
-	        this.preview_width = source["preview_width"];
-	        this.preview_height = source["preview_height"];
-	        this.source_width = source["source_width"];
-	        this.source_height = source["source_height"];
-	    }
-	}
-
-}
-
 export namespace adb {
 	
+	export class Device {
+	    serial: string;
+	    state: number;
+	    abi?: string;
+	    usb?: string;
+	    product: string;
+	    model: string;
+	    device: string;
+	    transport_id: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Device(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.abi = source["abi"];
+	        this.usb = source["usb"];
+	        this.product = source["product"];
+	        this.model = source["model"];
+	        this.device = source["device"];
+	        this.transport_id = source["transport_id"];
+	    }
+	}
 	export class Display {
 	    width: number;
 	    height: number;
@@ -265,32 +72,6 @@ export namespace adb {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.x = source["x"];
 	        this.y = source["y"];
-	    }
-	}
-	export class Device {
-	    serial: string;
-	    state: number;
-	    abi?: string;
-	    usb?: string;
-	    product: string;
-	    model: string;
-	    device: string;
-	    transport_id: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Device(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.serial = source["serial"];
-	        this.state = source["state"];
-	        this.abi = source["abi"];
-	        this.usb = source["usb"];
-	        this.product = source["product"];
-	        this.model = source["model"];
-	        this.device = source["device"];
-	        this.transport_id = source["transport_id"];
 	    }
 	}
 
@@ -370,6 +151,223 @@ export namespace latencywin {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace app {
+	
+	export class UserAction {
+	    type: string;
+	    x: number;
+	    y: number;
+	    tx: number;
+	    ty: number;
+	    speed: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserAction(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.x = source["x"];
+	        this.y = source["y"];
+	        this.tx = source["tx"];
+	        this.ty = source["ty"];
+	        this.speed = source["speed"];
+	    }
+	}
+	export class WinOpLatencyResult {
+	    latency: number;
+	    responseIndex: number;
+	    responseTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WinOpLatencyResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latency = source["latency"];
+	        this.responseIndex = source["responseIndex"];
+	        this.responseTime = source["responseTime"];
+	    }
+	}
+	export class UpdateInfo {
+	    latestVersion: string;
+	    needUpdate: boolean;
+	    err?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latestVersion = source["latestVersion"];
+	        this.needUpdate = source["needUpdate"];
+	        this.err = source["err"];
+	    }
+	}
+	export class GetImageResp {
+	    length: number;
+	    currentIndex: number;
+	    screenshotTime: string;
+	    imageFilePath: string;
+	    imageWidth: number;
+	    imageHeight: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetImageResp(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.length = source["length"];
+	        this.currentIndex = source["currentIndex"];
+	        this.screenshotTime = source["screenshotTime"];
+	        this.imageFilePath = source["imageFilePath"];
+	        this.imageWidth = source["imageWidth"];
+	        this.imageHeight = source["imageHeight"];
+	    }
+	}
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
+	    }
+	}
+	export class CropInfo {
+	    top: number;
+	    left: number;
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CropInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.top = source["top"];
+	        this.left = source["left"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
+	export class DeviceInfo {
+	    device_name: string;
+	    screen_width: number;
+	    screen_height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeviceInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.device_name = source["device_name"];
+	        this.screen_width = source["screen_width"];
+	        this.screen_height = source["screen_height"];
+	    }
+	}
+	export class UserScene {
+	    name: string;
+	    device: DeviceInfo;
+	    crop_coordinate: CropInfo;
+	    action: UserAction;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserScene(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.device = this.convertValues(source["device"], DeviceInfo);
+	        this.crop_coordinate = this.convertValues(source["crop_coordinate"], CropInfo);
+	        this.action = this.convertValues(source["action"], UserAction);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+
+}
+
+export namespace core {
+	
+	export class ImageRectInfo {
+	    x: number;
+	    y: number;
+	    w: number;
+	    h: number;
+	    preview_width: number;
+	    preview_height: number;
+	    source_width: number;
+	    source_height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageRectInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.x = source["x"];
+	        this.y = source["y"];
+	        this.w = source["w"];
+	        this.h = source["h"];
+	        this.preview_width = source["preview_width"];
+	        this.preview_height = source["preview_height"];
+	        this.source_width = source["source_width"];
+	        this.source_height = source["source_height"];
+	    }
+	}
+	export class ImageInfo {
+	    path: string;
+	    width: number;
+	    height: number;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	        this.size = source["size"];
+	    }
 	}
 
 }

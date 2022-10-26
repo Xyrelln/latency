@@ -20,6 +20,8 @@ export function DeleteScene(arg1:string):Promise<void>;
 
 export function DoUpdate(arg1:string):Promise<void>;
 
+export function GetCurrentVersion():Promise<string>;
+
 export function GetDisplay(arg1:string):Promise<adb.Display>;
 
 export function GetFirstImageInfo():Promise<core.ImageInfo>;

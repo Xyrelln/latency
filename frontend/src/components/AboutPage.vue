@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import {reactive, ref } from 'vue'
 
+import { GetCurrentVersion } from '../../wailsjs/go/app/Api' 
 
+const version = ref('v0.1.0-dev')
+
+const getCurrentVersion = () => {
+  GetCurrentVersion().then((res: string) => {
+    if ( res !== '') {
+      version.value = res
+    }
+  }).catch(err => { console.log(err) })
+}
 </script>
 
 <template>
@@ -20,7 +30,7 @@ import {reactive, ref } from 'vue'
           版本号
         </el-col>
         <el-col :span="4">
-          0.2.0
+          {{ version }}
         </el-col>
       </el-row>
     </div>

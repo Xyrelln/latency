@@ -31,8 +31,8 @@ import (
 )
 
 const (
-	appName                  = "latency-mobile"
-	localPassFile            = "latency-mobile-pass"
+	appName                  = "latency"
+	localPassFile            = "latency-pass"
 	lighttestServiceEndpoint = "https://lighttest.vrviu.com"
 	defaultStateKey          = "state_default"
 	defaultWorkspaceKey      = "wksp_default"
@@ -583,6 +583,11 @@ type UpdateInfo struct {
 	LatestVersion string `json:"latestVersion"`
 	NeedUpdate    bool   `json:"needUpdate"`
 	Err           string `json:"err,omitempty"`
+}
+
+// 获取当前版本号
+func (a *Api) GetCurrentVersion() string {
+	return lighttestVer.Version
 }
 
 // CheckUpdate ...
