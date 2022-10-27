@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {reactive, ref, watch, onMounted, onUpdated} from 'vue'
+import {reactive, ref, watch, onMounted, onUpdated, computed} from 'vue'
 import {core} from '@/../wailsjs/go/models'
 // import { ElMessage } from 'element-plus'
 
@@ -37,9 +37,23 @@ const isSelectBoxShow = ref(false)
 const paginationDisabled = ref(false)
 const defaultImageHolder = './assets/images/placeholder.png'
 
+
 const selectBoxStyle = reactive({
   width: '1px', 
   height: '1px'
+})
+
+const scalePercent = ref(70)
+// const previewBoxStyle = reactive({
+//   'max-width': scalePercent.value +'%',
+//   'max-height': scalePercent.value +'%',
+// })
+
+const previewBoxStyle = computed(()=> {
+  return {
+    'max-width': scalePercent.value +'%',
+    'max-height': scalePercent.value +'%',
+  }
 })
 
 const location = reactive({
@@ -244,6 +258,26 @@ const switchSelectBoxShow = (val: boolean) => {
   isSelectBoxShow.value = val
 }
 
+/**
+ * 放大
+ */
+const enlargePreviewBox = () => {
+  if (scalePercent.value < 90) {
+    scalePercent.value += 5
+  }
+  
+}
+  
+/**
+ * 缩小
+ */
+const narrowPreviewBox = () => {
+  if (scalePercent.value > 30) {
+    scalePercent.value -= 5
+  }
+}
+
+
 onMounted(()=>{
   selectBoxInit()
   actionBoxInit()
@@ -278,17 +312,32 @@ defineExpose({
     <el-row justify="center" class="preview-content">
       <!-- <el-col> -->
         <!-- <span>标识检测区域</span> -->
-        <div ref="previewImgDivRef" class="out-img-box">
+        <div ref="previewImgDivRef" class="out-img-box" :style="previewBoxStyle">
           <!-- <span v-if="isPaged" ref="previousPageRef" @click="getPreviousImage" class="page-button el-image-viewer__btn el-image-viewer__prev"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
           <img ref="previewImgRef" class="preview-img" draggable="false" :src="props.imageInfo.path == '' ? defaultImageHolder : props.imageInfo.path" alt=""/>
-          </div>
+          
+        </div>
+        <div style="display:inline; float:right">
+          <el-button-group>
+            <el-button @click="narrowPreviewBox" circle>
+              <el-icon>
+                <svg t="1666837842641" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2146" width="200" height="200"><path d="M919.264 905.984l-138.912-138.912C851.808 692.32 896 591.328 896 480c0-229.376-186.624-416-416-416S64 250.624 64 480s186.624 416 416 416c95.008 0 182.432-32.384 252.544-86.208l141.44 141.44a31.904 31.904 0 0 0 45.248 0 32 32 0 0 0 0.032-45.248zM128 480C128 285.92 285.92 128 480 128s352 157.92 352 352-157.92 352-352 352S128 674.08 128 480z" p-id="2147" fill="#8a8a8a"></path><path d="M625.792 448H336a32 32 0 0 0 0 64h289.792a32 32 0 1 0 0-64z" p-id="2148" fill="#8a8a8a"></path></svg>
+              </el-icon>
+            </el-button>
+            <el-button @click="enlargePreviewBox" circle>
+              <el-icon>
+                <svg t="1666837822348" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4593" width="200" height="200"><path d="M919.264 905.984l-138.912-138.912C851.808 692.32 896 591.328 896 480c0-229.376-186.624-416-416-416S64 250.624 64 480s186.624 416 416 416c95.008 0 182.432-32.384 252.544-86.208l141.44 141.44a31.904 31.904 0 0 0 45.248 0 32 32 0 0 0 0.032-45.248zM128 480C128 285.92 285.92 128 480 128s352 157.92 352 352-157.92 352-352 352S128 674.08 128 480z" p-id="4594" fill="#8a8a8a"></path><path d="M625.792 448H512v-112a32 32 0 0 0-64 0V448h-112a32 32 0 0 0 0 64H448v112a32 32 0 1 0 64 0V512h113.792a32 32 0 1 0 0-64z" p-id="4595" fill="#8a8a8a"></path></svg>
+              </el-icon>
+            </el-button>
+          </el-button-group>
+        </div>
           <!-- <span v-if="isPaged" ref="nextPageRef" @click="getNextImage"  class="page-button el-image-viewer__btn el-image-viewer__next"><i class="el-icon"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path></svg></i></span> -->
-          <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box" v-show="isSelectBoxShow">
-            <div ref="resizeTopRef" class="resizer resizer-t"></div>
-            <div ref="resizeRightRef" class="resizer resizer-r"></div>
-            <div ref="resizeBottomRef" class="resizer resizer-b"></div>
-            <div ref="resizeLeftRef" class="resizer resizer-l"></div>
-          </div>
+        <div ref="selectBoxRef" :style="selectBoxStyle" class="s-move-content-header" id="select-box" v-show="isSelectBoxShow">
+          <div ref="resizeTopRef" class="resizer resizer-t"></div>
+          <div ref="resizeRightRef" class="resizer resizer-r"></div>
+          <div ref="resizeBottomRef" class="resizer resizer-b"></div>
+          <div ref="resizeLeftRef" class="resizer resizer-l"></div>
+        </div>
           
       <!-- </el-col> -->
     </el-row>
@@ -357,8 +406,8 @@ defineExpose({
   /* width: 500px; */
   /* height: 100%; */
   /* line-height: 600px; */
-  max-width: 70%;
-  max-height: 70%;
+  /* max-width: 70%;
+  max-height: 70%; */
   text-align: center;
 }
 
@@ -474,6 +523,7 @@ img {
 .foler-open-icon:hover {
   cursor: pointer;
 }
+
 
 
 </style>

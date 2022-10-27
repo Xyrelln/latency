@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -21,6 +22,20 @@ import (
 func GetTimeStamp() string {
 	// return time.Now().Format("20060102150405.000")
 	return time.Now().Format("20060102150405")
+}
+
+func GetRandString(n int) string {
+	var bytes []byte = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")
+	rand.Seed(time.Now().UnixNano())
+
+	result := make([]byte, n)
+	for i := 0; i < n; i++ {
+		result[i] = bytes[rand.Int31()%62]
+	}
+
+	timeStamp := GetTimeStamp()
+	return timeStamp + string(result)
+
 }
 
 func GetExecuteRoot() (string, error) {

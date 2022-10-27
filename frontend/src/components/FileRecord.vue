@@ -4,25 +4,25 @@ import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { 
-  ListDevices,
-  Start,
-  StartRecord,
+  // ListDevices,
+  // Start,
+  // StartRecord,
   // StopRecord,
   // StopProcessing,
-  StartTransform,
-  StartAnalyse,
-  SetPointerLocationOff,
-  SetPointerLocationOn,
-  GetFirstImageInfo,
+  // StartTransform,
+  // StartAnalyse,
+  // SetPointerLocationOff,
+  // SetPointerLocationOn,
+  // GetFirstImageInfo,
   ClearMobleCache,
-  SetAutoSwipeOn,
-  SetAutoSwipeOff,
-  GetDisplay,
-  GetImageFiles,
-  InputSwipe,
-  IsAppReady,
-  StartWithVideo,
-  GetPhysicalSize,
+  // SetAutoSwipeOn,
+  // SetAutoSwipeOff,
+  // GetDisplay,
+  // GetImageFiles,
+  // InputSwipe,
+  // IsAppReady,
+  // StartWithVideo,
+  // GetPhysicalSize,
   ListRecords,
   UploadFile,
   // IsAppReady2,
@@ -41,6 +41,7 @@ const handleClearCacheData = ()=> {
       type: 'success',
       message: '清理成功'
     })
+    data.value = []
   }).catch(err => {
     ElMessage({
       type: 'error',

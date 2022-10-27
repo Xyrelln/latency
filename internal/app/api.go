@@ -183,11 +183,13 @@ func (a *Api) ListScens() ([]UserScene, error) {
 	return userScenes, nil
 }
 
-func (a *Api) SetScene(name string, userScene UserScene) {
-	log.Infof("set scene name: %s, content: %v", name, userScene)
+func (a *Api) SetScene(userScene UserScene) {
+	log.Infof("set scene content: %v", userScene)
 	var val bytes.Buffer
 	enc := gob.NewEncoder(&val)
 	enc.Encode(userScene)
+
+	name := fs.GetRandString(3)
 	a.store.set([]byte(sceneKeyPrefix+name), val.Bytes())
 }
 

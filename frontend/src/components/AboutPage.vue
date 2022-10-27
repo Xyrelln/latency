@@ -3,7 +3,7 @@ import {reactive, ref, onMounted} from 'vue'
 
 import { GetCurrentVersion } from '../../wailsjs/go/app/Api' 
 
-const version = ref('0.1.0')
+const version = ref('0.2.x-dev')
 
 const getCurrentVersion = () => {
   GetCurrentVersion().then((res: string) => {

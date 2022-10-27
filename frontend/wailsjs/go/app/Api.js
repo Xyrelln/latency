@@ -114,8 +114,8 @@ export function SetPointerLocationOn(arg1) {
   return window['go']['app']['Api']['SetPointerLocationOn'](arg1);
 }
 
-export function SetScene(arg1, arg2) {
-  return window['go']['app']['Api']['SetScene'](arg1, arg2);
+export function SetScene(arg1) {
+  return window['go']['app']['Api']['SetScene'](arg1);
 }
 
 export function Start(arg1, arg2) {

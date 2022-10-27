@@ -62,7 +62,7 @@ export function SetPointerLocationOff(arg1:string):Promise<Error>;
 
 export function SetPointerLocationOn(arg1:string):Promise<Error>;
 
-export function SetScene(arg1:string,arg2:app.UserScene):Promise<void>;
+export function SetScene(arg1:app.UserScene):Promise<void>;
 
 export function Start(arg1:string,arg2:number):Promise<Error>;
 

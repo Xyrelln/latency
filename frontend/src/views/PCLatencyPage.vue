@@ -277,7 +277,17 @@ function handleReload() {
 }
 
 const handleClearCache = () => {
-  ClearPCCache()
+  ClearPCCache().then( res => {
+    ElMessage({
+      type: 'success',
+      message: '清理成功'
+    })
+  }).catch(err => {
+    ElMessage({
+      type: 'error',
+      message: '清理失败: ' + err
+    })
+  })
 }
 
 
