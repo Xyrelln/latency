@@ -38,6 +38,16 @@ CompileWinAmd64:
       - build/bin/latency.exe
     expire_in: 24 hrs
 
+DocGenerate:
+  image: default.registry.tke.com/vrviu/mdpdf:0.3 # 注意需配置 k8s runner
+  stage: build
+  script:
+    - /usr/bin/python3 /usr/local/bin/mdpdf.py -f doc #  doc 表示要转换的文档目录
+  artifacts:
+    paths:
+      - doc/*.pdf # 默认转换的pdf 在原文档目录，通过匹配进行归档
+    expire_in: 1 week
+
 PubBin:
   stage: delivery
   tags:
@@ -46,6 +56,7 @@ PubBin:
     - "[System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8"
   dependencies:
     - CompileWinAmd64
+    - DocGenerate
   variables:
     OSSUTIL: C:\Dev\ossutil64\ossutil64.exe
     OSSUTIL_CONF: C:\Dev\ossutil64\config
@@ -61,6 +72,7 @@ PubBin:
     - 'mkdir $LATENCY_PKG\lib\'
     - 'cp -r $env:LIB_WINDOWS_PATH\* $LATENCY_PKG\lib\'
     # docs
+    - dir doc
     - 'cp -r .\doc\* $LATENCY_PKG\'
     # rscapture
     - 'mkdir $LATENCY_PKG\lib\rscapture'

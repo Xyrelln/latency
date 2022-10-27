@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {reactive, ref } from 'vue'
+import {reactive, ref, onMounted} from 'vue'
 
 import { GetCurrentVersion } from '../../wailsjs/go/app/Api' 
 
-const version = ref('v0.1.0-dev')
+const version = ref('0.1.0')
 
 const getCurrentVersion = () => {
   GetCurrentVersion().then((res: string) => {
@@ -12,6 +12,10 @@ const getCurrentVersion = () => {
     }
   }).catch(err => { console.log(err) })
 }
+
+onMounted(() => {
+  getCurrentVersion()
+})
 </script>
 
 <template>
