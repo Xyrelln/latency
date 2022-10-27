@@ -2,6 +2,7 @@
 import {reactive, ref, onMounted} from 'vue'
 
 import { GetCurrentVersion } from '../../wailsjs/go/app/Api' 
+import { isWailsRun } from '@/utils/utils'
 
 const version = ref('0.2.x-dev')
 
@@ -14,7 +15,10 @@ const getCurrentVersion = () => {
 }
 
 onMounted(() => {
-  getCurrentVersion()
+  if (isWailsRun()) {
+    getCurrentVersion()
+  }
+ 
 })
 </script>
 

@@ -56,6 +56,7 @@ const latencyTabName = ref('list')
 
 const fileRecordRef = ref()
 
+
 const form = reactive({
   device: '',
   sx: 0,
@@ -70,7 +71,23 @@ const form = reactive({
 
 const latencyForm = reactive({
   auto: true,
-  scene: {},
+  scene: {
+    name: '',
+    action: {
+      type: 'swipe',
+      x: 0,
+      y: 0,
+      tx: 0,
+      ty: 0,
+      speed: 500
+    },
+    crop_coordinate: {
+      left: 0,
+      top: 0,
+      width: 0,
+      height:0
+    },
+  },
   device: {
     serial: '',
     state: 0,
@@ -117,17 +134,19 @@ const userScenes: {scens: Array<app.UserScene>} = reactive({
 })
 
 // @ts-ignore:  default value
-const userScene:app.UserScene = reactive({
-  name: '',
-  device: {},
-  crop_coordinate: {
-    top: 100,
-    left: 100,
-    width: 50,
-    height: 50,
-  },
-  action: {},
-})
+// const userScene:app.UserScene = reactive({
+//   name: '',
+//   device: {},
+//   crop_coordinate: {
+//     top: 100,
+//     left: 100,
+//     width: 50,
+//     height: 50,
+//   },
+//   action: {},
+// })
+
+const selectedScene = ref<app.UserScene>()
 
 const imagePageInfo:ImagePage = reactive({
   size: 1,
@@ -286,11 +305,27 @@ const handleGetScenes = () => {
 
 
 
-const handleSceneChange = (val: app.UserScene) => {
-  userScene.name = val.name
-  userScene.device = val.device
-  userScene.crop_coordinate = val.crop_coordinate
-  userScene.action = val.action
+const handleSceneChange = () => {
+  console.log('handleSceneChange')
+  if (selectedScene.value != undefined || selectedScene.value != null) {
+    latencyForm.scene.name = selectedScene.value.name
+    latencyForm.scene.crop_coordinate = selectedScene.value.crop_coordinate
+    latencyForm.scene.action = selectedScene.value.action
+    
+      // userScene.crop_coordinate = val.crop_coordinate
+  // userScene.action = val.action
+
+  // imagePreviewRef.value.selectBoxInit()
+  // cropInfo.left = val.crop_coordinate.left
+  // cropInfo.top = val.crop_coordinate.top
+  // cropInfo.width = val.crop_coordinate.width
+  // cropInfo.height = val.crop_coordinate.height
+  }
+  // console.log(latencyForm.scene)
+  // userScene.name = val.name
+  // userScene.device = val.device
+  // userScene.crop_coordinate = val.crop_coordinate
+  // userScene.action = val.action
 
   // imagePreviewRef.value.selectBoxInit()
   // cropInfo.left = val.crop_coordinate.left
@@ -298,7 +333,7 @@ const handleSceneChange = (val: app.UserScene) => {
   // cropInfo.width = val.crop_coordinate.width
   // cropInfo.height = val.crop_coordinate.height
 
-  console.log(userScene)
+  // console.log(userScene)
 }
 
 // const deviceStateCheck = () => {
@@ -314,41 +349,67 @@ function handleLoadExtVideo() {
 /**
  * 发送拖动事件
  */
-function handleInputSwipe() {
-  const swipeEvent = adb.SwipeEvent.createFrom(
-    { 
-      sx: Math.trunc(deviceInfo.height/2),
-      sy: Math.trunc(deviceInfo.width/2),
-      dx: Math.trunc(deviceInfo.height/2) + Math.trunc(deviceInfo.height/2/2),
-      dy: Math.trunc( deviceInfo.width/2),
-      speed: form.speed
-    }
-  )
-  // const interval = 2
-  console.log(swipeEvent)
-  InputSwipe(latencyForm.device.serial, swipeEvent)
-}
+// function handleInputSwipe() {
+//   const swipeEvent = adb.SwipeEvent.createFrom(
+//     { 
+//       sx: Math.trunc(deviceInfo.height/2),
+//       sy: Math.trunc(deviceInfo.width/2),
+//       dx: Math.trunc(deviceInfo.height/2) + Math.trunc(deviceInfo.height/2/2),
+//       dy: Math.trunc( deviceInfo.width/2),
+//       speed: form.speed
+//     }
+//   )
+//   // const interval = 2
+//   console.log(swipeEvent)
+//   InputSwipe(latencyForm.device.serial, swipeEvent)
+// }
 
 /**
  * 发送操作事件
  */
  function handleAutoInput() {
-  if (userScene.action.type === 'swipe') {
+  console.log("handleAutoInput")
+  if (selectedScene.value === undefined) {
+    ElMessage({
+      type: 'warning',
+      message: '场景信息为空',
+    })
+    return
+  }
+  if (selectedScene.value.action.type === 'swipe') {
     const swipeEvent = adb.SwipeEvent.createFrom({ 
-      sx: userScene.action.x,
-      sy: userScene.action.y,
-      dx: userScene.action.tx,
-      dy: userScene.action.ty,
-      speed: userScene.action.speed
+      sx: selectedScene.value.action.x,
+      sy: selectedScene.value.action.y,
+      dx: selectedScene.value.action.tx,
+      dy: selectedScene.value.action.ty,
+      speed: selectedScene.value.action.speed
     })  
-    InputSwipe(latencyForm.device.serial, swipeEvent)
+    InputSwipe(latencyForm.device.serial, swipeEvent).then().catch(err => { console.log(err)})
   } else {
     const tapEvent = adb.TapEvent.createFrom({
-      x: userScene.action.x,
-      y: userScene.action.y
+      x: selectedScene.value.action.x,
+      y: selectedScene.value.action.y
     })
     InputTap(latencyForm.device.serial, tapEvent).then().catch(err => { console.log(err)})
   }
+
+  // if (latencyForm.scene.action.type === 'swipe') {
+  //   const swipeEvent = adb.SwipeEvent.createFrom({ 
+  //     sx: latencyForm.scene.action.x,
+  //     sy: latencyForm.scene.action.y,
+  //     dx: latencyForm.scene.action.tx,
+  //     dy: latencyForm.scene.action.ty,
+  //     speed: latencyForm.scene.action.speed
+  //   })  
+  //   InputSwipe(latencyForm.device.serial, swipeEvent).then().catch(err => { console.log(err)})
+
+  // } else if (latencyForm.scene.action.type === 'click') {
+  //   const tapEvent = adb.TapEvent.createFrom({
+  //     x: latencyForm.scene.action.x,
+  //     y: latencyForm.scene.action.y
+  //   })
+  //   InputTap(latencyForm.device.serial, tapEvent).then().catch(err => { console.log(err)})
+  // }
 }
 
 
@@ -356,8 +417,19 @@ function handleInputSwipe() {
  * 启动
  */
 async function handleStart() {
-  // 设备状态检查
-
+  if (latencyForm.auto === true && Object.keys(latencyForm.scene).length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '勾选自动操作后需选择场景',
+    })
+    return
+  }
+  //   setTimeout(() => {
+  //     handleAutoInput()
+  //     // handleInputSwipe()
+  //   }, 1500);
+  // }
+  
   // 重置状态，开启进度条
   handleResetStatus()
   NProgress.start()
@@ -373,8 +445,18 @@ async function handleStart() {
   // if (!status) {
   //   await handleGetDisplay()
   // }
-
-  Start(latencyForm.device.serial, settingForm.timeout)
+  // if (latencyForm.auto === true) {
+  const action = app.UserAction.createFrom({
+    auto: latencyForm.auto,
+    type: latencyForm.scene.action.type,
+    x: latencyForm.scene.action.x,
+    y: latencyForm.scene.action.y,
+    tx: latencyForm.scene.action.tx,
+    ty: latencyForm.scene.action.ty,
+    speed: latencyForm.scene.action.speed,
+  })
+  // }
+  Start(latencyForm.device.serial, settingForm.timeout, action)
 
   // 1s 后拖动
   // doSwipe()
@@ -383,12 +465,12 @@ async function handleStart() {
   processStatus.value = 2
   runUntilCountDown(settingForm.timeout)
 
-  if (latencyForm.auto === true) {
-    setTimeout(() => {
-      handleAutoInput()
-      // handleInputSwipe()
-    }, 1500);
-  }
+  // if (latencyForm.auto === true) {
+  //   setTimeout(() => {
+  //     handleAutoInput()
+  //     // handleInputSwipe()
+  //   }, 1500);
+  // }
 }
 
 function handleStopRecord() {
@@ -424,19 +506,27 @@ const handleOpenFolder = (val: number) => {
 const handleLoadImage = (val: number) => {}
 
 const handleCalc = () => {
+  if (selectedScene.value === undefined) {
+    ElMessage({
+      type: 'warning',
+      message: '场景信息为空',
+    })
+    return
+  }
+
   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
   const rectinfo = core.ImageRectInfo.createFrom({
-    x: userScene.crop_coordinate.left,
-    y: userScene.crop_coordinate.top,
-    w: userScene.crop_coordinate.width,
-    h: userScene.crop_coordinate.height,
+    x: selectedScene.value.crop_coordinate.left,
+    y: selectedScene.value.crop_coordinate.top,
+    w: selectedScene.value.crop_coordinate.width,
+    h: selectedScene.value.crop_coordinate.height,
     preview_width: pImgSize.width,
     preview_height: pImgSize.height,
     source_width: imageInfo.width,
     source_height: imageInfo.height,
   })
-  const threshold = 20
-  StartAnalyse(rectinfo, threshold)
+  // const threshold = 20
+  StartAnalyse(rectinfo, settingForm.diffScore)
   NProgress.start()
   // delayTimes.value = 0 
   // calcButtonDisable.value = true
@@ -454,7 +544,6 @@ function runUntilCountDown(second: number, callback?: Function){
     if (countDownSecond.value  > 0) {
       countDownSecond.value  --
     }
-
   }
 
   clearCurrentInterval()
@@ -589,6 +678,17 @@ async function addEventLister() {
     })
   })
 
+  EventsOn("latency:record_file_exists", () => {
+    if (latencyForm.auto === true) {
+      ElNotification({
+        title: '操作提醒',
+        message: "开始自动化操作",
+      })
+      // handleAutoInput()
+    }
+  })
+    
+
   EventsOn("latency:analyse_filish", (res: number)=>{
     if (res) {
       result.latency =  Math.floor(res * 100)/100
@@ -622,18 +722,26 @@ async function addEventLister() {
 }
 
 const updateCropInfo = () => {
-  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
-    imageZoom.value = pImgSize.width / imageInfo.width 
-    // console.log(imageZoom.value)
-    
-    cropInfo.left = Math.trunc(userScene.crop_coordinate.left * imageZoom.value),
-    cropInfo.top = Math.trunc(userScene.crop_coordinate.top * imageZoom.value),
-    cropInfo.width = Math.trunc(userScene.crop_coordinate.width * imageZoom.value),
-    cropInfo.height = Math.trunc(userScene.crop_coordinate.height * imageZoom.value),
+  if (selectedScene.value === undefined) {
+    ElMessage({
+      type: 'warning',
+      message: '场景信息为空',
+    })
+    return
+  }
 
-    // console.log(cropInfo)
-    imagePreviewRef.value.updateSelectBoxStyle()
-    imagePreviewRef.value.switchSelectBoxShow(true)
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  imageZoom.value = pImgSize.width / imageInfo.width 
+  // console.log(imageZoom.value)
+  
+  cropInfo.left = Math.trunc(selectedScene.value.crop_coordinate.left * imageZoom.value),
+  cropInfo.top = Math.trunc(selectedScene.value.crop_coordinate.top * imageZoom.value),
+  cropInfo.width = Math.trunc(selectedScene.value.crop_coordinate.width * imageZoom.value),
+  cropInfo.height = Math.trunc(selectedScene.value.crop_coordinate.height * imageZoom.value),
+
+  // console.log(cropInfo)
+  imagePreviewRef.value.updateSelectBoxStyle()
+  imagePreviewRef.value.switchSelectBoxShow(true)
 }
 
 function getFirstImage(){
@@ -644,6 +752,7 @@ function getFirstImage(){
     imageInfo.height = res.height
 
     updateCropInfo()
+    calcButtonDisable.value = false
     
   }).catch(err => {
     console.log(err)
@@ -682,6 +791,7 @@ async function removeEventLister() {
   EventsOff("latency:transform_start_error")
   EventsOff("latency:record_start_error")
   EventsOff("latency:transform_filish")
+  EventsOff("latency:record_file_exists")
 }
 
 /**
@@ -777,7 +887,7 @@ onUnmounted(()=>{
                 <el-form-item v-if="latencyForm.auto===true" label="场景">
                   <el-col :span="20">
                     <el-select
-                      v-model="latencyForm.scene"
+                      v-model="selectedScene"
                       filterable
                       placeholder="请选择场景"
                       @focus="handleGetScenes"
@@ -785,7 +895,7 @@ onUnmounted(()=>{
                       style="width:100%">
                       <el-option
                         v-for="item in userScenes.scens"
-                        :key="item.name"
+                        :key="item.key"
                         :label="item.name + '(' + item.device.device_name + ')'"
                         :value="item"
                       >
@@ -879,8 +989,8 @@ onUnmounted(()=>{
                 <span>动作</span>
               </el-col>
               <el-col :span="12" class="info-line">
-                <span v-if="userScene.action.type==='click'">点击 x: {{ userScene.action.x}} y: {{ userScene.action.y }}</span>
-                <span v-if="userScene.action.type==='swipe'">滑动 x: {{ userScene.action.x}} y:{{ userScene.action.y}} tx: {{ userScene.action.tx }} ty:{{ userScene.action.ty }}  speed: {{ userScene.action.speed }}</span>
+                <span v-if="latencyForm.scene.action.type==='click'">点击 x: {{ latencyForm.scene.action.x}} y: {{ latencyForm.scene.action.y }}</span>
+                <span v-if="latencyForm.scene.action.type==='swipe'">滑动 x: {{ latencyForm.scene.action.x}} y:{{ latencyForm.scene.action.y}} tx: {{ latencyForm.scene.action.tx }} ty:{{ latencyForm.scene.action.ty }}  speed: {{ latencyForm.scene.action.speed }}</span>
               </el-col>
             </el-row>
             <el-row justify="center" class="result-row">
@@ -888,7 +998,7 @@ onUnmounted(()=>{
                 <span>观察区域</span>
               </el-col>
               <el-col :span="12" class="info-line">
-                left: {{ userScene.crop_coordinate.left }} top: {{ userScene.crop_coordinate.top }}  width: {{ userScene.crop_coordinate.width }}  height: {{ userScene.crop_coordinate.height }}
+                left: {{ latencyForm.scene.crop_coordinate.left }} top: {{ latencyForm.scene.crop_coordinate.top }}  width: {{ latencyForm.scene.crop_coordinate.width }}  height: {{ latencyForm.scene.crop_coordinate.height }}
               </el-col>
             </el-row>
             <el-row justify="center" class="result-row">

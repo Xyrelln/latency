@@ -41,7 +41,7 @@ func (d *Device) AutoSwipe(se SwipeEvent) error {
 
 func (d *Device) InputSwipe(se SwipeEvent) error {
 	cmd := d.Command(fmt.Sprintf("input swipe %d %d %d %d %d", se.Sx, se.Sy, se.Dx, se.Dy, se.Speed))
-	err := cmd.Run()
+	err := cmd.BackendRun()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -52,7 +52,7 @@ func (d *Device) InputSwipe(se SwipeEvent) error {
 
 func (d *Device) InputTap(tap TapEvent) error {
 	cmd := d.Command(fmt.Sprintf("input tap %d %d", tap.X, tap.Y))
-	err := cmd.Run()
+	err := cmd.BackendRun()
 	if err != nil {
 		log.Error(err)
 		return err

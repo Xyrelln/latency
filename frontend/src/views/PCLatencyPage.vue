@@ -454,9 +454,9 @@ onUnmounted(()=>{
                         <el-form-item label="截图总数" prop="frame_count">
                           <el-input v-model.number="latencyForm.frame_count"/>
                         </el-form-item>
-                        <el-form-item label="自动上传">
+                        <!-- <el-form-item label="自动上传">
                           <el-switch v-model="latencyForm.auto_upload" />
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="调式">
                           <el-button @click="handleReload">重载页面</el-button>
                         </el-form-item>

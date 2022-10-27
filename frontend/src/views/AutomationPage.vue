@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {reactive, ref, h, inject, Ref, provide, onMounted, computed, watch, onUnmounted} from 'vue'
-import { UserFilled, VideoPlay } from '@element-plus/icons-vue'
+import { UserFilled, VideoPlay, Delete } from '@element-plus/icons-vue'
 import { ElMessage, TabsPaneContext } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
@@ -306,8 +306,10 @@ const handleLoadScreenshot = () => {
 
     const pImgSize = imagePreviewRef.value.getPreviewImgSize()
     imageZoom.value = imageInfo.width / pImgSize.width
-    console.log(pImgSize)
-    console.log(imageZoom.value)
+
+    imagePreviewRef.value.switchSelectBoxShow(true)
+    // console.log(pImgSize)
+    // console.log(imageZoom.value)
     // imageInfo.path = res
   }).catch(err => {
     console.log(err)
@@ -361,12 +363,19 @@ const handleSetScene = () => {
     crop_coordinate: cropInfo,
     action: action
   })
-  SetScene(userScene).then().catch(err => { console.log(err) })
+  SetScene(userScene).then(res => {
+    inputSceneName.value = ''
+    ElMessage({
+      type: 'success',
+      message: '场景保存成功'
+    })
+  }).catch(err => { console.log(err) })
 }
 
-const handleDelScene = () => {
-  const name = ''
-  DeleteScene(name).then().catch(err => { console.log(err)})
+const handleDelScene = (key: string) => {
+  DeleteScene(key).then( res => {
+    handleGetScenes()
+  }).catch(err => { console.log(err)})
 }
 
 const handleTabClick = (tab: TabsPaneContext, event: Event) => {
@@ -421,7 +430,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                     <el-icon>
                       <svg t="1666852111201" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6878" width="200" height="200"><path d="M817.926086 824.102251l-33.619702-33.623795c67.307965-68.77948 108.87057-162.728198 108.87057-266.540565 0-210.568786-170.671101-381.177466-381.177466-381.177466-26.38595 0-52.001351 3.009544-76.785827 8.262174l51.617611 43.2265c10.053983 8.518001 11.334139 23.503297 2.817162 33.621748-8.390088 10.05603-23.438828 11.336186-33.493835 2.883677l-106.374726-89.211834-3.136433-2.625804c-0.89744-0.704035-1.281179-1.727341-1.986237-2.560312l-4.930289-4.931313c0.255827-0.128937 0.576121-0.25685 0.896416-0.38374-2.113127-4.227278-2.818185-9.028631-2.177596-13.641695-0.063445-6.852058 2.49789-13.639648 8.198729-18.443048l109.511159-91.901083c10.055007-8.452509 25.103748-7.172353 33.493835 2.946099 8.516977 10.118452 7.235798 25.169239-2.882654 33.621748l-76.914764 64.48978c32.789801-8.196683 66.796312-13.000082 102.147448-13.000082 236.8258 0 428.824649 191.998849 428.824649 428.824649C940.824137 640.877229 893.879965 746.802724 817.926086 824.102251L817.926086 824.102251zM130.823046 523.93789c0 210.506365 170.670078 381.175419 381.176442 381.175419 40.795125 0 80.053244-6.53074 116.875894-18.442024l-67.883063-56.933687c-10.05603-8.390088-11.399631-23.438828-2.947122-33.493835 8.516977-10.053983 23.50432-11.398608 33.55728-2.947122l109.513206 91.902106c6.083555 5.122671 8.580422 12.617365 8.005324 19.981077 0.575098 7.363711-1.921769 14.793938-8.005324 19.97903l-109.447714 91.837638c-10.05603 8.388041-25.105794 7.106862-33.559327-3.009544-8.452509-9.992585-7.108908-25.106818 2.947122-33.494858l46.174646-38.679951c-30.676673 7.043417-62.441121 11.014868-95.166453 11.014868-236.891292-0.063445-428.888094-192.062294-428.888094-428.888094 0-123.023918 52.064796-233.624898 135.064139-311.819818l33.620725 33.685193C177.508321 315.354318 130.823046 414.106436 130.823046 523.93789L130.823046 523.93789z" p-id="6879" fill="#707070"></path></svg>
                     </el-icon>
-                    同步显示
+                    同步屏幕
                   </el-button>
 
                   <el-button @click="handleInput" :icon="VideoPlay">
@@ -483,7 +492,10 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 
             <el-tab-pane label="管理" name="manage">
               <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 100px)">
-
+                <el-row v-for="(item, index) in userScenes.scens" key="item">
+                  {{ item }}
+                  <el-button type="danger" :icon="Delete" @click="handleDelScene(item.key)">删除</el-button>
+                </el-row>
               </el-scrollbar>
             </el-tab-pane>
           </el-tabs>

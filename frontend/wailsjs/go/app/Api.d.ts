@@ -6,6 +6,8 @@ import {adb} from '../models';
 import {fs} from '../models';
 import {latencywin} from '../models';
 
+export function AutoInput(arg1:string,arg2:app.UserAction):Promise<Error>;
+
 export function CalculateLatencyByCurrentImage(arg1:number):Promise<app.WinOpLatencyResult>;
 
 export function CalculateLatencyByImageDiff(arg1:core.ImageRectInfo,arg2:number):Promise<app.WinOpLatencyResult>;
@@ -64,11 +66,11 @@ export function SetPointerLocationOn(arg1:string):Promise<Error>;
 
 export function SetScene(arg1:app.UserScene):Promise<void>;
 
-export function Start(arg1:string,arg2:number):Promise<Error>;
+export function Start(arg1:string,arg2:number,arg3:app.UserAction):Promise<Error>;
 
 export function StartAnalyse(arg1:core.ImageRectInfo,arg2:number):Promise<Error>;
 
-export function StartRecord(arg1:string):Promise<Error>;
+export function StartRecord(arg1:string,arg2:app.UserAction):Promise<Error>;
 
 export function StartTransform():Promise<Error>;
 

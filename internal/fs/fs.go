@@ -239,6 +239,16 @@ func FileExists(path string) bool {
 	return fi.Mode().IsRegular()
 }
 
+func FileSizeGreaterThan(path string, size int64) bool {
+	fi, err := os.Lstat(path)
+	if err != nil {
+		return false
+	}
+	return fi.Size() > size
+
+	// return fi.Mode().IsRegular()
+}
+
 // RelativePath returns a qualified path created by joining the
 // directory of the calling file and the given relative path.
 //

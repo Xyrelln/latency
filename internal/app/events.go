@@ -5,6 +5,7 @@ const (
 	eventRecordStart           = "latency:record_start"
 	eventRecordStartError      = "latency:record_start_error"
 	eventRecordFilish          = "latency:record_filish"
+	eventRecordFileExists      = "latency:record_file_exists"
 	eventRecordStopError       = "latency:record_stop_error"
 	eventTransformStart        = "latency:transform_start"
 	eventTransformStartError   = "latency:transform_start_error"

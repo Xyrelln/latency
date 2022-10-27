@@ -131,6 +131,7 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 }
 
 type UserAction struct {
+	Auto  bool   `json:"auto"`
 	Type  string `json:"type"`
 	X     int    `json:"x"`
 	Y     int    `json:"y"`
@@ -154,6 +155,7 @@ type DeviceInfo struct {
 
 type UserScene struct {
 	Name           string     `json:"name"`
+	Key            string     `json:"key"`
 	Device         DeviceInfo `json:"device"`
 	CropCoordinate CropInfo   `json:"crop_coordinate"`
 	Action         UserAction `json:"action"`
@@ -186,16 +188,26 @@ func (a *Api) ListScens() ([]UserScene, error) {
 func (a *Api) SetScene(userScene UserScene) {
 	log.Infof("set scene content: %v", userScene)
 	var val bytes.Buffer
+
+	name := fs.GetRandString(3)
+	userScene.Key = name
+
 	enc := gob.NewEncoder(&val)
 	enc.Encode(userScene)
 
-	name := fs.GetRandString(3)
 	a.store.set([]byte(sceneKeyPrefix+name), val.Bytes())
 }
 
 func (a *Api) DeleteScene(key string) {
 	log.Infof("delete scene name: %s", key)
-	a.store.del([]byte(key))
+	if key == "" {
+		return
+		// items, err := a.store.list([]byte(sceneKeyPrefix))
+		// if err != nil {
+		// 	log.Errorf("failed to get scenes from store: %v", err)
+		// 	// return nil, err
+	}
+	a.store.del([]byte(sceneKeyPrefix + key))
 }
 
 // 检查 app 依赖包环境信息
@@ -269,19 +281,7 @@ func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 	return nil
 }
 
-// 发送拖动事件
-func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
-	device := adb.GetDevice(serial)
-	return device.InputSwipe(sw)
-}
-
-// 发送点击事件
-func (a *Api) InputTap(serial string, tap adb.TapEvent) error {
-	device := adb.GetDevice(serial)
-	return device.InputTap(tap)
-}
-
-// 发送点击事件
+// 加载截图
 func (a *Api) LoadScreenshot(serial string) (core.ImageInfo, error) {
 	var img core.ImageInfo
 	device := adb.GetDevice(serial)
@@ -351,7 +351,7 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 	return device.SetPointerLocationOff()
 }
 
-func (a *Api) StartRecord(serial string) (rerr error) {
+func (a *Api) StartRecord(serial string, userAction UserAction) (rerr error) {
 	defer func() {
 		if rerr != nil {
 			log.Error(rerr)
@@ -366,18 +366,61 @@ func (a *Api) StartRecord(serial string) (rerr error) {
 	runner, rerr := cmd.ScrcpyStart(serial, recFile)
 	a.cmdRunner = runner
 
-	// cmd, err := cmd.StartScrcpy(serial, recFile)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return err
-	// }
-	// a.Cmd = cmd
-	//isExists := fs.FileExists(recFile)
-	//if isExists {
-	//	a.emitInfo(eventRecordStart)
-	//}
-	// a.emitInfo(eventRecordStart)
+	// record file exists check
+	go func() {
+		var nums [15][0]int
+		interval := 200
+
+		for range nums {
+			isExists := fs.FileSizeGreaterThan(recFile, 10)
+			if isExists {
+				log.Info("record file exists: %s", recFile)
+				a.emitInfo(eventRecordFileExists)
+
+				if userAction.Auto {
+					a.AutoInput(serial, userAction)
+				}
+
+				break
+			}
+			time.Sleep(time.Duration(interval) * time.Millisecond)
+		}
+	}()
+
 	return
+}
+
+func (a *Api) AutoInput(serial string, userAction UserAction) error {
+	if userAction.Type == "swipe" {
+
+		a.InputSwipe(serial, adb.SwipeEvent{
+			Sx:    userAction.X,
+			Sy:    userAction.Y,
+			Dx:    userAction.Tx,
+			Dy:    userAction.Ty,
+			Speed: userAction.Speed,
+		})
+	} else if userAction.Type == "click" {
+		a.InputTap(serial, adb.TapEvent{
+			X: userAction.X,
+			Y: userAction.Y,
+		})
+	}
+	return nil
+}
+
+// 发送拖动事件
+func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
+	log.Infof("get input swipe event： %v on %s", sw, serial)
+	device := adb.GetDevice(serial)
+	return device.InputSwipe(sw)
+}
+
+// 发送点击事件
+func (a *Api) InputTap(serial string, tap adb.TapEvent) error {
+	log.Infof("get input tap event： %v on %s", tap, serial)
+	device := adb.GetDevice(serial)
+	return device.InputTap(tap)
 }
 
 func (a *Api) StopRunner() error {
@@ -386,8 +429,8 @@ func (a *Api) StopRunner() error {
 }
 
 // Start 启动延迟测试
-func (a *Api) Start(serial string, recordSecond int64) error {
-	err := a.StartRecord(serial)
+func (a *Api) Start(serial string, recordSecond int64, userAction UserAction) error {
+	err := a.StartRecord(serial, userAction)
 	if err != nil {
 		a.emitInfo(eventRecordStartError)
 		return err
