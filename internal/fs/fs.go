@@ -244,6 +244,7 @@ func FileSizeGreaterThan(path string, size int64) bool {
 	if err != nil {
 		return false
 	}
+	log.Infof("file size: %d", fi.Size())
 	return fi.Size() > size
 
 	// return fi.Mode().IsRegular()

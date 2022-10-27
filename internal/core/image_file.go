@@ -93,11 +93,12 @@ func GetCropRect(imageRect ImageRectInfo) (image.Rectangle, error) {
 	// 	return image.Rect(0, 0, 0, 0), errors.New("image with wrong scaling")
 	// }
 
-	x0 := imageRect.X * imageRect.SourceWidth / imageRect.PreviewWidth
-	y0 := imageRect.Y * imageRect.SourceHeight / imageRect.PreviewHeight
-	x1 := imageRect.W*imageRect.SourceWidth/imageRect.PreviewWidth + x0
-	y1 := imageRect.H*imageRect.SourceHeight/imageRect.PreviewHeight + y0
-	cropRect := image.Rect(x0, y0, x1, y1)
+	// x0 := imageRect.X * imageRect.SourceWidth / imageRect.PreviewWidth
+	// y0 := imageRect.Y * imageRect.SourceHeight / imageRect.PreviewHeight
+	// x1 := imageRect.W*imageRect.SourceWidth/imageRect.PreviewWidth + x0
+	// y1 := imageRect.H*imageRect.SourceHeight/imageRect.PreviewHeight + y0
+	// cropRect := image.Rect(x0, y0, x1, y1)
+	cropRect := image.Rect(imageRect.X, imageRect.Y, imageRect.W, imageRect.H)
 
 	return cropRect, nil
 }

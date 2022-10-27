@@ -791,7 +791,9 @@ async function removeEventLister() {
   EventsOff("latency:transform_start_error")
   EventsOff("latency:record_start_error")
   EventsOff("latency:transform_filish")
+  EventsOff("latency:analyse_start")
   EventsOff("latency:record_file_exists")
+  EventsOff("latency:analyse_filish")
 }
 
 /**

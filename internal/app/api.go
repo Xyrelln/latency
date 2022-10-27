@@ -372,7 +372,7 @@ func (a *Api) StartRecord(serial string, userAction UserAction) (rerr error) {
 		interval := 200
 
 		for range nums {
-			isExists := fs.FileSizeGreaterThan(recFile, 10)
+			isExists := fs.FileSizeGreaterThan(recFile, 1024*1024)
 			if isExists {
 				log.Info("record file exists: %s", recFile)
 				a.emitInfo(eventRecordFileExists)
@@ -565,7 +565,7 @@ func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, diffScore int) error {
 	dm := core.NewDelayMonitor()
 	dm.VideoPath = filepath.Join(a.VideoDir, recordFile)
 	dm.ImagesFolder = a.ImagesDir
-	dm.PointerRect = image.Rect(0, 0, 100, 35)
+	dm.PointerRect = image.Rect(0, 0, 100, 35) // 指针位置观察点
 	dm.SceneRect = imageRect
 	costTime, err := dm.Run()
 	if err != nil {
