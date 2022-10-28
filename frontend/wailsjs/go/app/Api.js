@@ -106,6 +106,10 @@ export function OpenImageInExplorer(arg1) {
   return window['go']['app']['Api']['OpenImageInExplorer'](arg1);
 }
 
+export function SaveUser(arg1) {
+  return window['go']['app']['Api']['SaveUser'](arg1);
+}
+
 export function SetAutoSwipeOff() {
   return window['go']['app']['Api']['SetAutoSwipeOff']();
 }

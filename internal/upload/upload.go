@@ -48,6 +48,20 @@ func GetUserInfo() (lighttestservice.UserInfo, error) {
 	return userInfo, nil
 }
 
+func CheckUserValid(userName, key string) (lighttestservice.UserInfo, error) {
+	ls := GetLightService()
+	userInfo, err := ls.Service.GetUserInfo(token.ClientInfo{
+		Name:     "op-latency",
+		Version:  "0.2.1",
+		Username: userName,
+	}, key)
+
+	if err != nil {
+		return lighttestservice.UserInfo{}, err
+	}
+	return userInfo, nil
+}
+
 // UploadFile 上传文件
 func UploadFile(filePath string) error {
 	f, err := os.Open(filePath)

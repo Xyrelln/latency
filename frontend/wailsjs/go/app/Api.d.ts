@@ -59,6 +59,8 @@ export function LoadScreenshot(arg1:string):Promise<core.ImageInfo>;
 
 export function OpenImageInExplorer(arg1:number):Promise<void>;
 
+export function SaveUser(arg1:app.UserSecrect):Promise<lighttestservice.UserInfo>;
+
 export function SetAutoSwipeOff():Promise<Error>;
 
 export function SetAutoSwipeOn(arg1:adb.SwipeEvent,arg2:number):Promise<Error>;

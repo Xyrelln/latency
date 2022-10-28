@@ -636,10 +636,49 @@ func (a *Api) GetCurrentVersion() string {
 	return lighttestVer.Version
 }
 
+type UserSecrect struct {
+	Username string `json:"username"`
+	Key      string `json:"key"`
+}
+
 // CheckUpdate ...
 func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 	// userInfo, err := upload.GetUserInfo()
-	return upload.GetUserInfo()
+	user := "userSecrect"
+	val, err := a.store.get([]byte(user))
+	if err != nil {
+		log.Errorf("get user secrect failed: %v", err)
+	}
+	if val == nil {
+		log.Warn("user not exists")
+		return lighttestservice.UserInfo{}, errors.New(fmt.Sprint("user not exists"))
+	}
+
+	userSecrect := UserSecrect{}
+	dec := gob.NewDecoder(bytes.NewBuffer(val))
+	if err = dec.Decode(&userSecrect); err != nil {
+		return lighttestservice.UserInfo{}, err
+	}
+	userInfo, err := upload.CheckUserValid(userSecrect.Username, userSecrect.Key)
+	if err != nil {
+		return lighttestservice.UserInfo{}, err
+	}
+	return userInfo, nil
+}
+
+// CheckUpdate ...
+func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, error) {
+	// userInfo, err := upload.GetUserInfo()
+	userInfo, err := upload.CheckUserValid(userSecrect.Username, userSecrect.Key)
+	if err != nil {
+		return lighttestservice.UserInfo{}, err
+	}
+	user := "userSecrect"
+	var val bytes.Buffer
+	enc := gob.NewEncoder(&val)
+	enc.Encode(userSecrect)
+	a.store.set([]byte(user), val.Bytes())
+	return userInfo, nil
 }
 
 // CheckUpdate ...

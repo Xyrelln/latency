@@ -32,6 +32,7 @@ declare module '@vue/runtime-core' {
     HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     ImagePreview: typeof import('./src/components/ImagePreview.vue')['default']
     ImagePreviewBak: typeof import('./src/components/ImagePreviewBak.vue')['default']
+    Login: typeof import('./src/components/Login.vue')['default']
     ScreenPreview: typeof import('./src/components/ScreenPreview.vue')['default']
   }
 }

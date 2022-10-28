@@ -11,9 +11,10 @@ import AboutPage from '../components/AboutPage.vue';
 import AutomationPage from './AutomationPage.vue';
 import AndroidLatencyPage from './AndroidLatencyPage.vue';
 import PCLatencyPage from './PCLatencyPage.vue';
+import Login from '@/components/Login.vue'
 
 import { EventsOn, EventsOff } from '@/../wailsjs/runtime/runtime'
-import { CheckUpdate, DoUpdate, CheckUser } from '@/../wailsjs/go/app/api'
+import { CheckUpdate, DoUpdate, CheckUser, SaveUser } from '@/../wailsjs/go/app/api'
 import { app } from '@/../wailsjs/go/models'
 import { isWailsRun } from '@/utils/utils'
 
@@ -24,6 +25,7 @@ const upgradeInfo = reactive({
   latestVersion: '',
   needUpdate: false,
 })
+const isLoginFormShow = ref(false)
 
 /**
  * 开启事件监听
@@ -78,6 +80,7 @@ const handleCheckUser = () => {
     console.log(res)
   }).catch(err => {
     console.log(err)
+    isLoginFormShow.value = true
   })
 }
 
@@ -92,6 +95,10 @@ const handleCheckUser = () => {
   })
   
   upgradeDialogVisible.value = false
+}
+
+const handleLoginSuccess = ()=> {
+  isLoginFormShow.value = false
 }
 
 onMounted(()=>{
@@ -143,6 +150,13 @@ onUnmounted(()=>{
           >
         </span>
       </template>
+    </el-dialog>
+
+    <el-dialog v-model="isLoginFormShow" title="授权校验" width="35%" center>
+      <Login 
+        ref="loginRef"
+        @login-success="handleLoginSuccess"
+      />
     </el-dialog>
    
   </el-container>
