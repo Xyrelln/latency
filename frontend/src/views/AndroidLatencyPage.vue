@@ -669,6 +669,7 @@ async function addEventLister() {
     })
     getFirstImage()
     NProgress.done()
+    fileRecordRef.value.handleLoadCacheFiles()
   })
   EventsOn("latency:analyse_start", ()=>{
     ElNotification({
@@ -847,181 +848,179 @@ onUnmounted(()=>{
 </script>
 
 <template>
-    <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
-        <el-container>
-        <el-aside class="aside-content" width="240px">
-            <el-row class="row-item">
-              <el-form :model="latencyForm">
-                <el-form-item label="设备">
-                  <el-col :span="20">
-                  <el-select
-                    v-model="latencyForm.device"
-                    @focus="getDeviceList"
-                    @change="handleDeviceChange"
-                    filterable
-                    placeholder="请选择设备"
-                    style="width:100%">
-                    <el-option
-                      v-for="item in data.devices"
-                      :key="item.serial"
-                      :label="item.device + '(' + item.serial + ')'"
-                      :value="item"
-                    >
-                    </el-option>
-                  </el-select>
-                </el-col>
-                <el-col :span="4">
-                  <el-tooltip
-                    class="device-question"
-                    effect="dark"
-                    content="如列表为空，请检查设备是否正常连接"
-                    placement="right"
-                    >
-                    <i class="el-icon button-icon" style="float: right;">
-                      <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
-                    </i>
-                  </el-tooltip>
-                </el-col>
-                </el-form-item>
-                <el-form-item label="自动">
-                  <el-switch v-model="latencyForm.auto" />
-                </el-form-item>
-                <el-form-item v-if="latencyForm.auto===true" label="场景">
-                  <el-col :span="20">
-                    <el-select
-                      v-model="selectedScene"
-                      filterable
-                      placeholder="请选择场景"
-                      @focus="handleGetScenes"
-                      @change="handleSceneChange"
-                      style="width:100%">
-                      <el-option
-                        v-for="item in userScenes.scens"
-                        :key="item.key"
-                        :label="item.name + '(' + item.device.device_name + ')'"
-                        :value="item"
-                      >
-                      </el-option>
-                    </el-select>
-                  </el-col>
-                  <el-col :span="4">
-                    <el-tooltip
-                      class="device-question"
-                      effect="dark"
-                      content="选择自动运行场景, 如列表为空，请在场景配置页签配置"
-                      placement="right"
-                      >
-                      <i class="el-icon button-icon" style="float: right;">
-                        <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
-                      </i>
-                    </el-tooltip>
+  <el-container>
+    <el-aside class="aside-content" width="240px">
+        <el-row class="row-item">
+          <el-form :model="latencyForm">
+            <el-form-item label="设备">
+              <el-col :span="20">
+              <el-select
+                v-model="latencyForm.device"
+                @focus="getDeviceList"
+                @change="handleDeviceChange"
+                filterable
+                placeholder="请选择设备"
+                style="width:100%">
+                <el-option
+                  v-for="item in data.devices"
+                  :key="item.serial"
+                  :label="item.device + '(' + item.serial + ')'"
+                  :value="item"
+                >
+                </el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="4">
+              <el-tooltip
+                class="device-question"
+                effect="dark"
+                content="如列表为空，请检查设备是否正常连接"
+                placement="right"
+                >
+                <i class="el-icon button-icon" style="float: right;">
+                  <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                </i>
+              </el-tooltip>
+            </el-col>
+            </el-form-item>
+            <el-form-item label="自动">
+              <el-switch v-model="latencyForm.auto" />
+            </el-form-item>
+            <el-form-item v-if="latencyForm.auto===true" label="场景">
+              <el-col :span="20">
+                <el-select
+                  v-model="selectedScene"
+                  filterable
+                  placeholder="请选择场景"
+                  @focus="handleGetScenes"
+                  @change="handleSceneChange"
+                  style="width:100%">
+                  <el-option
+                    v-for="item in userScenes.scens"
+                    :key="item.key"
+                    :label="item.name + '(' + item.device.device_name + ')'"
+                    :value="item"
+                  >
+                  </el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="4">
+                <el-tooltip
+                  class="device-question"
+                  effect="dark"
+                  content="选择自动运行场景, 如列表为空，请在场景配置页签配置"
+                  placement="right"
+                  >
+                  <i class="el-icon button-icon" style="float: right;">
+                    <svg t="1663058405930" class="icon button-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3677" width="200" height="200"><path d="M512 784.352m-48 0a1.5 1.5 0 1 0 96 0 1.5 1.5 0 1 0-96 0Z" p-id="3678" fill="#8a8a8a"></path><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128.288C300.416 128.288 128.288 300.416 128.288 512c0 211.552 172.128 383.712 383.712 383.712 211.552 0 383.712-172.16 383.712-383.712C895.712 300.416 723.552 128.288 512 128.288z" p-id="3679" fill="#8a8a8a"></path><path d="M512 673.696c-17.664 0-32-14.336-32-32l0-54.112c0-52.352 40-92.352 75.328-127.648C581.216 434.016 608 407.264 608 385.92c0-53.344-43.072-96.736-96-96.736-53.824 0-96 41.536-96 94.56 0 17.664-14.336 32-32 32s-32-14.336-32-32c0-87.424 71.776-158.56 160-158.56s160 72.096 160 160.736c0 47.904-36.32 84.192-71.424 119.296C572.736 532.992 544 561.728 544 587.552l0 54.112C544 659.328 529.664 673.696 512 673.696z" p-id="3680" fill="#8a8a8a"></path></svg>
+                  </i>
+                </el-tooltip>
 
-                  </el-col>
-                </el-form-item>
-              </el-form>
-            </el-row>
-            <el-row class="row-item">
-            <el-button class="operation-button" v-if="processStatus===0" :disabled="latencyForm.device.serial===''" type="primary" @click="handleStart" >开始</el-button>
-            <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
-            </el-row>
-            <el-tabs 
-                v-model="latencyTabName" 
-                class="platform-tabs">
-                <el-tab-pane label="记录" name="list">
-                  <FileRecord ref="fileRecordRef"/>
-                </el-tab-pane>
-            
-                <el-tab-pane label="设置" name="setting">
-                  <el-row>
-                    <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
-                      <el-form-item label="触控阈值" prop="touchScore">
-                        <el-input v-model.number="settingForm.touchScore"/>
-                      </el-form-item>
-                      <el-form-item label="区域阈值" prop="diffScore">
-                        <el-input v-model.number="settingForm.diffScore"/>
-                      </el-form-item>
-                        <el-form-item label="录制时长" prop="timeout">
-                      <el-input v-model.number="settingForm.timeout"/>
-                      </el-form-item>
-                      <el-form-item label="场景时间" prop="sceneStart">
-                        <el-input v-model.number="settingForm.sceneStart"/>
-                      </el-form-item>
-                      <el-form-item label="自动上传">
-                        <el-switch v-model="settingForm.autoUpload" />
-                      </el-form-item>
-                      <el-form-item label="调式">
-                        <el-button @click="handleReload">重载页面</el-button>
-                      </el-form-item>
-                    </el-form>
-                  </el-row>
-                </el-tab-pane>
-                <!-- <el-tab-pane label="帮助" name="detail" disabled>
-                    <HelpPage></HelpPage>
-                </el-tab-pane> -->
-            </el-tabs>
-        </el-aside>
-        <el-main class="main-content">
-          <div>
-              <ScreenPreview
-                ref="imagePreviewRef"
-                :imageInfo="imageInfo"
-                :cropInfo="cropInfo"
-                :pageInfo="imagePageInfo"
-                @crop-change="handleCropChange"
-                @page-change="handlePageChange"
-                @open-folder="handleOpenFolder"
-                />
-            </div>
-            <el-row justify="center" class="button-row">
-              <el-button type="success" :disabled="calcButtonDisable" @click="handleCalc">
-                <i class="el-icon button-icon">
-                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
-                </i>
-                计算延迟
-              </el-button>
-              <el-button :disabled="calcButtonDisable"  @click="handleCalcWithCurrent">
-                <i class="el-icon button-icon">
-                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
-                </i>
-                计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
-              <!-- <el-button>打开当前截图</el-button> -->
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>动作</span>
               </el-col>
-              <el-col :span="12" class="info-line">
-                <span v-if="latencyForm.scene.action.type==='click'">点击 x: {{ latencyForm.scene.action.x}} y: {{ latencyForm.scene.action.y }}</span>
-                <span v-if="latencyForm.scene.action.type==='swipe'">滑动 x: {{ latencyForm.scene.action.x}} y:{{ latencyForm.scene.action.y}} tx: {{ latencyForm.scene.action.tx }} ty:{{ latencyForm.scene.action.ty }}  speed: {{ latencyForm.scene.action.speed }}</span>
-              </el-col>
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>观察区域</span>
-              </el-col>
-              <el-col :span="12" class="info-line">
-                left: {{ latencyForm.scene.crop_coordinate.left }} top: {{ latencyForm.scene.crop_coordinate.top }}  width: {{ latencyForm.scene.crop_coordinate.width }}  height: {{ latencyForm.scene.crop_coordinate.height }}
-              </el-col>
-            </el-row>
-            <el-row justify="center" class="result-row">
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>操作延迟(毫秒)</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.latency}}
-              </el-col>
-              <el-col :span="4" class="info-line">
-                <el-button link>开始图片</el-button>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                <el-button link>结束图片</el-button>
-              </el-col>
-            </el-row>
-        </el-main>
-        </el-container>
-    </el-scrollbar>
+            </el-form-item>
+          </el-form>
+        </el-row>
+        <el-row class="row-item">
+        <el-button class="operation-button" v-if="processStatus===0" :disabled="latencyForm.device.serial===''" type="primary" @click="handleStart" >开始</el-button>
+        <el-button class="operation-button" v-if="processStatus===2" type="danger"  @click="handleStopProcessing" >停止 {{ countDownSecond > 0 ? ": " + countDownSecond : ""}}</el-button>
+        </el-row>
+        <el-tabs 
+            v-model="latencyTabName" 
+            class="platform-tabs">
+            <el-tab-pane label="记录" name="list">
+              <FileRecord ref="fileRecordRef"/>
+            </el-tab-pane>
+        
+            <el-tab-pane label="设置" name="setting">
+              <el-row>
+                <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
+                  <el-form-item label="触控阈值" prop="touchScore">
+                    <el-input v-model.number="settingForm.touchScore"/>
+                  </el-form-item>
+                  <el-form-item label="区域阈值" prop="diffScore">
+                    <el-input v-model.number="settingForm.diffScore"/>
+                  </el-form-item>
+                    <el-form-item label="录制时长" prop="timeout">
+                  <el-input v-model.number="settingForm.timeout"/>
+                  </el-form-item>
+                  <el-form-item label="场景时间" prop="sceneStart">
+                    <el-input v-model.number="settingForm.sceneStart"/>
+                  </el-form-item>
+                  <el-form-item label="自动上传">
+                    <el-switch v-model="settingForm.autoUpload" />
+                  </el-form-item>
+                  <el-form-item label="调式">
+                    <el-button @click="handleReload">重载页面</el-button>
+                  </el-form-item>
+                </el-form>
+              </el-row>
+            </el-tab-pane>
+            <!-- <el-tab-pane label="帮助" name="detail" disabled>
+                <HelpPage></HelpPage>
+            </el-tab-pane> -->
+        </el-tabs>
+    </el-aside>
+    <el-main class="main-content">
+      <div>
+          <ScreenPreview
+            ref="imagePreviewRef"
+            :imageInfo="imageInfo"
+            :cropInfo="cropInfo"
+            :pageInfo="imagePageInfo"
+            @crop-change="handleCropChange"
+            @page-change="handlePageChange"
+            @open-folder="handleOpenFolder"
+            />
+        </div>
+        <el-row justify="center" class="button-row">
+          <el-button type="success" :disabled="calcButtonDisable" @click="handleCalc">
+            <i class="el-icon button-icon">
+              <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+            </i>
+            计算延迟
+          </el-button>
+          <el-button :disabled="calcButtonDisable"  @click="handleCalcWithCurrent">
+            <i class="el-icon button-icon">
+              <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+            </i>
+            计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
+          <!-- <el-button>打开当前截图</el-button> -->
+        </el-row>
+        <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
+            <span>动作</span>
+          </el-col>
+          <el-col :span="12" class="info-line">
+            <span v-if="latencyForm.scene.action.type==='click'">点击 x: {{ latencyForm.scene.action.x}} y: {{ latencyForm.scene.action.y }}</span>
+            <span v-if="latencyForm.scene.action.type==='swipe'">滑动 x: {{ latencyForm.scene.action.x}} y:{{ latencyForm.scene.action.y}} tx: {{ latencyForm.scene.action.tx }} ty:{{ latencyForm.scene.action.ty }}  speed: {{ latencyForm.scene.action.speed }}</span>
+          </el-col>
+        </el-row>
+        <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
+            <span>观察区域</span>
+          </el-col>
+          <el-col :span="12" class="info-line">
+            left: {{ latencyForm.scene.crop_coordinate.left }} top: {{ latencyForm.scene.crop_coordinate.top }}  width: {{ latencyForm.scene.crop_coordinate.width }}  height: {{ latencyForm.scene.crop_coordinate.height }}
+          </el-col>
+        </el-row>
+        <el-row justify="center" class="result-row">
+        </el-row>
+        <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
+            <span>操作延迟(毫秒)</span>
+          </el-col>
+          <el-col :span="4" class="info-line">
+            {{ result.latency}}
+          </el-col>
+          <el-col :span="4" class="info-line">
+            <el-button link>开始图片</el-button>
+          </el-col>
+          <el-col :span="4" class="info-line">
+            <el-button link>结束图片</el-button>
+          </el-col>
+        </el-row>
+    </el-main>
+  </el-container>
 </template>
 
 <style scoped>

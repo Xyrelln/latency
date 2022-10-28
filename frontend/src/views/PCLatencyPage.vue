@@ -381,153 +381,151 @@ onUnmounted(()=>{
 </script>
 
 <template>
-    <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
-        <el-container>
-        <el-aside class="aside-content" width="240px">
-            <el-row class="row-item">
-              <el-form :model="latencyForm">
-                <el-form-item label="录制窗口">
-                  <el-select 
-                    v-model="latencyForm.capture_window" class="m-2" 
-                    @focus="getCaptureWindows"
-                    filterable
-                    placeholder="请选择录制窗口"
-                    size="default">
-                    <el-option
-                      v-for="item in capture_windows.value"
-                      :key="item"
-                      :label="item"
-                      :value="item"
-                    />
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="操控方式">
-                  <el-select v-model="latencyForm.operate_method" class="m-2" placeholder="请选择操控方式" size="default">
-                    <el-option
-                      v-for="item in operateMethods"
-                      :key="item.value"
-                      :label="item.name"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </el-form-item>
-                <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="操控按键">
-                  <el-input 
-                    v-model="latencyForm.operate_key"
-                    @focus="event => handleOperateKeyFocus(event, 'operate_key')"
-                    @blur="event => handleOperateKeyBlur(event, 'operate_key')"
-                    placeholder="请进行按键操作">
-                  </el-input>
-                </el-form-item>
-                <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="自动操作">
-                  <el-switch v-model="latencyForm.auto" />
-                </el-form-item>
-                <el-form-item label="快捷启动">
-                  <el-input 
-                    v-model="latencyForm.start_hotkey"
-                    @focus="event => handleOperateKeyFocus(event, 'start_hotkey')"
-                    @blur="event => handleOperateKeyBlur(event, 'start_hotkey')"
-                    placeholder="请进行按键操作"
-                    >
-                  </el-input>
-                </el-form-item>
-              </el-form>
-            </el-row>
-            <el-row class="row-item">
-            <el-button class="operation-button" type="primary" @click="handleStart" :disabled="isRunning" >开始</el-button>
-            </el-row>
-
-            <el-tabs 
-                v-model="latencyTabName" 
-                class="platform-tabs">
-                <!-- <el-tab-pane label="记录" name="list">
-                  <FileRecord ref="fileRecordRef"/>
-                </el-tab-pane> -->
-            
-                <el-tab-pane label="设置" name="setting">
-                <!-- <el-scrollbar style="height:60vh"> -->
-                    <el-row>
-                    <el-form :model="latencyForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
-                        <el-form-item label="对比阈值" prop="diffScore">
-                          <el-input v-model.number="latencyForm.diffScore"/>
-                        </el-form-item>
-                        <el-form-item label="截图总数" prop="frame_count">
-                          <el-input v-model.number="latencyForm.frame_count"/>
-                        </el-form-item>
-                        <!-- <el-form-item label="自动上传">
-                          <el-switch v-model="latencyForm.auto_upload" />
-                        </el-form-item> -->
-                        <el-form-item label="调式">
-                          <el-button @click="handleReload">重载页面</el-button>
-                        </el-form-item>
-                        <el-form-item label="缓存">
-                          <el-button @click="handleClearCache">清理数据</el-button>
-                        </el-form-item>
-                    </el-form>
-                    </el-row>
-                <!-- </el-scrollbar> -->
-                </el-tab-pane>
-                <!-- <el-tab-pane label="帮助" name="detail" disabled>
-                    <HelpPage></HelpPage>
-                </el-tab-pane> -->
-                
-            </el-tabs>
-        </el-aside>
-        <el-main class="main-content">
-            <div>
-              <ScreenPreview
-                ref="imagePreviewRef"
-                :imageInfo="imageInfo"
-                :cropInfo="cropInfo"
-                :pageInfo="imagePageInfo"
-                @crop-change="handleCropChange"
-                @page-change="handlePageChange"
-                @open-folder="handleOpenFolder"
+  <el-container>
+    <el-aside class="aside-content" width="240px">
+        <el-row class="row-item">
+          <el-form :model="latencyForm">
+            <el-form-item label="录制窗口">
+              <el-select 
+                v-model="latencyForm.capture_window" class="m-2" 
+                @focus="getCaptureWindows"
+                filterable
+                placeholder="请选择录制窗口"
+                size="default">
+                <el-option
+                  v-for="item in capture_windows.value"
+                  :key="item"
+                  :label="item"
+                  :value="item"
                 />
-            </div>
-            <el-row justify="center" class="button-row">
-              <el-button type="success" @click="handleCalc">
-                <i class="el-icon button-icon">
-                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
-                </i>
-                计算延迟
-              </el-button>
-              <el-button @click="handleCalcWithCurrent">
-                <i class="el-icon button-icon">
-                  <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
-                </i>
-                计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>操作时间</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.inputTime}}
-              </el-col>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="操控方式">
+              <el-select v-model="latencyForm.operate_method" class="m-2" placeholder="请选择操控方式" size="default">
+                <el-option
+                  v-for="item in operateMethods"
+                  :key="item.value"
+                  :label="item.name"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="操控按键">
+              <el-input 
+                v-model="latencyForm.operate_key"
+                @focus="(event:FocusEvent) => handleOperateKeyFocus(event, 'operate_key')"
+                @blur="(event:FocusEvent) => handleOperateKeyBlur(event, 'operate_key')"
+                placeholder="请进行按键操作">
+              </el-input>
+            </el-form-item>
+            <el-form-item v-if="latencyForm.operate_method==='keyboard'" label="自动操作">
+              <el-switch v-model="latencyForm.auto" />
+            </el-form-item>
+            <el-form-item label="快捷启动">
+              <el-input 
+                v-model="latencyForm.start_hotkey"
+                @focus="(event:FocusEvent) => handleOperateKeyFocus(event, 'start_hotkey')"
+                @blur="(event:FocusEvent) => handleOperateKeyBlur(event, 'start_hotkey')"
+                placeholder="请进行按键操作"
+                >
+              </el-input>
+            </el-form-item>
+          </el-form>
+        </el-row>
+        <el-row class="row-item">
+        <el-button class="operation-button" type="primary" @click="handleStart" :disabled="isRunning" >开始</el-button>
+        </el-row>
 
-              <el-col :span="4" class="info-line">
-                <span>响应时间</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.responseTime}}
-              </el-col>
-            </el-row>
-            <el-row justify="center" class="result-row">
-              <el-col :span="4" class="info-line">
-                <span>操作延迟(毫秒)</span>
-              </el-col>
-              <el-col :span="4" class="info-line">
-                {{ result.latency}}
-              </el-col>
-              <el-col :span="4" class="info-line">
-              </el-col>
-              <el-col :span="4" class="info-line">
-              </el-col>
-            </el-row>
-        </el-main>
-        </el-container>
-    </el-scrollbar>
+        <el-tabs 
+            v-model="latencyTabName" 
+            class="platform-tabs">
+            <!-- <el-tab-pane label="记录" name="list">
+              <FileRecord ref="fileRecordRef"/>
+            </el-tab-pane> -->
+        
+            <el-tab-pane label="设置" name="setting">
+            <!-- <el-scrollbar style="height:60vh"> -->
+                <el-row>
+                <el-form :model="latencyForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
+                    <el-form-item label="对比阈值" prop="diffScore">
+                      <el-input v-model.number="latencyForm.diffScore"/>
+                    </el-form-item>
+                    <el-form-item label="截图总数" prop="frame_count">
+                      <el-input v-model.number="latencyForm.frame_count"/>
+                    </el-form-item>
+                    <!-- <el-form-item label="自动上传">
+                      <el-switch v-model="latencyForm.auto_upload" />
+                    </el-form-item> -->
+                    <el-form-item label="调式">
+                      <el-button @click="handleReload">重载页面</el-button>
+                    </el-form-item>
+                    <el-form-item label="缓存">
+                      <el-button @click="handleClearCache">清理数据</el-button>
+                    </el-form-item>
+                </el-form>
+                </el-row>
+            <!-- </el-scrollbar> -->
+            </el-tab-pane>
+            <!-- <el-tab-pane label="帮助" name="detail" disabled>
+                <HelpPage></HelpPage>
+            </el-tab-pane> -->
+            
+        </el-tabs>
+    </el-aside>
+    <el-main class="main-content">
+        <div>
+          <ScreenPreview
+            ref="imagePreviewRef"
+            :imageInfo="imageInfo"
+            :cropInfo="cropInfo"
+            :pageInfo="imagePageInfo"
+            @crop-change="handleCropChange"
+            @page-change="handlePageChange"
+            @open-folder="handleOpenFolder"
+            />
+        </div>
+        <el-row justify="center" class="button-row">
+          <el-button type="success" @click="handleCalc">
+            <i class="el-icon button-icon">
+              <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+            </i>
+            计算延迟
+          </el-button>
+          <el-button @click="handleCalcWithCurrent">
+            <i class="el-icon button-icon">
+              <svg t="1666320784905" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5742" width="200" height="200"><path d="M928 1024H96a96 96 0 0 1-96-96V96a96 96 0 0 1 96-96h832a96 96 0 0 1 96 96v832a96 96 0 0 1-96 96zM896 160a32 32 0 0 0-32-32H160a32 32 0 0 0-32 32v160h768V160z m0 288H128v416a32 32 0 0 0 32 32h704a32 32 0 0 0 32-32V448z m-256 64h128v320h-128V512z m-192 192h128v128h-128v-128z m0-192h128v128h-128v-128z m-192 192h128v128H256v-128z m0-192h128v128H256v-128z" p-id="5743" fill="#8a8a8a"></path></svg>
+            </i>
+            计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
+        </el-row>
+        <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
+            <span>操作时间</span>
+          </el-col>
+          <el-col :span="4" class="info-line">
+            {{ result.inputTime}}
+          </el-col>
+
+          <el-col :span="4" class="info-line">
+            <span>响应时间</span>
+          </el-col>
+          <el-col :span="4" class="info-line">
+            {{ result.responseTime}}
+          </el-col>
+        </el-row>
+        <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
+            <span>操作延迟(毫秒)</span>
+          </el-col>
+          <el-col :span="4" class="info-line">
+            {{ result.latency}}
+          </el-col>
+          <el-col :span="4" class="info-line">
+          </el-col>
+          <el-col :span="4" class="info-line">
+          </el-col>
+        </el-row>
+    </el-main>
+  </el-container>
 </template>
 
 <style scoped>
@@ -547,7 +545,7 @@ onUnmounted(()=>{
   border: solid 1px #e6e6e6;
   padding: 0.5rem;
   border-radius: 4px;
-  height: 80vh;
+  /* height: 100%; */
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 
@@ -556,7 +554,7 @@ onUnmounted(()=>{
   padding: 0.5rem;
   border-radius: 4px;
   margin-left: 1rem;
-  width: calc(100vw - 320px);
+  /* width: calc(100vw - 320px); */
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 

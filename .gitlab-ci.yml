@@ -73,7 +73,7 @@ PubBin:
     - 'cp -r $env:LIB_WINDOWS_PATH\* $LATENCY_PKG\lib\'
     # docs
     - dir doc
-    - 'cp -r .\doc\* $LATENCY_PKG\'
+    - 'cp -r .\doc\*.pdf $LATENCY_PKG\'
     # rscapture
     - 'mkdir $LATENCY_PKG\lib\rscapture'
     - 'curl.exe -k --output $LATENCY_PKG\lib\rscapture\rscapture.exe --header "PRIVATE-TOKEN: $env:EPC_TOKEN" "https://$env:CI_SERVER_HOST/api/v4/projects/895/jobs/artifacts/master/raw/target/release/rscapture-wgc.exe?job=Compile"'

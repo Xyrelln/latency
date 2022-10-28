@@ -401,105 +401,106 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 </script>
 
 <template>
-    <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
-          <el-tabs 
-            v-model="tabName"
-            type="border-card"
-            class="platform-tabs"
-            @tab-click="handleTabClick"
-            >
-            <el-tab-pane label="录制" name="record">
-              <el-row justify="space-between" style="display:flex">
-                <el-col class="button-row" :span="12">
-                  <el-select
-                      v-model="latencyForm.device"
-                      class="device-select"
-                      @focus="getDeviceList"
-                      filterable
-                      placeholder="请选择设备"
-                      >
-                      <el-option
-                        v-for="item in data.devices"
-                        :key="item.serial"
-                        :label="item.device + '(' + item.serial + ')'"
-                        :value="item"
-                      >
-                    </el-option>
-                  </el-select>
-                  <el-button type="primary" @click="handleLoadScreenshot">
-                    <el-icon>
-                      <svg t="1666852111201" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6878" width="200" height="200"><path d="M817.926086 824.102251l-33.619702-33.623795c67.307965-68.77948 108.87057-162.728198 108.87057-266.540565 0-210.568786-170.671101-381.177466-381.177466-381.177466-26.38595 0-52.001351 3.009544-76.785827 8.262174l51.617611 43.2265c10.053983 8.518001 11.334139 23.503297 2.817162 33.621748-8.390088 10.05603-23.438828 11.336186-33.493835 2.883677l-106.374726-89.211834-3.136433-2.625804c-0.89744-0.704035-1.281179-1.727341-1.986237-2.560312l-4.930289-4.931313c0.255827-0.128937 0.576121-0.25685 0.896416-0.38374-2.113127-4.227278-2.818185-9.028631-2.177596-13.641695-0.063445-6.852058 2.49789-13.639648 8.198729-18.443048l109.511159-91.901083c10.055007-8.452509 25.103748-7.172353 33.493835 2.946099 8.516977 10.118452 7.235798 25.169239-2.882654 33.621748l-76.914764 64.48978c32.789801-8.196683 66.796312-13.000082 102.147448-13.000082 236.8258 0 428.824649 191.998849 428.824649 428.824649C940.824137 640.877229 893.879965 746.802724 817.926086 824.102251L817.926086 824.102251zM130.823046 523.93789c0 210.506365 170.670078 381.175419 381.176442 381.175419 40.795125 0 80.053244-6.53074 116.875894-18.442024l-67.883063-56.933687c-10.05603-8.390088-11.399631-23.438828-2.947122-33.493835 8.516977-10.053983 23.50432-11.398608 33.55728-2.947122l109.513206 91.902106c6.083555 5.122671 8.580422 12.617365 8.005324 19.981077 0.575098 7.363711-1.921769 14.793938-8.005324 19.97903l-109.447714 91.837638c-10.05603 8.388041-25.105794 7.106862-33.559327-3.009544-8.452509-9.992585-7.108908-25.106818 2.947122-33.494858l46.174646-38.679951c-30.676673 7.043417-62.441121 11.014868-95.166453 11.014868-236.891292-0.063445-428.888094-192.062294-428.888094-428.888094 0-123.023918 52.064796-233.624898 135.064139-311.819818l33.620725 33.685193C177.508321 315.354318 130.823046 414.106436 130.823046 523.93789L130.823046 523.93789z" p-id="6879" fill="#707070"></path></svg>
-                    </el-icon>
-                    同步屏幕
+    <!-- <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)"> -->
+        <el-tabs 
+          v-model="tabName"
+          class="platform-tabs"
+          @tab-click="handleTabClick"
+          >
+          <el-tab-pane label="录制" name="record">
+            <el-scrollbar>
+            <el-row justify="space-between" style="display:flex">
+              <el-col class="button-row" :span="12">
+                <el-select
+                    v-model="latencyForm.device"
+                    class="device-select"
+                    @focus="getDeviceList"
+                    filterable
+                    placeholder="请选择设备"
+                    >
+                    <el-option
+                      v-for="item in data.devices"
+                      :key="item.serial"
+                      :label="item.device + '(' + item.serial + ')'"
+                      :value="item"
+                    >
+                  </el-option>
+                </el-select>
+                <el-button type="primary" @click="handleLoadScreenshot">
+                  <el-icon>
+                    <svg t="1666852111201" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6878" width="200" height="200"><path d="M817.926086 824.102251l-33.619702-33.623795c67.307965-68.77948 108.87057-162.728198 108.87057-266.540565 0-210.568786-170.671101-381.177466-381.177466-381.177466-26.38595 0-52.001351 3.009544-76.785827 8.262174l51.617611 43.2265c10.053983 8.518001 11.334139 23.503297 2.817162 33.621748-8.390088 10.05603-23.438828 11.336186-33.493835 2.883677l-106.374726-89.211834-3.136433-2.625804c-0.89744-0.704035-1.281179-1.727341-1.986237-2.560312l-4.930289-4.931313c0.255827-0.128937 0.576121-0.25685 0.896416-0.38374-2.113127-4.227278-2.818185-9.028631-2.177596-13.641695-0.063445-6.852058 2.49789-13.639648 8.198729-18.443048l109.511159-91.901083c10.055007-8.452509 25.103748-7.172353 33.493835 2.946099 8.516977 10.118452 7.235798 25.169239-2.882654 33.621748l-76.914764 64.48978c32.789801-8.196683 66.796312-13.000082 102.147448-13.000082 236.8258 0 428.824649 191.998849 428.824649 428.824649C940.824137 640.877229 893.879965 746.802724 817.926086 824.102251L817.926086 824.102251zM130.823046 523.93789c0 210.506365 170.670078 381.175419 381.176442 381.175419 40.795125 0 80.053244-6.53074 116.875894-18.442024l-67.883063-56.933687c-10.05603-8.390088-11.399631-23.438828-2.947122-33.493835 8.516977-10.053983 23.50432-11.398608 33.55728-2.947122l109.513206 91.902106c6.083555 5.122671 8.580422 12.617365 8.005324 19.981077 0.575098 7.363711-1.921769 14.793938-8.005324 19.97903l-109.447714 91.837638c-10.05603 8.388041-25.105794 7.106862-33.559327-3.009544-8.452509-9.992585-7.108908-25.106818 2.947122-33.494858l46.174646-38.679951c-30.676673 7.043417-62.441121 11.014868-95.166453 11.014868-236.891292-0.063445-428.888094-192.062294-428.888094-428.888094 0-123.023918 52.064796-233.624898 135.064139-311.819818l33.620725 33.685193C177.508321 315.354318 130.823046 414.106436 130.823046 523.93789L130.823046 523.93789z" p-id="6879" fill="#707070"></path></svg>
+                  </el-icon>
+                  同步屏幕
+                </el-button>
+
+                <el-button @click="handleInput" :icon="VideoPlay">
+                  演示
+                </el-button>
+              </el-col>
+
+              <el-col class="button-row" :span="12" >
+                <div style="float:right">
+                  <el-input class="scene-name-input" v-model="inputSceneName" clearable  placeholder="请输入保存的场景名称"></el-input>
+                  <el-button @click="handleSetScene" type="success">
+                    <i class="el-icon button-icon">
+                      <svg t="1666605626827" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4819" width="200" height="200"><path d="M665.6 332.8 665.6 128C665.6 113.86151 654.13849 102.4 640 102.4 625.86151 102.4 614.4 113.86151 614.4 128L614.4 332.8C614.4 346.93849 625.86151 358.4 640 358.4 654.13849 358.4 665.6 346.93849 665.6 332.8L665.6 332.8ZM640 51.2 819.2 51.2 793.6 25.6 793.6 384.133545C793.6 426.406699 759.102946 460.8 716.727898 460.8L281.672102 460.8C239.236715 460.8 204.8 426.413438 204.8 384.133545L204.8 25.6C204.8 11.46151 193.33849 0 179.2 0 165.06151 0 153.6 11.46151 153.6 25.6L153.6 384.133545C153.6 454.707134 210.976425 512 281.672102 512L716.727898 512C787.345461 512 844.8 454.718257 844.8 384.133545L844.8 25.6 844.8 0 819.2 0 640 0C625.86151 0 614.4 11.46151 614.4 25.6 614.4 39.73849 625.86151 51.2 640 51.2L640 51.2Z" p-id="4820" fill="#8a8a8a"></path><path d="M844.8 972.8 128.081132 972.8C85.544157 972.8 51.2 938.575806 51.2 896.163853L51.2 100.711064 51.2 25.6 25.6 51.2 102.4 51.2 896.233363 51.2C938.580175 51.2 972.8 85.414085 972.8 127.868001L972.8 998.4C972.8 1012.53849 984.26151 1024 998.4 1024 1012.53849 1024 1024 1012.53849 1024 998.4L1024 127.868001C1024 57.135182 966.85523 0 896.233363 0L102.4 0 25.6 0 0 0 0 25.6 0 100.711064 0 896.163853C0 966.892966 57.307204 1024 128.081132 1024L844.8 1024C858.93849 1024 870.4 1012.53849 870.4 998.4 870.4 984.26151 858.93849 972.8 844.8 972.8L844.8 972.8Z" p-id="4821" fill="#8a8a8a"></path></svg>
+                    </i>
+                    保存
                   </el-button>
+                </div>
+              </el-col>
 
-                  <el-button @click="handleInput" :icon="VideoPlay">
-                    演示
-                  </el-button>
-                </el-col>
+            </el-row>
 
-                <el-col class="button-row" :span="12" >
-                  <div style="float:right">
-                    <el-input class="scene-name-input" v-model="inputSceneName" clearable  placeholder="请输入保存的场景名称"></el-input>
-                    <el-button @click="handleSetScene" type="success">
-                      <i class="el-icon button-icon">
-                        <svg t="1666605626827" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4819" width="200" height="200"><path d="M665.6 332.8 665.6 128C665.6 113.86151 654.13849 102.4 640 102.4 625.86151 102.4 614.4 113.86151 614.4 128L614.4 332.8C614.4 346.93849 625.86151 358.4 640 358.4 654.13849 358.4 665.6 346.93849 665.6 332.8L665.6 332.8ZM640 51.2 819.2 51.2 793.6 25.6 793.6 384.133545C793.6 426.406699 759.102946 460.8 716.727898 460.8L281.672102 460.8C239.236715 460.8 204.8 426.413438 204.8 384.133545L204.8 25.6C204.8 11.46151 193.33849 0 179.2 0 165.06151 0 153.6 11.46151 153.6 25.6L153.6 384.133545C153.6 454.707134 210.976425 512 281.672102 512L716.727898 512C787.345461 512 844.8 454.718257 844.8 384.133545L844.8 25.6 844.8 0 819.2 0 640 0C625.86151 0 614.4 11.46151 614.4 25.6 614.4 39.73849 625.86151 51.2 640 51.2L640 51.2Z" p-id="4820" fill="#8a8a8a"></path><path d="M844.8 972.8 128.081132 972.8C85.544157 972.8 51.2 938.575806 51.2 896.163853L51.2 100.711064 51.2 25.6 25.6 51.2 102.4 51.2 896.233363 51.2C938.580175 51.2 972.8 85.414085 972.8 127.868001L972.8 998.4C972.8 1012.53849 984.26151 1024 998.4 1024 1012.53849 1024 1024 1012.53849 1024 998.4L1024 127.868001C1024 57.135182 966.85523 0 896.233363 0L102.4 0 25.6 0 0 0 0 25.6 0 100.711064 0 896.163853C0 966.892966 57.307204 1024 128.081132 1024L844.8 1024C858.93849 1024 870.4 1012.53849 870.4 998.4 870.4 984.26151 858.93849 972.8 844.8 972.8L844.8 972.8Z" p-id="4821" fill="#8a8a8a"></path></svg>
-                      </i>
-                      保存
-                    </el-button>
-                  </div>
-                </el-col>
+            <el-container>
+              <el-main class="main-content">
+                <div>
+                  <ScreenPreview
+                    ref="imagePreviewRef"
+                    :imageInfo="imageInfo"
+                    :cropInfo="cropInfo"
+                    :pageInfo="imagePageInfo"
+                    @crop-change="handleCropChange"
+                    @page-change="handlePageChange"
+                    @open-folder="handleOpenFolder"
+                    @user-action="handleUserAction"
+                    />
+                </div>
 
-              </el-row>
-
-              <el-container>
-                <el-main class="main-content">
-                  <div>
-                    <ScreenPreview
-                      ref="imagePreviewRef"
-                      :imageInfo="imageInfo"
-                      :cropInfo="cropInfo"
-                      :pageInfo="imagePageInfo"
-                      @crop-change="handleCropChange"
-                      @page-change="handlePageChange"
-                      @open-folder="handleOpenFolder"
-                      @user-action="handleUserAction"
-                      />
-                  </div>
-
-                  <el-row justify="center" class="result-row">
-                  </el-row>
-                  <el-row justify="center" class="result-row">
-                    <el-col :span="4" class="info-line">
-                      <span>动作</span>
-                    </el-col>
-                    <el-col :span="8" class="info-line">
-                      <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
-                      <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ userAction.speed }}</span>
-                    </el-col>
-                  </el-row>
-                  <el-row justify="center" class="result-row">
-                    <el-col :span="4" class="info-line">
-                      <span>观察区域</span>
-                    </el-col>
-                    <el-col :span="8" class="info-line">
-                      left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
-                    </el-col>
-                  </el-row>
-                </el-main>
-              </el-container>
-            </el-tab-pane>
-
-            <el-tab-pane label="管理" name="manage">
-              <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 100px)">
-                <el-row v-for="(item, index) in userScenes.scens" key="item">
-                  {{ item }}
-                  <el-button type="danger" :icon="Delete" @click="handleDelScene(item.key)">删除</el-button>
+                <el-row justify="center" class="result-row">
                 </el-row>
-              </el-scrollbar>
-            </el-tab-pane>
-          </el-tabs>
-    </el-scrollbar>
+                <el-row justify="center" class="result-row">
+                  <el-col :span="4" class="info-line">
+                    <span>动作</span>
+                  </el-col>
+                  <el-col :span="8" class="info-line">
+                    <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
+                    <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ userAction.speed }}</span>
+                  </el-col>
+                </el-row>
+                <el-row justify="center" class="result-row">
+                  <el-col :span="4" class="info-line">
+                    <span>观察区域</span>
+                  </el-col>
+                  <el-col :span="8" class="info-line">
+                    left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
+                  </el-col>
+                </el-row>
+              </el-main>
+            </el-container>
+          </el-scrollbar>
+          </el-tab-pane>
+
+          <el-tab-pane label="管理" name="manage">
+            <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 100px)">
+              <el-row v-for="(item, index) in userScenes.scens" key="item">
+                {{ item }}
+                <el-button type="danger" :icon="Delete" @click="handleDelScene(item.key)">删除</el-button>
+              </el-row>
+            </el-scrollbar>
+          </el-tab-pane>
+        </el-tabs>
+    <!-- </el-scrollbar> -->
 </template>
 
 <style scoped>
@@ -527,7 +528,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
   border: solid 1px #e6e6e6;
   padding: 0.5rem;
   border-radius: 4px;
-  margin-left: 1rem;
+  /* margin-left: 1rem; */
   width: calc(100vw - 320px);
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
@@ -562,21 +563,17 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
   margin: 7px 0;
 }
 
-/* .button-row {
-  display: flex;
-  align-items: center;
-} */
-/* .inline-label {
-  width: 50px;
-  display: flex;
-  align-items: center;
-} */
-
 .device-select {
   width: 180px;
+  margin-right: 12px;
 }
 .scene-name-input {
   width: 180px;
+  margin-right: 12px;
+}
+
+.platform-tabs {
+  width: calc(100vw - 50px);
 }
 
 </style>
