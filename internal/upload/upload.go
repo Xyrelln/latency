@@ -18,19 +18,34 @@ type lightService struct {
 var lightServiceIns *lightService
 var once sync.Once
 
+const secretKey = "EBIpWLd1cC29gQl6"
+
 // GetLightService 返回 lightService 实例
 func GetLightService() *lightService {
 	once.Do(func() {
 		lightServiceIns = &lightService{
 			Service: lighttestservice.LightTestService{Endpoint: "https://lighttest.vrviu.com"},
 			Client: token.ClientInfo{
-				Name:     "perftool",
-				Version:  "0.0.1",
-				Username: "NarakaPlayer",
+				Name:     "op-latency",
+				Version:  "0.2.1",
+				Username: "vrviu",
 			},
 		}
 	})
 	return lightServiceIns
+}
+func GetUserInfo() (lighttestservice.UserInfo, error) {
+	ls := GetLightService()
+	userInfo, err := ls.Service.GetUserInfo(token.ClientInfo{
+		Name:     "op-latency",
+		Version:  "0.2.1",
+		Username: "vrviu",
+	}, secretKey)
+
+	if err != nil {
+		return lighttestservice.UserInfo{}, err
+	}
+	return userInfo, nil
 }
 
 // UploadFile 上传文件
@@ -51,7 +66,7 @@ func UploadFile(filePath string) error {
 	// 	Username: "NarakaPlayer",
 	// }
 	log.Infof("prepare upload file: %s, base name: %s", filePath, filepath.Base(filePath))
-	uploadPath, err := ls.Service.UploadFile(ls.Client, filepath.Base(filePath), f)
+	uploadPath, err := ls.Service.UploadFile(ls.Client, secretKey, filepath.Base(filePath), f)
 	if err != nil {
 		log.Errorf("upload file failed, err: %v", err)
 		return err
@@ -73,7 +88,7 @@ func UploadResult(costTime float64) error {
 	// 	Version:  "0.0.1",
 	// 	Username: "NarakaPlayer",
 	// }
-	err := ls.Service.UploadJSONData(ls.Client, Result{CostTime: costTime})
+	err := ls.Service.UploadJSONData(ls.Client, secretKey, Result{CostTime: costTime})
 	if err != nil {
 		log.Errorf("upload result failed, err: %v", err)
 	}

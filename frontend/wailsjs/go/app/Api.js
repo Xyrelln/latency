@@ -18,6 +18,10 @@ export function CheckUpdate() {
   return window['go']['app']['Api']['CheckUpdate']();
 }
 
+export function CheckUser() {
+  return window['go']['app']['Api']['CheckUser']();
+}
+
 export function ClearMobleCache() {
   return window['go']['app']['Api']['ClearMobleCache']();
 }

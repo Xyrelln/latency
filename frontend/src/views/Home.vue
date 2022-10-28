@@ -13,7 +13,7 @@ import AndroidLatencyPage from './AndroidLatencyPage.vue';
 import PCLatencyPage from './PCLatencyPage.vue';
 
 import { EventsOn, EventsOff } from '@/../wailsjs/runtime/runtime'
-import { CheckUpdate, DoUpdate } from '@/../wailsjs/go/app/api'
+import { CheckUpdate, DoUpdate, CheckUser } from '@/../wailsjs/go/app/api'
 import { app } from '@/../wailsjs/go/models'
 import { isWailsRun } from '@/utils/utils'
 
@@ -73,6 +73,14 @@ const setEventOff = () => {
   })
 }
 
+const handleCheckUser = () => {
+  CheckUser().then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
 /**
  * 执行升级
  */
@@ -90,6 +98,7 @@ onMounted(()=>{
   if (isWailsRun()) {
     setEventOn()
     handleCheckUpgrade()
+    handleCheckUser()
   } 
 })
 

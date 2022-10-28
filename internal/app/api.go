@@ -26,6 +26,7 @@ import (
 
 	// lighttestServ "gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
 	// lighttestToken "gitlab.vrviu.com/epc/lighttest-lib/token"
+	"gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
 	lighttestUpdate "gitlab.vrviu.com/epc/lighttest-lib/update"
 	lighttestVer "gitlab.vrviu.com/epc/lighttest-lib/version"
 )
@@ -633,6 +634,12 @@ type UpdateInfo struct {
 // 获取当前版本号
 func (a *Api) GetCurrentVersion() string {
 	return lighttestVer.Version
+}
+
+// CheckUpdate ...
+func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
+	// userInfo, err := upload.GetUserInfo()
+	return upload.GetUserInfo()
 }
 
 // CheckUpdate ...

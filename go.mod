@@ -10,7 +10,7 @@ require (
 	github.com/otiai10/gosseract/v2 v2.4.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
-	gitlab.vrviu.com/epc/lighttest-lib v0.2.1
+	gitlab.vrviu.com/epc/lighttest-lib v0.3.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
