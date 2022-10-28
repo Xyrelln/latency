@@ -1,36 +1,24 @@
 package app
 
 import (
+	"bytes"
+	"fmt"
 	"path/filepath"
+	"time"
 
-	badger "github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
+	bolt "go.etcd.io/bbolt"
 )
 
-var errKeyNotFound = badger.ErrKeyNotFound
-
-type dblogger = badger.Logger
+const defaultBucket = "latency"
 
 type store struct {
-	db *badger.DB
+	db *bolt.DB
 }
 
-// func newStore(path string, l dblogger) (*store, error) {
-// 	dbPath := filepath.Join(path, "db")
-// 	opts := badger.DefaultOptions(dbPath)
-// 	// opts = opts.WithLogger(l)
-// 	db, err := badger.Open(opts)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &store{db}, nil
-// }
-
 func newStore(path string) (*store, error) {
-	dbPath := filepath.Join(path, "db")
-	// It will be created if it doesn't exist.
-	db, err := badger.Open(badger.DefaultOptions(dbPath))
+	dbPath := filepath.Join(path, "latency.db")
+	db, err := bolt.Open(dbPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Errorf("db open failed: %v", err)
 		return nil, err
@@ -39,42 +27,44 @@ func newStore(path string) (*store, error) {
 	return &store{db}, nil
 }
 
-func (s *store) get(key []byte) (val []byte, rtnErr error) {
-	rtnErr = s.db.View(func(txn *badger.Txn) error {
-		data, err := txn.Get(key)
-		if err != nil {
-			return err
-		}
-		val, err = data.ValueCopy(val)
-		return err
+func (s *store) get(key []byte) ([]byte, error) {
+	var result []byte
+
+	s.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(defaultBucket))
+		result = b.Get(key)
+
+		return nil
 	})
-	return val, rtnErr
+	return result, nil
 }
 
 func (s *store) set(key, val []byte) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		return txn.Set(key, val)
+	return s.db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		if err != nil {
+			return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		}
+		return b.Put(key, val)
 	})
 }
 
 func (s *store) del(key []byte) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		return txn.Delete(key)
+	return s.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(defaultBucket))
+		return b.Delete(key)
 	})
 }
 
 func (s *store) list(prefix []byte) ([][]byte, error) {
 	var items [][]byte
-	err := s.db.View(func(txn *badger.Txn) error {
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-			val, err := item.ValueCopy([]byte{})
-			if err != nil {
-				return err
-			}
-			items = append(items, val)
+
+	err := s.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket([]byte(defaultBucket)).Cursor()
+
+		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+			fmt.Printf("key=%s, value=%s\n", k, v)
+			items = append(items, v)
 		}
 		return nil
 	})

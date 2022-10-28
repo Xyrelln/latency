@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/corona10/goimagehash v1.1.0
-	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/go-vgo/robotgo v0.100.10
 	github.com/moutend/go-hook v0.1.0
 	github.com/otiai10/gosseract/v2 v2.4.0
@@ -17,18 +16,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.2.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.1 // indirect
-	github.com/dgraph-io/ristretto v0.1.0 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
-	github.com/golang/protobuf v1.3.1 // indirect
-	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
-	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -42,7 +30,6 @@ require (
 	github.com/vcaesar/imgo v0.30.0 // indirect
 	github.com/vcaesar/keycode v0.10.0 // indirect
 	github.com/vcaesar/tt v0.20.0 // indirect
-	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
@@ -67,6 +54,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
+	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sync v0.0.0-20220907140024-f12130a52804

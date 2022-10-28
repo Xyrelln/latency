@@ -91,7 +91,7 @@ func (a *Api) startup(ctx context.Context) {
 		log.Errorf("app: failed to create database: %v", err)
 		// fmt.Errorf("app: failed to create database: %v", err)
 	} else {
-		a.state = a.getCurrentState()
+		// a.state = a.getCurrentState()
 	}
 }
 
@@ -103,23 +103,23 @@ func (a *Api) domready(ctx context.Context) {
 	a.IsAppReady()
 }
 
-func (a *Api) getCurrentState() *workspaceState {
-	rtn := &workspaceState{
-		CurrentID: defaultWorkspaceKey,
-	}
-	val, err := a.store.get([]byte(defaultStateKey))
-	if err != nil && err != errKeyNotFound {
-		log.Errorf("failed to get current state from store: %v", err)
-	}
-	if len(val) == 0 {
-		return rtn
-	}
-	dec := gob.NewDecoder(bytes.NewBuffer(val))
-	if err := dec.Decode(rtn); err != nil {
-		log.Errorf("failed to decode state: %v", err)
-	}
-	return rtn
-}
+// func (a *Api) getCurrentState() *workspaceState {
+// 	rtn := &workspaceState{
+// 		CurrentID: defaultWorkspaceKey,
+// 	}
+// 	val, err := a.store.get([]byte(defaultStateKey))
+// 	if err != nil && err != errKeyNotFound {
+// 		log.Errorf("failed to get current state from store: %v", err)
+// 	}
+// 	if len(val) == 0 {
+// 		return rtn
+// 	}
+// 	dec := gob.NewDecoder(bytes.NewBuffer(val))
+// 	if err := dec.Decode(rtn); err != nil {
+// 		log.Errorf("failed to decode state: %v", err)
+// 	}
+// 	return rtn
+// }
 
 // 获取设备列表
 func (a *Api) ListDevices() ([]*adb.Device, error) {
