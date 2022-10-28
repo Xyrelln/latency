@@ -82,10 +82,10 @@ const latencyForm = reactive({
       speed: 500
     },
     crop_coordinate: {
-      left: 0,
-      top: 0,
-      width: 0,
-      height:0
+      left: 100,
+      top: 100,
+      width: 50,
+      height:50
     },
   },
   device: {
@@ -728,17 +728,16 @@ const updateCropInfo = () => {
       type: 'warning',
       message: '场景信息为空',
     })
-    return
   }
 
   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
   imageZoom.value = pImgSize.width / imageInfo.width 
   // console.log(imageZoom.value)
   
-  cropInfo.left = Math.trunc(selectedScene.value.crop_coordinate.left * imageZoom.value),
-  cropInfo.top = Math.trunc(selectedScene.value.crop_coordinate.top * imageZoom.value),
-  cropInfo.width = Math.trunc(selectedScene.value.crop_coordinate.width * imageZoom.value),
-  cropInfo.height = Math.trunc(selectedScene.value.crop_coordinate.height * imageZoom.value),
+  cropInfo.left = Math.trunc(latencyForm.scene.crop_coordinate.left * imageZoom.value),
+  cropInfo.top = Math.trunc(latencyForm.scene.crop_coordinate.top * imageZoom.value),
+  cropInfo.width = Math.trunc(latencyForm.scene.crop_coordinate.width * imageZoom.value),
+  cropInfo.height = Math.trunc(latencyForm.scene.crop_coordinate.height * imageZoom.value),
 
   // console.log(cropInfo)
   imagePreviewRef.value.updateSelectBoxStyle()
