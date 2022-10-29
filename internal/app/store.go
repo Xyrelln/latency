@@ -69,7 +69,12 @@ func (s *store) list(prefix []byte) ([][]byte, error) {
 	var items [][]byte
 
 	err := s.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte(defaultBucket)).Cursor()
+		b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		if err != nil {
+			return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		}
+		// c := tx.Bucket([]byte(defaultBucket)).Cursor()
+		c := b.Cursor()
 
 		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
 			fmt.Printf("key=%s, value=%s\n", k, v)
