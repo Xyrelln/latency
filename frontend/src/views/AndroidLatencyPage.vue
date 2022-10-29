@@ -863,7 +863,7 @@ onUnmounted(()=>{
                 <el-option
                   v-for="item in data.devices"
                   :key="item.serial"
-                  :label="item.device + '(' + item.serial + ')'"
+                  :label="item.serial"
                   :value="item"
                 >
                 </el-option>
@@ -897,7 +897,7 @@ onUnmounted(()=>{
                   <el-option
                     v-for="item in userScenes.scens"
                     :key="item.key"
-                    :label="item.name + '(' + item.device.device_name + ')'"
+                    :label="item.name"
                     :value="item"
                   >
                   </el-option>

@@ -124,7 +124,8 @@ func Devices() ([]*Device, error) {
 	if adb == "" {
 		return nil, ErrADBNotFound
 	}
-	cmd := Cmd{Args: []string{"devices", "-l"}}
+	cmd := Cmd{Args: []string{"devices"}}
+	// cmd := Cmd{Args: []string{"devices", "-l"}}
 	if out, err := cmd.Call(); err == nil {
 		return parseDevices(out)
 	} else {

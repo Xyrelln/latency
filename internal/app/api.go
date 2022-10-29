@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
@@ -656,11 +657,15 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 	}
 
 	userSecrect := UserSecrect{}
-	dec := gob.NewDecoder(bytes.NewBuffer(val))
-	if err = dec.Decode(&userSecrect); err != nil {
-		log.Error("user not exists")
-		return lighttestservice.UserInfo{}, err
+	// dec := gob.NewDecoder(bytes.NewBuffer(val))
+	err = json.Unmarshal(val, &userSecrect)
+	if err != nil {
+		log.Errorf("user unmarshal failed: %v", err)
 	}
+	// if err = dec.Decode(&userSecrect); err != nil {
+	// 	log.Error("user not exists")
+	// 	return lighttestservice.UserInfo{}, err
+	// }
 	if userSecrect.Username == "" || userSecrect.Key == "" {
 		log.Error("username or key is empty")
 		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
@@ -676,7 +681,7 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, error) {
 	// userInfo, err := upload.GetUserInfo()
 	if userSecrect.Username == "" || userSecrect.Key == "" {
-		log.Error("username or key is empty")
+		log.Errorf("username or key is empty")
 		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
 	}
 
@@ -684,10 +689,19 @@ func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, erro
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
 	}
-	var val bytes.Buffer
-	enc := gob.NewEncoder(&val)
-	enc.Encode(userSecrect)
-	a.store.set([]byte(userSecrectKey), val.Bytes())
+	// var val bytes.Buffer
+	// enc := gob.NewEncoder(&val)
+	// enc.Encode(userSecrect)
+	encoded, err := json.Marshal(userSecrect)
+	if err != nil {
+		log.Errorf("user info marshal failed: %v", err)
+		return lighttestservice.UserInfo{}, err
+	}
+	err = a.store.set([]byte(userSecrectKey), encoded)
+	if err != nil {
+		log.Errorf("write user info to store failed: %v", err)
+		return lighttestservice.UserInfo{}, err
+	}
 	return userInfo, nil
 }
 

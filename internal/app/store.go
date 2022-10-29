@@ -18,12 +18,22 @@ type store struct {
 
 func newStore(path string) (*store, error) {
 	dbPath := filepath.Join(path, "latency.db")
-	log.Infof("create db on path: %s", dbPath)
+	log.Infof("read db on path: %s", dbPath)
 	db, err := bolt.Open(dbPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Errorf("db open failed: %v", err)
 		return nil, err
 	}
+
+	db.View(func(tx *bolt.Tx) error {
+		// b := tx.Bucket([]byte(defaultBucket))
+		_, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		if err != nil {
+			log.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+			// return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		}
+		return nil
+	})
 
 	return &store{db}, nil
 }
@@ -32,11 +42,11 @@ func (s *store) get(key []byte) ([]byte, error) {
 	var result []byte
 
 	s.db.View(func(tx *bolt.Tx) error {
-		// b := tx.Bucket([]byte(defaultBucket))
-		b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
-		if err != nil {
-			return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
-		}
+		b := tx.Bucket([]byte(defaultBucket))
+		// b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		// if err != nil {
+		// 	return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		// }
 		result = b.Get(key)
 
 		return nil
@@ -46,21 +56,22 @@ func (s *store) get(key []byte) ([]byte, error) {
 
 func (s *store) set(key, val []byte) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
-		if err != nil {
-			return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
-		}
+		b := tx.Bucket([]byte(defaultBucket))
+		// b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		// if err != nil {
+		// 	return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		// }
 		return b.Put(key, val)
 	})
 }
 
 func (s *store) del(key []byte) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
-		// b := tx.Bucket([]byte(defaultBucket))
-		b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
-		if err != nil {
-			return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
-		}
+		b := tx.Bucket([]byte(defaultBucket))
+		// b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		// if err != nil {
+		// 	return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		// }
 		return b.Delete(key)
 	})
 }
@@ -69,10 +80,11 @@ func (s *store) list(prefix []byte) ([][]byte, error) {
 	var items [][]byte
 
 	err := s.db.View(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
-		if err != nil {
-			return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
-		}
+		b := tx.Bucket([]byte(defaultBucket))
+		// b, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
+		// if err != nil {
+		// 	return fmt.Errorf("create bucket %s failed, err: %v", defaultBucket, err)
+		// }
 		// c := tx.Bucket([]byte(defaultBucket)).Cursor()
 		c := b.Cursor()
 

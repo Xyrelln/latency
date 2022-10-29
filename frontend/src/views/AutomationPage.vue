@@ -421,7 +421,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                     <el-option
                       v-for="item in data.devices"
                       :key="item.serial"
-                      :label="item.device + '(' + item.serial + ')'"
+                      :label="item.serial"
                       :value="item"
                     >
                   </el-option>

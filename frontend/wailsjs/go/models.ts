@@ -1,5 +1,101 @@
+export namespace fs {
+	
+	export class RecordFile {
+	    dir_name: string;
+	    file_path: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RecordFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir_name = source["dir_name"];
+	        this.file_path = source["file_path"];
+	        this.size = source["size"];
+	    }
+	}
+
+}
+
+export namespace latencywin {
+	
+	export class InputConf {
+	    type: string;
+	    isAuto: boolean;
+	    keyTap: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new InputConf(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.isAuto = source["isAuto"];
+	        this.keyTap = source["keyTap"];
+	    }
+	}
+	export class Config {
+	    inputConf?: InputConf;
+	    captureWindow: string;
+	    frames?: number;
+	    startKey: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.inputConf = this.convertValues(source["inputConf"], InputConf);
+	        this.captureWindow = source["captureWindow"];
+	        this.frames = source["frames"];
+	        this.startKey = source["startKey"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace app {
 	
+	export class CropInfo {
+	    top: number;
+	    left: number;
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CropInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.top = source["top"];
+	        this.left = source["left"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
 	export class UserAction {
 	    auto: boolean;
 	    type: string;
@@ -24,22 +120,6 @@ export namespace app {
 	        this.speed = source["speed"];
 	    }
 	}
-	export class UpdateInfo {
-	    latestVersion: string;
-	    needUpdate: boolean;
-	    err?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latestVersion = source["latestVersion"];
-	        this.needUpdate = source["needUpdate"];
-	        this.err = source["err"];
-	    }
-	}
 	export class VersionInfo {
 	    version: string;
 	    commitShortSHA: string;
@@ -54,40 +134,6 @@ export namespace app {
 	        this.version = source["version"];
 	        this.commitShortSHA = source["commitShortSHA"];
 	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
-	export class CropInfo {
-	    top: number;
-	    left: number;
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CropInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.top = source["top"];
-	        this.left = source["left"];
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
-	export class WinOpLatencyResult {
-	    latency: number;
-	    responseIndex: number;
-	    responseTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new WinOpLatencyResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latency = source["latency"];
-	        this.responseIndex = source["responseIndex"];
-	        this.responseTime = source["responseTime"];
 	    }
 	}
 	export class GetImageResp {
@@ -179,6 +225,38 @@ export namespace app {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.username = source["username"];
 	        this.key = source["key"];
+	    }
+	}
+	export class WinOpLatencyResult {
+	    latency: number;
+	    responseIndex: number;
+	    responseTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WinOpLatencyResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latency = source["latency"];
+	        this.responseIndex = source["responseIndex"];
+	        this.responseTime = source["responseTime"];
+	    }
+	}
+	export class UpdateInfo {
+	    latestVersion: string;
+	    needUpdate: boolean;
+	    err?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latestVersion = source["latestVersion"];
+	        this.needUpdate = source["needUpdate"];
+	        this.err = source["err"];
 	    }
 	}
 
@@ -329,84 +407,6 @@ export namespace adb {
 	        this.device = source["device"];
 	        this.transport_id = source["transport_id"];
 	    }
-	}
-
-}
-
-export namespace fs {
-	
-	export class RecordFile {
-	    dir_name: string;
-	    file_path: string;
-	    size: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new RecordFile(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.dir_name = source["dir_name"];
-	        this.file_path = source["file_path"];
-	        this.size = source["size"];
-	    }
-	}
-
-}
-
-export namespace latencywin {
-	
-	export class InputConf {
-	    type: string;
-	    isAuto: boolean;
-	    keyTap: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new InputConf(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.type = source["type"];
-	        this.isAuto = source["isAuto"];
-	        this.keyTap = source["keyTap"];
-	    }
-	}
-	export class Config {
-	    inputConf?: InputConf;
-	    captureWindow: string;
-	    frames?: number;
-	    startKey: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Config(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.inputConf = this.convertValues(source["inputConf"], InputConf);
-	        this.captureWindow = source["captureWindow"];
-	        this.frames = source["frames"];
-	        this.startKey = source["startKey"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }
