@@ -101,6 +101,10 @@ const handleLoginSuccess = ()=> {
   isLoginFormShow.value = false
 }
 
+const handleCloseLogin = () => {
+  isLoginFormShow.value = true
+}
+
 onMounted(()=>{
   if (isWailsRun()) {
     setEventOn()
@@ -152,7 +156,7 @@ onUnmounted(()=>{
       </template>
     </el-dialog>
 
-    <el-dialog v-model="isLoginFormShow" title="授权校验" width="35%" center>
+    <el-dialog v-model="isLoginFormShow" title="授权校验" width="35%" center :before-close="handleCloseLogin">
       <Login 
         ref="loginRef"
         @login-success="handleLoginSuccess"

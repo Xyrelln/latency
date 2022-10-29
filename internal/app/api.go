@@ -40,6 +40,7 @@ const (
 	recordFile               = "rec.mp4"
 	firstImageFile           = "0001.png"
 	sceneKeyPrefix           = "scene_"
+	userSecrectKey           = "userSecrect"
 )
 
 var autorun = true
@@ -644,20 +645,25 @@ type UserSecrect struct {
 // CheckUpdate ...
 func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 	// userInfo, err := upload.GetUserInfo()
-	user := "userSecrect"
-	val, err := a.store.get([]byte(user))
+	val, err := a.store.get([]byte(userSecrectKey))
 	if err != nil {
 		log.Errorf("get user secrect failed: %v", err)
+		return lighttestservice.UserInfo{}, err
 	}
 	if val == nil {
 		log.Warn("user not exists")
-		return lighttestservice.UserInfo{}, errors.New(fmt.Sprint("user not exists"))
+		return lighttestservice.UserInfo{}, errors.New("user not exists")
 	}
 
 	userSecrect := UserSecrect{}
 	dec := gob.NewDecoder(bytes.NewBuffer(val))
 	if err = dec.Decode(&userSecrect); err != nil {
+		log.Error("user not exists")
 		return lighttestservice.UserInfo{}, err
+	}
+	if userSecrect.Username == "" || userSecrect.Key == "" {
+		log.Error("username or key is empty")
+		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
 	}
 	userInfo, err := upload.CheckUserValid(userSecrect.Username, userSecrect.Key)
 	if err != nil {
@@ -669,15 +675,19 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 // CheckUpdate ...
 func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, error) {
 	// userInfo, err := upload.GetUserInfo()
+	if userSecrect.Username == "" || userSecrect.Key == "" {
+		log.Error("username or key is empty")
+		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
+	}
+
 	userInfo, err := upload.CheckUserValid(userSecrect.Username, userSecrect.Key)
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
 	}
-	user := "userSecrect"
 	var val bytes.Buffer
 	enc := gob.NewEncoder(&val)
 	enc.Encode(userSecrect)
-	a.store.set([]byte(user), val.Bytes())
+	a.store.set([]byte(userSecrectKey), val.Bytes())
 	return userInfo, nil
 }
 
