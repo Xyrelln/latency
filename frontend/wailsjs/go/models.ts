@@ -1,3 +1,82 @@
+export namespace adb {
+	
+	export class Display {
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Display(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
+	export class SwipeEvent {
+	    sx: number;
+	    sy: number;
+	    dx: number;
+	    dy: number;
+	    speed: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SwipeEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sx = source["sx"];
+	        this.sy = source["sy"];
+	        this.dx = source["dx"];
+	        this.dy = source["dy"];
+	        this.speed = source["speed"];
+	    }
+	}
+	export class TapEvent {
+	    x: number;
+	    y: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TapEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.x = source["x"];
+	        this.y = source["y"];
+	    }
+	}
+	export class Device {
+	    serial: string;
+	    state: number;
+	    abi?: string;
+	    usb?: string;
+	    product: string;
+	    model: string;
+	    device: string;
+	    transport_id: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Device(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.abi = source["abi"];
+	        this.usb = source["usb"];
+	        this.product = source["product"];
+	        this.model = source["model"];
+	        this.device = source["device"];
+	        this.transport_id = source["transport_id"];
+	    }
+	}
+
+}
+
 export namespace fs {
 	
 	export class RecordFile {
@@ -78,24 +157,6 @@ export namespace latencywin {
 
 export namespace app {
 	
-	export class CropInfo {
-	    top: number;
-	    left: number;
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CropInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.top = source["top"];
-	        this.left = source["left"];
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
 	export class UserAction {
 	    auto: boolean;
 	    type: string;
@@ -120,6 +181,22 @@ export namespace app {
 	        this.speed = source["speed"];
 	    }
 	}
+	export class UpdateInfo {
+	    latestVersion: string;
+	    needUpdate: boolean;
+	    err?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latestVersion = source["latestVersion"];
+	        this.needUpdate = source["needUpdate"];
+	        this.err = source["err"];
+	    }
+	}
 	export class VersionInfo {
 	    version: string;
 	    commitShortSHA: string;
@@ -134,6 +211,40 @@ export namespace app {
 	        this.version = source["version"];
 	        this.commitShortSHA = source["commitShortSHA"];
 	        this.buildTimestamp = source["buildTimestamp"];
+	    }
+	}
+	export class CropInfo {
+	    top: number;
+	    left: number;
+	    width: number;
+	    height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CropInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.top = source["top"];
+	        this.left = source["left"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
+	export class WinOpLatencyResult {
+	    latency: number;
+	    responseIndex: number;
+	    responseTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WinOpLatencyResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latency = source["latency"];
+	        this.responseIndex = source["responseIndex"];
+	        this.responseTime = source["responseTime"];
 	    }
 	}
 	export class GetImageResp {
@@ -227,38 +338,6 @@ export namespace app {
 	        this.key = source["key"];
 	    }
 	}
-	export class WinOpLatencyResult {
-	    latency: number;
-	    responseIndex: number;
-	    responseTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new WinOpLatencyResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latency = source["latency"];
-	        this.responseIndex = source["responseIndex"];
-	        this.responseTime = source["responseTime"];
-	    }
-	}
-	export class UpdateInfo {
-	    latestVersion: string;
-	    needUpdate: boolean;
-	    err?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latestVersion = source["latestVersion"];
-	        this.needUpdate = source["needUpdate"];
-	        this.err = source["err"];
-	    }
-	}
 
 }
 
@@ -327,85 +406,6 @@ export namespace lighttestservice {
 	        this.username = source["username"];
 	        this.client = source["client"];
 	        this.description = source["description"];
-	    }
-	}
-
-}
-
-export namespace adb {
-	
-	export class Display {
-	    width: number;
-	    height: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Display(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.width = source["width"];
-	        this.height = source["height"];
-	    }
-	}
-	export class SwipeEvent {
-	    sx: number;
-	    sy: number;
-	    dx: number;
-	    dy: number;
-	    speed: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new SwipeEvent(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.sx = source["sx"];
-	        this.sy = source["sy"];
-	        this.dx = source["dx"];
-	        this.dy = source["dy"];
-	        this.speed = source["speed"];
-	    }
-	}
-	export class TapEvent {
-	    x: number;
-	    y: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new TapEvent(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.x = source["x"];
-	        this.y = source["y"];
-	    }
-	}
-	export class Device {
-	    serial: string;
-	    state: number;
-	    abi?: string;
-	    usb?: string;
-	    product: string;
-	    model: string;
-	    device: string;
-	    transport_id: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Device(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.serial = source["serial"];
-	        this.state = source["state"];
-	        this.abi = source["abi"];
-	        this.usb = source["usb"];
-	        this.product = source["product"];
-	        this.model = source["model"];
-	        this.device = source["device"];
-	        this.transport_id = source["transport_id"];
 	    }
 	}
 

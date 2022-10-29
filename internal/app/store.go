@@ -25,7 +25,7 @@ func newStore(path string) (*store, error) {
 		return nil, err
 	}
 
-	db.View(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		// b := tx.Bucket([]byte(defaultBucket))
 		_, err := tx.CreateBucketIfNotExists([]byte(defaultBucket))
 		if err != nil {
