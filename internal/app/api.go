@@ -354,7 +354,9 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 	return device.SetPointerLocationOff()
 }
 
-func (a *Api) StartRecord(serial string, userAction UserAction) (rerr error) {
+type CallBack func() error
+
+func (a *Api) StartRecord(serial string, userAction UserAction, actionCallback CallBack) (rerr error) {
 	defer func() {
 		if rerr != nil {
 			log.Error(rerr)
@@ -370,25 +372,26 @@ func (a *Api) StartRecord(serial string, userAction UserAction) (rerr error) {
 	a.cmdRunner = runner
 
 	// record file exists check
-	go func() {
-		var nums [15][0]int
-		interval := 200
+	// go func() {
+	var nums [15][0]int
+	interval := 200
 
-		for range nums {
-			isExists := fs.FileSizeGreaterThan(recFile, 1024*1024)
-			if isExists {
-				log.Info("record file exists: %s", recFile)
-				a.emitInfo(eventRecordFileExists)
+	for range nums {
+		isExists := fs.FileSizeGreaterThan(recFile, 1024*10)
+		if isExists {
+			log.Info("record file exists: %s", recFile)
+			a.emitInfo(eventRecordFileExists)
 
-				if userAction.Auto {
-					a.AutoInput(serial, userAction)
-				}
-
-				break
+			if userAction.Auto {
+				a.AutoInput(serial, userAction)
+				actionCallback()
 			}
-			time.Sleep(time.Duration(interval) * time.Millisecond)
+
+			break
 		}
-	}()
+		time.Sleep(time.Duration(interval) * time.Millisecond)
+	}
+	// }()
 
 	return
 }
@@ -433,18 +436,27 @@ func (a *Api) StopRunner() error {
 
 // Start 启动延迟测试
 func (a *Api) Start(serial string, recordSecond int64, userAction UserAction) error {
-	err := a.StartRecord(serial, userAction)
+
+	err := a.StartRecord(serial, userAction, func() error {
+		time.Sleep(time.Duration(recordSecond) * time.Second)
+		e := a.StopScrcpyServer(serial)
+		if e != nil {
+			a.emitInfo(eventRecordStopError)
+			return e
+		}
+		return nil
+	})
 	if err != nil {
 		a.emitInfo(eventRecordStartError)
 		return err
 	}
 	// wait for filish
-	time.Sleep(time.Duration(recordSecond) * time.Second)
-	err = a.StopScrcpyServer(serial)
-	if err != nil {
-		a.emitInfo(eventRecordStopError)
-		return err
-	}
+	// time.Sleep(time.Duration(recordSecond) * time.Second)
+	// err = a.StopScrcpyServer(serial)
+	// if err != nil {
+	// 	a.emitInfo(eventRecordStopError)
+	// 	return err
+	// }
 	err = a.StartTransform()
 	if err != nil {
 		a.emitInfo(eventTransformStartError)
@@ -559,13 +571,23 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	return mInfo, nil
 }
 
-func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, diffScore int) error {
+type Threshold struct {
+	PointerThreshold    float64 `json:"pointer_threshold"`
+	BlackWhiteThreshold int     `json:"black_white_threshold"`
+	SceneThreshold      int     `json:"scene_threshold"`
+}
+
+func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, threshold Threshold) error {
 	// log.Infof("current rect: %v", imageRect)
 	// log.Infof("workdir: %s", a.ImagesDir)
 	// a.emitInfo(eventAnalyseStart)
 	// responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect, diffScore)
 
 	dm := core.NewDelayMonitor()
+	dm.PointerThreshold = threshold.PointerThreshold
+	dm.BlackWhiteThreshold = threshold.BlackWhiteThreshold
+	dm.SceneThreshold = threshold.SceneThreshold
+
 	dm.VideoPath = filepath.Join(a.VideoDir, recordFile)
 	dm.ImagesFolder = a.ImagesDir
 	dm.PointerRect = image.Rect(0, 0, 100, 35) // 指针位置观察点

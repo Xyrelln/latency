@@ -155,7 +155,7 @@ const imagePageInfo:ImagePage = reactive({
 })
 
 const settingForm = reactive({
-  touchScore: 4,
+  touchScore: 1,
   diffScore: 20,
   timeout: 3,
   sceneStart: 1500,
@@ -526,7 +526,13 @@ const handleCalc = () => {
     source_height: imageInfo.height,
   })
   // const threshold = 20
-  StartAnalyse(rectinfo, settingForm.diffScore)
+  
+  const threshold = app.Threshold.createFrom({
+    pointer_threshold: settingForm.touchScore,
+    black_white_threshold: 60,
+    scene_threshold: settingForm.diffScore,
+  })
+  StartAnalyse(rectinfo, threshold)
   NProgress.start()
   // delayTimes.value = 0 
   // calcButtonDisable.value = true
@@ -934,7 +940,7 @@ onUnmounted(()=>{
               <el-row>
                 <el-form :model="settingForm" ref="settingFormRef" :rules="rules" label-position="left" label-width="100px">
                   <el-form-item label="触控阈值" prop="touchScore">
-                    <el-input v-model.number="settingForm.touchScore"/>
+                    <el-input v-model="settingForm.touchScore"/>
                   </el-form-item>
                   <el-form-item label="区域阈值" prop="diffScore">
                     <el-input v-model.number="settingForm.diffScore"/>

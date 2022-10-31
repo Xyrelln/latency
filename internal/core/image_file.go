@@ -107,7 +107,7 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 	// var images []image.Image
 	var imgs []ImageFile
 	var eg errgroup.Group
-	touchArea := image.Rect(0, 0, 100, 35)
+	touchArea := image.Rect(0, 0, 200, 35)
 
 	_ = filepath.Walk(
 		dirName,
