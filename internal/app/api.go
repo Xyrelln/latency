@@ -459,7 +459,7 @@ func (a *Api) StopTransform() error {
 
 func (a *Api) ListRecords() ([]fs.RecordFile, error) {
 	root, _ := fs.GetExecuteRoot()
-	workDir := filepath.Join(root, "cache")
+	workDir := filepath.Join(root, "cache", "mobile")
 	files, err := fs.GetRecordFiles(workDir)
 	if err != nil {
 		log.Errorf("ListRecords error: %v", err)
