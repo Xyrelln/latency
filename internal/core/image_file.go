@@ -115,11 +115,12 @@ func ListImageFileWithCrop(dirName string, rect, touchRect image.Rectangle) ([]I
 			eg.Go(func() error {
 				img, err := LoadImage(path, info, e)
 				if img != nil {
-					cropImgT, _ := CropImage(img, touchRect)
-					blackWhiteImg := RGBtoBlackAndWhite(cropImgT, WhiteThreshold)
+					cropImgT := CropImage(img, touchRect)
+					// blackWhiteImg := RGBtoBlackAndWhite(cropImgT, WhiteThreshold)
+					blackWhiteImg := RGBtoGray(cropImgT)
 					//extImgHashT, _ := goimagehash.ExtAverageHash(cropImgT, 8, 8)
 
-					cropImgC, _ := CropImage(img, rect)
+					cropImgC := CropImage(img, rect)
 					extImgHashC, _ := goimagehash.ExtDifferenceHash(cropImgC, 16, 16)
 					imgs = append(imgs, ImageFile{
 						Path:         path,

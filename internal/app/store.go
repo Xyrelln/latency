@@ -18,7 +18,7 @@ type store struct {
 func newStore(path string) (*store, error) {
 	dbPath := filepath.Join(path, "latency.db")
 	log.Infof("read db on path: %s", dbPath)
-	db, err := bolt.Open(dbPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(dbPath, 0600, &bolt.Options{Timeout: 10 * time.Second})
 	if err != nil {
 		log.Errorf("db open failed: %v", err)
 		return nil, err

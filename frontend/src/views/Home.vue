@@ -35,7 +35,6 @@ const setEventOn = () => {
     ElMessage({
       type: 'success',
       message: '新版本更新成功，下次打开应用生效',
-      duration: 0,
       showClose: true
     })
   })
@@ -44,7 +43,6 @@ const setEventOn = () => {
     ElMessage({
       type: 'error',
       message: '新版本更新失败: ' + err,
-      duration: 0,
       showClose: true
     })
   })

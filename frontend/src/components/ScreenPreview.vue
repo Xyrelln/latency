@@ -411,11 +411,12 @@ const getPreviewImgSize = () => {
   const h = previewImgRef.value.offsetHeight
   // console.log(previewImgRef.value.style)
   
-  const styles = window.getComputedStyle(previewImgRef.value);
-  console.log('getPreviewImgSize')
-  console.log(parseInt(w))
-  console.log(parseInt(styles.width, 10))
-  return { width: parseInt(styles.width, 10), height: parseInt(styles.height, 10)}
+  // const styles = window.getComputedStyle(previewImgRef.value);
+  console.log('getPreviewImgSize', w, h)
+  // console.log(parseInt(w))
+  // console.log(parseInt(styles.width, 10))
+  
+  return { width: w, height: h}
 }
 
 const handleCurrentChange = (val: number) => {

@@ -37,7 +37,7 @@ func TestCropCurserArea(t *testing.T) {
 
 	// touchArea := image.Rect(0, 0, 100, 35)
 	touchArea := image.Rect(0, 0, 100, 35)
-	cropImg, _ := CropImage(img, touchArea)
+	cropImg := CropImage(img, touchArea)
 
 	// cropImage, err := CropCurserArea("/Users/jason/Developer/epc/op-latency-mobile/out/image/4/0001.png")
 	// if err != nil {
@@ -57,7 +57,7 @@ func TestCropCurserArea(t *testing.T) {
 }
 
 func TestGrayImage(t *testing.T) {
-	filename := "/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/mobile/20221101114458/images/0001.png"
+	filename := "/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/mobile/20221101215156/images/0002.png"
 	infile, err := os.Open(filename)
 	defer infile.Close()
 	if err != nil {
@@ -71,13 +71,16 @@ func TestGrayImage(t *testing.T) {
 
 	// touchArea := image.Rect(0, 0, 300, 300)
 	// touchArea := image.Rect(0, 103, 100, 138)
-	touchArea := image.Rect(0, 100, 100, 138)
+	touchArea := image.Rect(0, 102, 137, 142)
 	// cropImg, _ := CropImage(img, touchArea)
 
 	result := image.NewRGBA(touchArea)
 	draw.Draw(result, touchArea, img, touchArea.Min, draw.Src)
 
-	bwImg := RGBtoBlackAndWhite(result, 60)
+	// bwImg := RGBtoBlackAndWhite(result, 10)
+	// bwImg := RGBtoGrayScale(result)
+
+	bwImg := RGBtoGray(result)
 
 	// func CropImage(img image.Image, area image.Rectangle) image.Image {
 	// result := image.NewRGBA(touchArea)
@@ -86,7 +89,7 @@ func TestGrayImage(t *testing.T) {
 	// }
 
 	// Encode the grayscale image to the new file
-	newFileName := "/Users/jason/Downloads/017-bw.png"
+	newFileName := "/Users/jason/Downloads/102.png"
 	newfile, err := os.Create(newFileName)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile.Name(), err)
@@ -94,7 +97,17 @@ func TestGrayImage(t *testing.T) {
 
 	}
 	defer newfile.Close()
-	png.Encode(newfile, bwImg)
+	png.Encode(newfile, result)
+
+	newFileName2 := "/Users/jason/Downloads/102-bw.png"
+	newfile2, err := os.Create(newFileName2)
+	if err != nil {
+		log.Printf("failed creating %s: %s", newfile2.Name(), err)
+		log.Fatal(err)
+
+	}
+	defer newfile2.Close()
+	png.Encode(newfile2, bwImg)
 	// newfile.Close()
 }
 
@@ -138,7 +151,7 @@ func TestAvageHash(t *testing.T) {
 	}
 	defer fd2.Close()
 	img2, _, _ := image.Decode(fd2)
-	cropImg2, _ := CropImage(img2, touchArea)
+	cropImg2 := CropImage(img2, touchArea)
 	extImgHashT2, _ := goimagehash.ExtDifferenceHash(cropImg2, 16, 16)
 	score, _ := extImgHashT1.Distance(extImgHashT2)
 	log.Printf("dHash 16* 16 score: %d \n", score)

@@ -240,7 +240,6 @@ async function removeEventLister() {
 //       title: '环境检查',
 //       type: 'error',
 //       message: err,
-//       duration: 0,
 //     })
 //   })
 // }

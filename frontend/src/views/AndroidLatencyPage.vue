@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {reactive, ref, h, inject, Ref, provide, onMounted, computed, watch, onUnmounted} from 'vue'
-// import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import NProgress from 'nprogress'
@@ -171,7 +170,7 @@ const imagePageInfo:ImagePage = reactive({
 const settingForm = reactive({
   touchScore: 1,
   diffScore: 20,
-  timeout: 3,
+  timeout: 1,
   sceneStart: 1500,
   prepareTimeout: 3,
   develop: false,
@@ -180,6 +179,10 @@ const settingForm = reactive({
 
 provide('threshold', settingForm.diffScore)
 
+const imagePreviewInfo = reactive({
+  width: 0,
+  height: 0,
+})
 
 const rules =  {
   touchScore: [
@@ -533,9 +536,19 @@ const handleCropTouchChange = (res: CropInfo)=> {
   cropTouchInfo.height = res.height
 }
 
-const handleScaleChange = () => {
+const handleGetPreviewImage = () => {
   const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  imagePreviewInfo.width = pImgSize.width
+  imagePreviewInfo.height = pImgSize.height
+
   imageZoom.value = imageInfo.width / pImgSize.width
+}
+
+const handleScaleChange = () => {
+  // const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  // imageZoom.value = imageInfo.width / pImgSize.width
+
+  handleGetPreviewImage()
 
   imagePreviewRef.value.updateSelectBoxStyle()
   imagePreviewRef.value.updateSelectBoxTouchStyle()
@@ -553,14 +566,15 @@ const handleCalc = () => {
     return
   }
 
-  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  // const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  handleGetPreviewImage()
   const rectinfo = core.ImageRectInfo.createFrom({
     x: selectedScene.value.crop_coordinate.left,
     y: selectedScene.value.crop_coordinate.top,
     w: selectedScene.value.crop_coordinate.width + selectedScene.value.crop_coordinate.left,
     h: selectedScene.value.crop_coordinate.height + selectedScene.value.crop_coordinate.top,
-    preview_width: pImgSize.width,
-    preview_height: pImgSize.height,
+    preview_width: imagePreviewInfo.width,
+    preview_height: imagePreviewInfo.height,
     source_width: imageInfo.width,
     source_height: imageInfo.height,
   })
@@ -700,7 +714,6 @@ async function addEventLister() {
       title: '进度提示: 2/3',
       type: 'error',
       message: "数据预处理失败，请重试",
-      duration: 0,
     })
     NProgress.done()
   })
@@ -709,17 +722,16 @@ async function addEventLister() {
       title: '进度提示: 2/3',
       type: 'error',
       message: "录制失败，请重试",
-      duration: 0,
     })
     NProgress.done()
   })
-  EventsOn("latency:transform_filish", ()=>{
+  EventsOn("latency:transform_filish", async()=>{
     ElNotification({
       title: '进度提示: 2/3',
       type: 'success',
       message: "数据预处理完成，加载首帧画面",
     })
-    getFirstImage()
+    await getFirstImage()
 
     NProgress.done()
     updateCropInfo()
@@ -760,7 +772,6 @@ async function addEventLister() {
           title: '数值异常',
           type: 'error',
           message: "当前数值不在串流延迟正常范围内，建议重试",
-          duration: 0,
         })
       }
     } else {
@@ -788,15 +799,15 @@ const updateCropInfo = () => {
   imageZoom.value = pImgSize.width / imageInfo.width 
   // console.log(imageZoom.value)
   
-  cropInfo.left = Math.trunc(latencyForm.scene.crop_coordinate.left * imageZoom.value),
-  cropInfo.top = Math.trunc(latencyForm.scene.crop_coordinate.top * imageZoom.value),
-  cropInfo.width = Math.trunc(latencyForm.scene.crop_coordinate.width * imageZoom.value),
-  cropInfo.height = Math.trunc(latencyForm.scene.crop_coordinate.height * imageZoom.value),
+  cropInfo.left = latencyForm.scene.crop_coordinate.left * imageZoom.value,
+  cropInfo.top = latencyForm.scene.crop_coordinate.top * imageZoom.value,
+  cropInfo.width = latencyForm.scene.crop_coordinate.width * imageZoom.value,
+  cropInfo.height = latencyForm.scene.crop_coordinate.height * imageZoom.value,
 
-  cropTouchInfo.left = Math.trunc(latencyForm.scene.crop_touch_coordinate.left * imageZoom.value),
-  cropTouchInfo.top = Math.trunc(latencyForm.scene.crop_touch_coordinate.top * imageZoom.value),
-  cropTouchInfo.width = Math.trunc(latencyForm.scene.crop_touch_coordinate.width * imageZoom.value),
-  cropTouchInfo.height = Math.trunc(latencyForm.scene.crop_touch_coordinate.height * imageZoom.value),
+  cropTouchInfo.left = latencyForm.scene.crop_touch_coordinate.left * imageZoom.value,
+  cropTouchInfo.top = latencyForm.scene.crop_touch_coordinate.top * imageZoom.value,
+  cropTouchInfo.width = latencyForm.scene.crop_touch_coordinate.width * imageZoom.value,
+  cropTouchInfo.height = latencyForm.scene.crop_touch_coordinate.height * imageZoom.value,
 
   // console.log(cropInfo)
   imagePreviewRef.value.updateSelectBoxStyle()
@@ -805,8 +816,8 @@ const updateCropInfo = () => {
   imagePreviewRef.value.switchSelectBoxTouchShow(true)
 }
 
-function getFirstImage(){
-  GetFirstImageInfo().then((res: core.ImageInfo) => {
+async function getFirstImage(){
+  await GetFirstImageInfo().then((res: core.ImageInfo) => {
     console.log('getFirstImage')
     imageInfo.path = res.path
     imageInfo.width = res.width
@@ -867,7 +878,6 @@ async function initCheck() {
       title: '环境检查',
       type: 'error',
       message: err,
-      duration: 0,
     })
   })
 }
@@ -1078,7 +1088,14 @@ onUnmounted(()=>{
           </el-col>
         </el-row>
         <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
+            <span>图片信息</span>
+          </el-col>
+          <el-col :span="12" class="info-line">
+            source width: {{ imageInfo.width }} height: {{ imageInfo.height }}  preview width:{{ imagePreviewInfo.width}} height: {{imagePreviewInfo.height}}
+          </el-col>
         </el-row>
+
         <el-row justify="center" class="result-row">
           <el-col :span="4" class="info-line">
             <span>操作延迟(毫秒)</span>
