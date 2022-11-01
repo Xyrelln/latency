@@ -657,9 +657,13 @@ func (a *Api) UploadFile(filePath string) error {
 	defer f.Close()
 
 	userSecret, err := a.getUserSecret()
+	version := lighttestVer.Version
+	if version == "" {
+		version = "DEBUG"
+	}
 	client := token.ClientInfo{
-		Name:     appname,
-		Version:  lighttestVer.Version,
+		Name:     appName,
+		Version:  version,
 		Username: userSecret.Username,
 	}
 	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
@@ -743,9 +747,13 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 	}
 
 	userSecret, err := a.getUserSecret()
+	version := lighttestVer.Version
+	if version == "" {
+		version = "DEBUG"
+	}
 	client := token.ClientInfo{
-		Name:     appname,
-		Version:  lighttestVer.Version,
+		Name:     appName,
+		Version:  version,
 		Username: userSecret.Username,
 	}
 	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
@@ -764,9 +772,13 @@ func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, erro
 	}
 
 	userSecret, err := a.getUserSecret()
+	version := lighttestVer.Version
+	if version == "" {
+		version = "DEBUG"
+	}
 	client := token.ClientInfo{
-		Name:     appname,
-		Version:  lighttestVer.Version,
+		Name:     appName,
+		Version:  version,
 		Username: userSecret.Username,
 	}
 	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}

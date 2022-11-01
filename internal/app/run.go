@@ -19,11 +19,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
 
-var (
-	appname = "latency-vrviu"
-	verion  = "0.0.1"
-)
-
 //var assets embed.FS
 
 type FileLoader struct {
@@ -55,7 +50,7 @@ func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 func Run(assets embed.FS) int {
 	// Create an instance of the app structure
-	appData, err := appDataLocation(appname)
+	appData, err := appDataLocation(appName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open add data directory: %v\n", err)
 		return 1
