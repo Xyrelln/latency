@@ -77,10 +77,11 @@ func TestGrayImage(t *testing.T) {
 	result := image.NewRGBA(touchArea)
 	draw.Draw(result, touchArea, img, touchArea.Min, draw.Src)
 
-	// bwImg := RGBtoBlackAndWhite(result, 10)
-	// bwImg := RGBtoGrayScale(result)
+	bwImg := RGBtoBlackAndWhite(result, 60)
+	// bwImg := RGBtoGray(result)
+	// bwImg = GrayToBlackAndWhite(bwImg, 1)
 
-	bwImg := RGBtoGray(result)
+	// bwImg := RGBtoGray(result)
 
 	// func CropImage(img image.Image, area image.Rectangle) image.Image {
 	// result := image.NewRGBA(touchArea)
@@ -89,7 +90,7 @@ func TestGrayImage(t *testing.T) {
 	// }
 
 	// Encode the grayscale image to the new file
-	newFileName := "/Users/jason/Downloads/102.png"
+	newFileName := "/Users/jason/Downloads/103.png"
 	newfile, err := os.Create(newFileName)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile.Name(), err)
@@ -99,7 +100,7 @@ func TestGrayImage(t *testing.T) {
 	defer newfile.Close()
 	png.Encode(newfile, result)
 
-	newFileName2 := "/Users/jason/Downloads/102-bw.png"
+	newFileName2 := "/Users/jason/Downloads/103-bw.png"
 	newfile2, err := os.Create(newFileName2)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile2.Name(), err)
