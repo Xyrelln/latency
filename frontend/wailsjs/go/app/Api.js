@@ -138,8 +138,8 @@ export function StartAnalyse(arg1, arg2, arg3) {
   return window['go']['app']['Api']['StartAnalyse'](arg1, arg2, arg3);
 }
 
-export function StartRecord(arg1, arg2, arg3) {
-  return window['go']['app']['Api']['StartRecord'](arg1, arg2, arg3);
+export function StartRecord(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['Api']['StartRecord'](arg1, arg2, arg3, arg4);
 }
 
 export function StartTransform() {

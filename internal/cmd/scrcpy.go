@@ -69,8 +69,9 @@ func RecordVideo(ctx context.Context, serial, recFile string) (data []byte, err 
 	return CmdRun(cmd)
 }
 
-func ScrcpyStart(serial, recFile string) (*CmdRunner, error) {
-	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+func ScrcpyStart(serial, recFile string, recordSecond int) (*CmdRunner, error) {
+	var timeOut = 10
+	ctx, cancelFn := context.WithTimeout(context.Background(), time.Duration(recordSecond+timeOut)*time.Second)
 
 	go func() {
 		RecordVideo(ctx, serial, recFile)

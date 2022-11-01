@@ -356,7 +356,7 @@ func (a *Api) SetPointerLocationOff(serial string) error {
 
 type CallBack func() error
 
-func (a *Api) StartRecord(serial string, userAction UserAction, actionCallback CallBack) (rerr error) {
+func (a *Api) StartRecord(serial string, recordSecond int, userAction UserAction, actionCallback CallBack) (rerr error) {
 	defer func() {
 		if rerr != nil {
 			log.Error(rerr)
@@ -368,7 +368,7 @@ func (a *Api) StartRecord(serial string, userAction UserAction, actionCallback C
 	recFile := filepath.Join(a.VideoDir, recordFile)
 	log.Infof("starting record, store path: %s", recFile)
 
-	runner, rerr := cmd.ScrcpyStart(serial, recFile)
+	runner, rerr := cmd.ScrcpyStart(serial, recFile, recordSecond)
 	a.cmdRunner = runner
 
 	// record file exists check
@@ -435,9 +435,9 @@ func (a *Api) StopRunner() error {
 }
 
 // Start 启动延迟测试
-func (a *Api) Start(serial string, recordSecond int64, userAction UserAction) error {
+func (a *Api) Start(serial string, recordSecond int, userAction UserAction) error {
 
-	err := a.StartRecord(serial, userAction, func() error {
+	err := a.StartRecord(serial, recordSecond, userAction, func() error {
 		time.Sleep(time.Duration(recordSecond) * time.Second)
 		e := a.StopScrcpyServer(serial)
 		if e != nil {

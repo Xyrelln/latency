@@ -170,6 +170,6 @@ onUnmounted(()=>{
 <style scoped>
 .top-tabs {
   width: 100vw;
-  height: 100vh;
+  /* height: 96vh; */
 }
 </style>
