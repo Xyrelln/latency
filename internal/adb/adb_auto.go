@@ -24,8 +24,10 @@ type TapEvent struct {
 }
 
 type Display struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
+	Width     int `json:"width"`
+	Height    int `json:"height"`
+	AppWidth  int `json:"app_width"`
+	APPHeight int `json:"app_height"`
 }
 
 func (d *Device) AutoSwipe(se SwipeEvent) error {
@@ -106,7 +108,9 @@ func parsePhysicalSize(out string) (*Display, error) {
 
 // 获取屏幕分辨率
 func (d *Device) DisplaySize() (*Display, error) {
-	cmd := d.Command("dumpsys window displays | head -n 3")
+	cmd := d.Command("dumpsys window displays | grep 'displayId 0'")
+	// 荣耀手机获取应用分辨率存在问题
+	// cmd := d.Command("dumpsys window displays | head -n 5")
 
 	out, err := cmd.Call()
 	if err != nil {
@@ -125,20 +129,39 @@ func (d *Device) DisplaySize() (*Display, error) {
 
 func parseSize(out string) (*Display, error) {
 	var dispaly Display
-	reAppSize := regexp.MustCompile(`app=[0-9]+x[0-9]+`)
+	reAppSize := regexp.MustCompile(`, app [0-9]+ x [0-9]+`) // not re with: smallest app 1080 x 953,
+	reRealSize := regexp.MustCompile(`real [0-9]+ x [0-9]+`)
+
+	realSizes := reRealSize.Find([]byte(out))
+	if len(realSizes) == 0 {
+		return nil, errors.New("real display info read error")
+	}
+
+	realSizeValue := realSizes[4:]
+	realSizeValues := strings.Split(string(realSizeValue), "x")
+	// values := strings.Split(string(appSizes), "=")
+	if len(realSizeValues) != 2 {
+		return nil, fmt.Errorf("display size read error")
+	}
+	dispaly.Width, _ = strconv.Atoi(strings.TrimSpace(realSizeValues[0]))
+	dispaly.Height, _ = strconv.Atoi(strings.TrimSpace(realSizeValues[1]))
+
 	appSizes := reAppSize.Find([]byte(out))
 	if len(appSizes) == 0 {
 		return nil, errors.New("display info read error")
 	}
 
-	values := strings.Split(string(appSizes), "=")
-	if len(values) != 2 {
+	appSizeValue := appSizes[5:]
+	appSizeValues := strings.Split(string(appSizeValue), "x")
+	// values := strings.Split(string(appSizes), "=")
+	if len(appSizeValues) != 2 {
 		return nil, fmt.Errorf("display size read error")
 	}
 
-	sizes := strings.Split(values[len(values)-1], "x")
-	dispaly.Width, _ = strconv.Atoi(strings.TrimSpace(sizes[0]))
-	dispaly.Height, _ = strconv.Atoi(strings.TrimSpace(sizes[1]))
+	// sizes := strings.Split(appSizeValues[len(appSizeValues)-1], "x")
+	dispaly.AppWidth, _ = strconv.Atoi(strings.TrimSpace(appSizeValues[0]))
+	dispaly.APPHeight, _ = strconv.Atoi(strings.TrimSpace(appSizeValues[1]))
+
 	return &dispaly, nil
 }
 

@@ -2,7 +2,6 @@ package app
 
 import (
 	"bytes"
-	"fmt"
 	"path/filepath"
 	"time"
 
@@ -89,7 +88,7 @@ func (s *store) list(prefix []byte) ([][]byte, error) {
 		c := b.Cursor()
 
 		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-			fmt.Printf("key=%s, value=%s\n", k, v)
+			// fmt.Printf("key=%s, value=%s\n", k, v)
 			items = append(items, v)
 		}
 		return nil

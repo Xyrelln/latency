@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image"
 	"path/filepath"
 	"strings"
 	"time"
@@ -157,11 +156,12 @@ type DeviceInfo struct {
 }
 
 type UserScene struct {
-	Name           string     `json:"name"`
-	Key            string     `json:"key"`
-	Device         DeviceInfo `json:"device"`
-	CropCoordinate CropInfo   `json:"crop_coordinate"`
-	Action         UserAction `json:"action"`
+	Name                string     `json:"name"`
+	Key                 string     `json:"key"`
+	Device              DeviceInfo `json:"device"`
+	CropCoordinate      CropInfo   `json:"crop_coordinate"`
+	CropTouchCoordinate CropInfo   `json:"crop_touch_coordinate"`
+	Action              UserAction `json:"action"`
 }
 
 // 获取设备列表
@@ -577,7 +577,7 @@ type Threshold struct {
 	SceneThreshold      int     `json:"scene_threshold"`
 }
 
-func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, threshold Threshold) error {
+func (a *Api) StartAnalyse(imageRect, touchRect core.ImageRectInfo, threshold Threshold) error {
 	// log.Infof("current rect: %v", imageRect)
 	// log.Infof("workdir: %s", a.ImagesDir)
 	// a.emitInfo(eventAnalyseStart)
@@ -590,8 +590,9 @@ func (a *Api) StartAnalyse(imageRect core.ImageRectInfo, threshold Threshold) er
 
 	dm.VideoPath = filepath.Join(a.VideoDir, recordFile)
 	dm.ImagesFolder = a.ImagesDir
-	dm.PointerRect = image.Rect(0, 0, 100, 35) // 指针位置观察点
+	// dm.PointerRect = image.Rect(0, 0, 100, 35) // 指针位置观察点
 	dm.SceneRect = imageRect
+	dm.TouchRect = touchRect
 	costTime, err := dm.Run()
 	if err != nil {
 		fmt.Printf("delay monitor run failed:%v", err)

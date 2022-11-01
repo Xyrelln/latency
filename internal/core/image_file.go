@@ -103,11 +103,11 @@ func GetCropRect(imageRect ImageRectInfo) (image.Rectangle, error) {
 	return cropRect, nil
 }
 
-func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, error) {
+func ListImageFileWithCrop(dirName string, rect, touchRect image.Rectangle) ([]ImageFile, error) {
 	// var images []image.Image
 	var imgs []ImageFile
 	var eg errgroup.Group
-	touchArea := image.Rect(0, 0, 200, 35)
+	// touchArea := image.Rect(0, 0, 200, 35)
 
 	_ = filepath.Walk(
 		dirName,
@@ -115,7 +115,7 @@ func ListImageFileWithCrop(dirName string, rect image.Rectangle) ([]ImageFile, e
 			eg.Go(func() error {
 				img, err := LoadImage(path, info, e)
 				if img != nil {
-					cropImgT, _ := CropImage(img, touchArea)
+					cropImgT, _ := CropImage(img, touchRect)
 					blackWhiteImg := RGBtoBlackAndWhite(cropImgT, WhiteThreshold)
 					//extImgHashT, _ := goimagehash.ExtAverageHash(cropImgT, 8, 8)
 

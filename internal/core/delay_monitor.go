@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"image"
+	"op-latency-mobile/internal/adb"
 	"op-latency-mobile/internal/ffprobe"
 	"strconv"
 	"time"
@@ -26,7 +27,9 @@ type DelayMonitor struct {
 	PointerRect         image.Rectangle `json:"pointer_rect,omitempty"`
 	PointerThreshold    float64         `json:"pointer_threshold,omitempty"`
 	SceneRect           ImageRectInfo   `json:"scene_rect,omitempty"`
+	TouchRect           ImageRectInfo   `json:"touch_rect,omitempty"`
 	SceneThreshold      int             `json:"scene_threshold,omitempty"`
+	Display             adb.Display     `json:"display"`
 }
 
 func (dm *DelayMonitor) PTSPackets() (*ffprobe.Packets, error) {
@@ -75,12 +78,24 @@ func (dm *DelayMonitor) FrameSpacingTime(packets *ffprobe.Packets, startFrame, e
 }
 
 func (dm *DelayMonitor) FrameSpacing() (startFrame, endFrame int, err error) {
-	rect, err := GetCropRect(dm.SceneRect)
-	if err != nil {
-		log.Error("image with wrong scaling")
-	}
-	log.Printf("rect: %v", rect)
-	imgs, err := ListImageFileWithCrop(dm.ImagesFolder, rect)
+	// rect, err := GetCropRect(dm.SceneRect)
+	// if err != nil {
+	// 	log.Error("image with wrong scaling")
+	// }
+
+	rect := image.Rect(dm.SceneRect.X, dm.SceneRect.Y, dm.SceneRect.W, dm.SceneRect.H)
+	log.Printf("scene rect: %v", rect)
+
+	// touchRect := image.Rect(0, 0, 200, 35)
+	// var touchRect image.Rectangle
+	// if dm.TouchRect.X != 0 {
+	// 	touchRect = image.Rect(dm.TouchRect.X, dm.TouchRect.Y, dm.TouchRect.W, dm.TouchRect.H)
+	// } else {
+	// 	touchRect = image.Rect(0, 0, 200, 35)
+	// }
+	touchRect := image.Rect(dm.TouchRect.X, dm.TouchRect.Y, dm.TouchRect.W, dm.TouchRect.H)
+	log.Infof("touch rect: %v", touchRect)
+	imgs, err := ListImageFileWithCrop(dm.ImagesFolder, rect, touchRect)
 	if err != nil {
 		log.Error("Specified directory with images inside does not exists or is corrupted")
 	}

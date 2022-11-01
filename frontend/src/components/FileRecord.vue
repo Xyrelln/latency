@@ -30,7 +30,15 @@ import {
 import {adb, core, fs} from '../../wailsjs/go/models'
 
 
+interface Emits {
+  (e: 'load-extVideo'): void
+}
+
+
+const emit = defineEmits<Emits>()
+
 const data = ref<Array<fs.RecordFile>>([])
+
 
 /**
  * 清理所有缓存数据
@@ -53,8 +61,8 @@ const handleClearCacheData = ()=> {
 /**
  * 加载外部视频
  */
-const handleLoadVideo = () => {
-
+const handleLoadExtVideo = () => {
+  emit('load-extVideo')
 }
 
 /**
@@ -109,7 +117,7 @@ defineExpose({
           content="加载外部视频"
           placement="bottom-start"
         >
-          <el-button>加载</el-button>
+          <el-button @click="handleLoadExtVideo">加载</el-button>
         </el-tooltip>
 
         <!-- <el-tooltip

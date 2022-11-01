@@ -124,7 +124,7 @@ onUnmounted(()=>{
 
 <template>
   <el-container>
-    <el-tabs type="border-card" v-model="topTabName" >
+    <el-tabs type="border-card" v-model="topTabName" class="top-tabs" >
       <el-tab-pane label="延迟测试-PC" name="latency-pc">
         <PCLatencyPage></PCLatencyPage>
       </el-tab-pane>
@@ -168,5 +168,8 @@ onUnmounted(()=>{
 </template>
 
 <style scoped>
-
+.top-tabs {
+  width: 100vw;
+  height: 100vh;
+}
 </style>

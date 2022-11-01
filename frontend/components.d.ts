@@ -31,6 +31,7 @@ declare module '@vue/runtime-core' {
     FileRecord: typeof import('./src/components/FileRecord.vue')['default']
     HelpPage: typeof import('./src/components/HelpPage.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
+    ResizableDiv: typeof import('./src/components/ResizableDiv.vue')['default']
     ScreenPreview: typeof import('./src/components/ScreenPreview.vue')['default']
   }
 }

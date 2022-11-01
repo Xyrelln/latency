@@ -193,10 +193,18 @@ func TestRegexp(t *testing.T) {
 	// r, _ := regexp.Compile("p([a-z]+)ch")
 	// fmt.Println(r.MatchString("peach"))
 
-	re := regexp.MustCompile(`displayWidth=[0-9]+`)
-	re2 := regexp.MustCompile(`displayHeight=[0-9]+`)
-	fmt.Printf("%s \n", re.Find([]byte(`{displayWidth=1080 displayHeight=2400 density={3.0} cuto`)))
-	fmt.Printf("%q\n", re2.FindAll([]byte(`{displayWidth=1080 displayHeight=2400 density={3.0} cuto`), -1))
+	// re := regexp.MustCompile(`displayWidth=[0-9]+`)
+	// re2 := regexp.MustCompile(`displayHeight=[0-9]+`)
+	re := regexp.MustCompile(`, app [0-9]+ x [0-9]+`)
+	re2 := regexp.MustCompile(`, app [0-9]+ x [0-9]+`)
+	re3 := regexp.MustCompile(`real [0-9]+ x [0-9]+`)
+	out := []byte(` mDisplayInfo=DisplayInfo{"内置屏幕, displayId 0", uniqueId "****", app 1080 x 2232, real 1080 x 2340, largest app 2232 x 2232, smallest app 1080 x 972, mode 1, defaultMode 1, modes [{id=1, width=1080, height=2340, fps=60.000004}], colorMode 0, supportedColorModes [0, 7], hdrCapabilities android.view.Display$HdrCapabilities@6cb03a39, rotation 0, density 480 (409.432 x 412.75) dpi, layerStack 0, appVsyncOff 2000000, presDeadline 15666666, type BUILT_IN, address ****, state ON, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, removeMode 0}`)
+	value := re.Find(out)
+	fmt.Print(string(value[5:]))
+
+	fmt.Printf("%s \n", re.Find([]byte(` mDisplayInfo=DisplayInfo{"内置屏幕, displayId 0", uniqueId "****", app 1080 x 2232, real 1080 x 2340, largest app 2232 x 2232, smallest app 1080 x 972, mode 1, defaultMode 1, modes [{id=1, width=1080, height=2340, fps=60.000004}], colorMode 0, supportedColorModes [0, 7], hdrCapabilities android.view.Display$HdrCapabilities@6cb03a39, rotation 0, density 480 (409.432 x 412.75) dpi, layerStack 0, appVsyncOff 2000000, presDeadline 15666666, type BUILT_IN, address ****, state ON, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, removeMode 0}`)))
+	fmt.Printf("%q\n", re2.FindAll([]byte(`mDisplayInfo=DisplayInfo{"内置屏幕", displayId 0, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, FLAG_TRUSTED, real 1080 x 2400, largest app 2297 x 2251, smallest app 1080 x 953, appVsyncOff 1000000, presDeadline 13333333, mode 2, defaultMode 1, modes [{id=1, width=1080, height=2400, fps=60.0}, {id=2, width=1080, height=2400, fps=120.0}], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[2, 3, 4], mMaxLuminance=540.0, mMaxAverageLuminance=270.1, mMinLuminance=0.2}, minimalPostProcessingSupported false, rotation 0, state ON, type INTERNAL, uniqueId "local:19260932529451905", app 1080 x 2252, density 450 (391.885 x 403.708) dpi, layerStack 0, colorMode 0, supportedColorModes [0, 7, 9], address {port=129, model=0x446db75175f3}, deviceProductInfo DeviceProductInfo{name=, manufacturerPnpId=QCM, productId=1, modelYear=null, manufactureDate=ManufactureDate{week=27, year=2006}, relativeAddress=null}, removeMode 0}`), -1))
+	fmt.Printf("%q\n", re3.FindAll([]byte(`mDisplayInfo=DisplayInfo{"内置屏幕", displayId 0, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, FLAG_TRUSTED, real 1080 x 2400, largest app 2297 x 2251, smallest app 1080 x 953, appVsyncOff 1000000, presDeadline 13333333, mode 2, defaultMode 1, modes [{id=1, width=1080, height=2400, fps=60.0}, {id=2, width=1080, height=2400, fps=120.0}], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[2, 3, 4], mMaxLuminance=540.0, mMaxAverageLuminance=270.1, mMinLuminance=0.2}, minimalPostProcessingSupported false, rotation 0, state ON, type INTERNAL, uniqueId "local:19260932529451905", app 1080 x 2252, density 450 (391.885 x 403.708) dpi, layerStack 0, colorMode 0, supportedColorModes [0, 7, 9], address {port=129, model=0x446db75175f3}, deviceProductInfo DeviceProductInfo{name=, manufacturerPnpId=QCM, productId=1, modelYear=null, manufactureDate=ManufactureDate{week=27, year=2006}, relativeAddress=null}, removeMode 0}`), -1))
 }
 
 func TestEnv(t *testing.T) {

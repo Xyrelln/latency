@@ -1,15 +1,15 @@
 package core
 
 import (
-	"fmt"
 	"image"
+	"image/draw"
 	"image/png"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/corona10/goimagehash"
-	"github.com/otiai10/gosseract/v2"
+	// "github.com/otiai10/gosseract/v2"
 )
 
 func TestCropCurserArea(t *testing.T) {
@@ -57,7 +57,7 @@ func TestCropCurserArea(t *testing.T) {
 }
 
 func TestGrayImage(t *testing.T) {
-	filename := "/Users/jason/Downloads/mov/0033.png"
+	filename := "/Users/jason/Developer/epc/op-latency-mobile/build/bin/op-latency-mobile.app/Contents/MacOS/cache/mobile/20221101114458/images/0001.png"
 	infile, err := os.Open(filename)
 	defer infile.Close()
 	if err != nil {
@@ -69,28 +69,40 @@ func TestGrayImage(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	touchArea := image.Rect(0, 0, 100, 35)
-	cropImg, _ := CropImage(img, touchArea)
-	bwImg := RGBtoBlackAndWhite(cropImg,60)
+	// touchArea := image.Rect(0, 0, 300, 300)
+	// touchArea := image.Rect(0, 103, 100, 138)
+	touchArea := image.Rect(0, 100, 100, 138)
+	// cropImg, _ := CropImage(img, touchArea)
+
+	result := image.NewRGBA(touchArea)
+	draw.Draw(result, touchArea, img, touchArea.Min, draw.Src)
+
+	bwImg := RGBtoBlackAndWhite(result, 60)
+
+	// func CropImage(img image.Image, area image.Rectangle) image.Image {
+	// result := image.NewRGBA(touchArea)
+	// draw.Draw(result, touchArea, img, touchArea.Min, draw.Src)
+	// return result
+	// }
 
 	// Encode the grayscale image to the new file
-	newFileName := "//Users/jason/Downloads/mov/0033-bw.png"
+	newFileName := "/Users/jason/Downloads/017-bw.png"
 	newfile, err := os.Create(newFileName)
 	if err != nil {
 		log.Printf("failed creating %s: %s", newfile.Name(), err)
 		log.Fatal(err)
 
-
 	}
 	defer newfile.Close()
-	png.Encode(newfile,bwImg)
+	png.Encode(newfile, bwImg)
+	// newfile.Close()
 }
 
-//func TestLoadImage(t *testing.T) {
-//	ListImageFile("/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/")
+//	func TestLoadImage(t *testing.T) {
+//		ListImageFile("/Users/jason/Developer/epc/op-latency-mobile/out/image/167-png/")
 //
-//}
-func TestWhiteAndBlackDiff(t *testing.T){
+// }
+func TestWhiteAndBlackDiff(t *testing.T) {
 	f1 := "/Users/jason/Downloads/mov/0033-bw.png"
 	f2 := "/Users/jason/Downloads/mov/0034-bw.png"
 	img, percept, _ := CompareFiles(f1, f2)
@@ -102,7 +114,7 @@ func TestWhiteAndBlackDiff(t *testing.T){
 		log.Fatal(err)
 	}
 	defer newfile.Close()
-	png.Encode(newfile,img)
+	png.Encode(newfile, img)
 	log.Printf("diff percept %f", percept)
 }
 
@@ -136,7 +148,6 @@ func TestAvageHash(t *testing.T) {
 	avgScore, _ := avgHash.Distance(avgHash2)
 	log.Printf("avgScore: %d \n", avgScore)
 
-
 	pHash, _ := goimagehash.PerceptionHash(cropImg)
 	pHash2, _ := goimagehash.PerceptionHash(cropImg2)
 	pScore, _ := pHash.Distance(pHash2)
@@ -144,15 +155,13 @@ func TestAvageHash(t *testing.T) {
 
 }
 
-func TestOcr(t *testing.T)  {
-	client := gosseract.NewClient()
-	defer client.Close()
-	client.SetImage("/Users/jason/Downloads/mov/0034-bw.png")
-	text, _ := client.Text()
-	fmt.Println(text)
-}
-
-
+// func TestOcr(t *testing.T)  {
+// 	client := gosseract.NewClient()
+// 	defer client.Close()
+// 	client.SetImage("/Users/jason/Downloads/mov/0034-bw.png")
+// 	text, _ := client.Text()
+// 	fmt.Println(text)
+// }
 
 //func TestCalcTime(t *testing.T) {
 //	imagePath := "/Users/jason/Downloads/mov/6/images"

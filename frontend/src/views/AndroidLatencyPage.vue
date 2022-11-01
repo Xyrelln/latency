@@ -55,7 +55,8 @@ const data: {devices: Array<adb.Device>} = reactive({
 const latencyTabName = ref('list')
 
 const fileRecordRef = ref()
-
+const loadExtVideoVisible = ref(false)
+const extVideoPath = ref('')
 
 const form = reactive({
   device: '',
@@ -86,6 +87,12 @@ const latencyForm = reactive({
       top: 100,
       width: 50,
       height:50
+    },
+    crop_touch_coordinate: {
+      left: 0,
+      top: 0,
+      width: 100,
+      height:35
     },
   },
   device: {
@@ -123,6 +130,13 @@ const result = reactive({
 })
 
 const cropInfo:CropArea = reactive({
+  top: 100,
+  left: 100,
+  width: 50,
+  height: 50,
+})
+
+const cropTouchInfo:CropArea = reactive({
   top: 100,
   left: 100,
   width: 50,
@@ -310,6 +324,7 @@ const handleSceneChange = () => {
   if (selectedScene.value != undefined || selectedScene.value != null) {
     latencyForm.scene.name = selectedScene.value.name
     latencyForm.scene.crop_coordinate = selectedScene.value.crop_coordinate
+    latencyForm.scene.crop_touch_coordinate = selectedScene.value.crop_touch_coordinate
     latencyForm.scene.action = selectedScene.value.action
     
       // userScene.crop_coordinate = val.crop_coordinate
@@ -341,9 +356,17 @@ const handleSceneChange = () => {
 // }
 
 function handleLoadExtVideo() {
+  // handleResetStatus()
+  // NProgress.start()
+  // StartWithVideo(externalVideoPath.value)
+  loadExtVideoVisible.value = true
+}
+
+function handleStartWithExtVideo() {
   handleResetStatus()
   NProgress.start()
-  StartWithVideo(externalVideoPath.value)
+  StartWithVideo(extVideoPath.value)
+  loadExtVideoVisible.value = false
 }
 
 /**
@@ -503,6 +526,22 @@ const handleOpenFolder = (val: number) => {
   // OpenImageInExplorer(val).then().catch(err => console.log(err))
 }
 
+const handleCropTouchChange = (res: CropInfo)=> {
+  cropTouchInfo.left = res.left
+  cropTouchInfo.top = res.top
+  cropTouchInfo.width = res.width
+  cropTouchInfo.height = res.height
+}
+
+const handleScaleChange = () => {
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  imageZoom.value = imageInfo.width / pImgSize.width
+
+  imagePreviewRef.value.updateSelectBoxStyle()
+  imagePreviewRef.value.updateSelectBoxTouchStyle()
+}
+
+
 const handleLoadImage = (val: number) => {}
 
 const handleCalc = () => {
@@ -518,12 +557,19 @@ const handleCalc = () => {
   const rectinfo = core.ImageRectInfo.createFrom({
     x: selectedScene.value.crop_coordinate.left,
     y: selectedScene.value.crop_coordinate.top,
-    w: selectedScene.value.crop_coordinate.width,
-    h: selectedScene.value.crop_coordinate.height,
+    w: selectedScene.value.crop_coordinate.width + selectedScene.value.crop_coordinate.left,
+    h: selectedScene.value.crop_coordinate.height + selectedScene.value.crop_coordinate.top,
     preview_width: pImgSize.width,
     preview_height: pImgSize.height,
     source_width: imageInfo.width,
     source_height: imageInfo.height,
+  })
+
+  const rectTouchinfo = core.ImageRectInfo.createFrom({
+    x: selectedScene.value.crop_touch_coordinate.left,
+    y: selectedScene.value.crop_touch_coordinate.top,
+    w: selectedScene.value.crop_touch_coordinate.width + selectedScene.value.crop_touch_coordinate.left,
+    h: selectedScene.value.crop_touch_coordinate.height + selectedScene.value.crop_touch_coordinate.top,
   })
   // const threshold = 20
   
@@ -532,7 +578,7 @@ const handleCalc = () => {
     black_white_threshold: 60,
     scene_threshold: settingForm.diffScore,
   })
-  StartAnalyse(rectinfo, threshold)
+  StartAnalyse(rectinfo, rectTouchinfo, threshold)
   NProgress.start()
   // delayTimes.value = 0 
   // calcButtonDisable.value = true
@@ -674,7 +720,9 @@ async function addEventLister() {
       message: "数据预处理完成，加载首帧画面",
     })
     getFirstImage()
+
     NProgress.done()
+    updateCropInfo()
     fileRecordRef.value.handleLoadCacheFiles()
   })
   EventsOn("latency:analyse_start", ()=>{
@@ -745,9 +793,16 @@ const updateCropInfo = () => {
   cropInfo.width = Math.trunc(latencyForm.scene.crop_coordinate.width * imageZoom.value),
   cropInfo.height = Math.trunc(latencyForm.scene.crop_coordinate.height * imageZoom.value),
 
+  cropTouchInfo.left = Math.trunc(latencyForm.scene.crop_touch_coordinate.left * imageZoom.value),
+  cropTouchInfo.top = Math.trunc(latencyForm.scene.crop_touch_coordinate.top * imageZoom.value),
+  cropTouchInfo.width = Math.trunc(latencyForm.scene.crop_touch_coordinate.width * imageZoom.value),
+  cropTouchInfo.height = Math.trunc(latencyForm.scene.crop_touch_coordinate.height * imageZoom.value),
+
   // console.log(cropInfo)
   imagePreviewRef.value.updateSelectBoxStyle()
   imagePreviewRef.value.switchSelectBoxShow(true)
+  imagePreviewRef.value.updateSelectBoxTouchStyle()
+  imagePreviewRef.value.switchSelectBoxTouchShow(true)
 }
 
 function getFirstImage(){
@@ -757,7 +812,7 @@ function getFirstImage(){
     imageInfo.width = res.width
     imageInfo.height = res.height
 
-    updateCropInfo()
+
     calcButtonDisable.value = false
     
   }).catch(err => {
@@ -933,7 +988,10 @@ onUnmounted(()=>{
             v-model="latencyTabName" 
             class="platform-tabs">
             <el-tab-pane label="记录" name="list">
-              <FileRecord ref="fileRecordRef"/>
+              <FileRecord 
+               ref="fileRecordRef"
+               @load-extVideo="handleLoadExtVideo"
+               />
             </el-tab-pane>
         
             <el-tab-pane label="设置" name="setting">
@@ -971,10 +1029,13 @@ onUnmounted(()=>{
             ref="imagePreviewRef"
             :imageInfo="imageInfo"
             :cropInfo="cropInfo"
+            :cropTouchInfo="cropTouchInfo"
             :pageInfo="imagePageInfo"
             @crop-change="handleCropChange"
             @page-change="handlePageChange"
             @open-folder="handleOpenFolder"
+            @crop-touch-change="handleCropTouchChange"
+            @scale-change="handleScaleChange"
             />
         </div>
         <el-row justify="center" class="button-row">
@@ -1002,6 +1063,14 @@ onUnmounted(()=>{
         </el-row>
         <el-row justify="center" class="result-row">
           <el-col :span="4" class="info-line">
+            <span>触控区域</span>
+          </el-col>
+          <el-col :span="12" class="info-line">
+            left: {{ latencyForm.scene.crop_touch_coordinate.left }} top: {{ latencyForm.scene.crop_touch_coordinate.top }}  width: {{ latencyForm.scene.crop_touch_coordinate.width }}  height: {{ latencyForm.scene.crop_touch_coordinate.height }}
+          </el-col>
+        </el-row>
+        <el-row justify="center" class="result-row">
+          <el-col :span="4" class="info-line">
             <span>观察区域</span>
           </el-col>
           <el-col :span="12" class="info-line">
@@ -1024,6 +1093,22 @@ onUnmounted(()=>{
             <el-button link>结束图片</el-button>
           </el-col>
         </el-row>
+
+        <el-dialog
+          v-model="loadExtVideoVisible"
+          title="加载外部视频"
+          width="30%"
+        >
+          <el-input v-model="extVideoPath"></el-input>
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button @click="loadExtVideoVisible = false">取消</el-button>
+              <el-button type="primary" @click="handleStartWithExtVideo"
+                >确定</el-button
+              >
+            </span>
+          </template>
+        </el-dialog>
     </el-main>
   </el-container>
 </template>

@@ -18,6 +18,7 @@ import {
   ListScens,
   SetScene,
   DeleteScene,
+  SetPointerLocationOn,
 } from '../../wailsjs/go/app/Api'
 import {adb, app, core} from '../../wailsjs/go/models'
 
@@ -59,6 +60,11 @@ const deviceInfo = reactive({
   height: 1920,
 })
 
+const previewImageInfo = reactive({
+  width: 0,
+  height: 0,
+})
+
 
 const imageInfo = reactive({
   // path: '/Users/jason/Developer/epc/op-latency-mobile/tmp001.png',
@@ -84,6 +90,14 @@ const cropInfo:CropArea = reactive({
   height: 90,
 })
 
+
+const cropTouchInfo:CropArea = reactive({
+  top: 0,
+  left: 0,
+  width: 100,
+  height: 35,
+})
+
 const userAction = reactive({
   type: 'click',
   x: 0,
@@ -99,6 +113,15 @@ const realCropInfo:Ref<CropArea> = computed(()=> {
     left: Math.trunc(cropInfo.left * imageZoom.value),
     width: Math.trunc(cropInfo.width * imageZoom.value),
     height: Math.trunc(cropInfo.height * imageZoom.value),
+  }
+})
+
+const realCropTouchInfo:Ref<CropArea> = computed(()=> {
+  return {
+    top: Math.trunc(cropTouchInfo.top * imageZoom.value),
+    left: Math.trunc(cropTouchInfo.left * imageZoom.value),
+    width: Math.trunc(cropTouchInfo.width * imageZoom.value),
+    height: Math.trunc(cropTouchInfo.height * imageZoom.value),
   }
 })
 
@@ -270,6 +293,34 @@ const handleCropChange = (res: CropInfo)=> {
   cropInfo.height = res.height
 }
 
+const handleCropTouchChange = (res: CropInfo)=> {
+  cropTouchInfo.left = res.left
+  cropTouchInfo.top = res.top
+  cropTouchInfo.width = res.width
+  cropTouchInfo.height = res.height
+}
+
+const handleGetPreviewImgSize = () => {
+  const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+  previewImageInfo.width = pImgSize.width
+  previewImageInfo.height = pImgSize.height
+
+  imageZoom.value = imageInfo.width / pImgSize.width
+}
+
+const handleScaleChange = () => {
+  // const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+
+  // console.log(pImgSize)
+  // imageZoom.value = imageInfo.width / pImgSize.width
+  // console.log(imageZoom.value)
+
+  handleGetPreviewImgSize()
+
+  imagePreviewRef.value.updateSelectBoxStyle()
+  imagePreviewRef.value.updateSelectBoxTouchStyle()
+}
+
 const handlePageChange = (val: number) => {
   imagePageInfo.currentPage = val
   handleLoadImage(imagePageInfo.currentPage -1)
@@ -277,6 +328,28 @@ const handlePageChange = (val: number) => {
 
 const handleOpenFolder = (val: number) => {
   // OpenImageInExplorer(val).then().catch(err => console.log(err))
+}
+
+/**
+ * 开启指针显示
+ */
+ async function setPointerLocationOn():Promise<Boolean> {
+  let result = false
+  await SetPointerLocationOn(latencyForm.device.serial).then(res =>{ 
+    ElMessage({
+      type: 'success',
+      message: '开启指针成功'
+    })
+     result = true
+    }
+  ).catch(err => {
+    ElMessage({
+      type: 'warning',
+      message: '开启指针失败, 请确定已手工开启'
+    })
+    result = false
+  })
+  return result
 }
 
 const handleUserAction = (action: any) => {
@@ -298,21 +371,27 @@ const handleUserAction = (action: any) => {
 const handleLoadImage = (val: number) => {}
 const handleCalcWithCurrent = () => {}
 
-const handleLoadScreenshot = () => {
+const handleLoadScreenshot = async () => {
+  NProgress.start()
+  await setPointerLocationOn()
   LoadScreenshot(latencyForm.device.serial).then((res:core.ImageInfo) => {
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
 
-    const pImgSize = imagePreviewRef.value.getPreviewImgSize()
-    imageZoom.value = imageInfo.width / pImgSize.width
+    // const pImgSize = imagePreviewRef.value.getPreviewImgSize()
+    handleGetPreviewImgSize()
+    // imageZoom.value = imageInfo.width / pImgSize.width
 
+    imagePreviewRef.value.updateSelectBoxStyle()
+    imagePreviewRef.value.updateSelectBoxTouchStyle()
     imagePreviewRef.value.switchSelectBoxShow(true)
-    // console.log(pImgSize)
-    // console.log(imageZoom.value)
-    // imageInfo.path = res
+    imagePreviewRef.value.switchSelectBoxTouchShow(true)
+
+    NProgress.done()
   }).catch(err => {
     console.log(err)
+    NProgress.done()
   })
 }
 
@@ -349,6 +428,12 @@ const handleSetScene = () => {
     width: realCropInfo.value.width,
     height: realCropInfo.value.height,
   })
+  const cropTouchInfo = app.CropInfo.createFrom({
+    top: realCropTouchInfo.value.top,
+    left: realCropTouchInfo.value.left,
+    width: realCropTouchInfo.value.width,
+    height: realCropTouchInfo.value.height,
+  })
   const action = app.UserAction.createFrom({
     x: realUserAction.value.x,
     y: realUserAction.value.y,
@@ -361,6 +446,7 @@ const handleSetScene = () => {
     name: inputSceneName.value,
     device: deviceInfo,
     crop_coordinate: cropInfo,
+    crop_touch_coordinate: cropTouchInfo,
     action: action
   })
   SetScene(userScene).then(res => {
@@ -459,11 +545,14 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                     ref="imagePreviewRef"
                     :imageInfo="imageInfo"
                     :cropInfo="cropInfo"
+                    :cropTouchInfo="cropTouchInfo"
                     :pageInfo="imagePageInfo"
                     @crop-change="handleCropChange"
                     @page-change="handlePageChange"
                     @open-folder="handleOpenFolder"
                     @user-action="handleUserAction"
+                    @crop-touch-change="handleCropTouchChange"
+                    @scale-change="handleScaleChange"
                     />
                 </div>
 
@@ -480,10 +569,26 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                 </el-row>
                 <el-row justify="center" class="result-row">
                   <el-col :span="4" class="info-line">
+                    <span>触控区域</span>
+                  </el-col>
+                  <el-col :span="8" class="info-line">
+                    left: {{ realCropTouchInfo.left }} top: {{ realCropTouchInfo.top }}  width: {{ realCropTouchInfo.width }}  height: {{ realCropTouchInfo.height }}
+                  </el-col>
+                </el-row>
+                <el-row justify="center" class="result-row">
+                  <el-col :span="4" class="info-line">
                     <span>观察区域</span>
                   </el-col>
                   <el-col :span="8" class="info-line">
                     left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
+                  </el-col>
+                </el-row>
+                <el-row justify="center" class="result-row">
+                  <el-col :span="4" class="info-line">
+                    <span>图片信息</span>
+                  </el-col>
+                  <el-col :span="8" class="info-line">
+                    原始图片 width: {{ imageInfo.width }} height: {{ imageInfo.height }}  预览图 width:{{ previewImageInfo.width}} height: {{previewImageInfo.height}}  缩放比例: {{ imageZoom }}
                   </el-col>
                 </el-row>
               </el-main>

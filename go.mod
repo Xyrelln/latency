@@ -6,7 +6,6 @@ require (
 	github.com/corona10/goimagehash v1.1.0
 	github.com/go-vgo/robotgo v0.100.10
 	github.com/moutend/go-hook v0.1.0
-	github.com/otiai10/gosseract/v2 v2.4.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
 	gitlab.vrviu.com/epc/lighttest-lib v0.3.1
@@ -19,6 +18,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
+	github.com/otiai10/mint v1.3.3 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/robotn/gohook v0.31.3 // indirect
 	github.com/robotn/xgb v0.0.0-20190912153532-2cb92d044934 // indirect

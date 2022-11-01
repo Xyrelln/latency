@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -35,6 +36,7 @@ func CropImage(img image.Image, cropRect image.Rectangle) (cropImg image.Image, 
 		newImg = true
 	} else {
 		// Return an empty RGBA image
+		fmt.Print("crop image failed, return new empty image")
 		cropImg = &image.RGBA{}
 		newImg = true
 	}

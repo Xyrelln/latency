@@ -73,7 +73,7 @@ export function SetScene(arg1:app.UserScene):Promise<void>;
 
 export function Start(arg1:string,arg2:number,arg3:app.UserAction):Promise<Error>;
 
-export function StartAnalyse(arg1:core.ImageRectInfo,arg2:app.Threshold):Promise<Error>;
+export function StartAnalyse(arg1:core.ImageRectInfo,arg2:core.ImageRectInfo,arg3:app.Threshold):Promise<Error>;
 
 export function StartRecord(arg1:string,arg2:app.UserAction,arg3:app.CallBack):Promise<Error>;
 

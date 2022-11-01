@@ -52,6 +52,13 @@ const cropInfo:CropArea = reactive({
   height: 90,
 })
 
+const cropTouchInfo:CropArea = reactive({
+  top: 0,
+  left: 0,
+  width: 100,
+  height: 35,
+})
+
 const imagePageInfo:ImagePage = reactive({
   size: 1,
   total: 0,
@@ -317,6 +324,7 @@ const getCaptureWindows = () => {
   })
 }
 
+
 /**
  * 计算延迟
  */
@@ -478,6 +486,7 @@ onUnmounted(()=>{
             ref="imagePreviewRef"
             :imageInfo="imageInfo"
             :cropInfo="cropInfo"
+            :cropTouchInfo="cropTouchInfo"
             :pageInfo="imagePageInfo"
             @crop-change="handleCropChange"
             @page-change="handlePageChange"

@@ -134,8 +134,8 @@ export function Start(arg1, arg2, arg3) {
   return window['go']['app']['Api']['Start'](arg1, arg2, arg3);
 }
 
-export function StartAnalyse(arg1, arg2) {
-  return window['go']['app']['Api']['StartAnalyse'](arg1, arg2);
+export function StartAnalyse(arg1, arg2, arg3) {
+  return window['go']['app']['Api']['StartAnalyse'](arg1, arg2, arg3);
 }
 
 export function StartRecord(arg1, arg2, arg3) {
