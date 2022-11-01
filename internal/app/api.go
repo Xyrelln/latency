@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -16,7 +17,6 @@ import (
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/ffprobe"
 	"op-latency-mobile/internal/fs"
-	"op-latency-mobile/internal/upload"
 
 	latencywin "op-latency-mobile/internal/latency_win"
 
@@ -27,13 +27,13 @@ import (
 	// lighttestServ "gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
 	// lighttestToken "gitlab.vrviu.com/epc/lighttest-lib/token"
 	"gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
+	"gitlab.vrviu.com/epc/lighttest-lib/token"
 	lighttestUpdate "gitlab.vrviu.com/epc/lighttest-lib/update"
 	lighttestVer "gitlab.vrviu.com/epc/lighttest-lib/version"
 )
 
 const (
-	appName                  = "latency"
-	localPassFile            = "latency-pass"
+	appName                  = "op-latency"
 	lighttestServiceEndpoint = "https://lighttest.vrviu.com"
 	defaultStateKey          = "state_default"
 	defaultWorkspaceKey      = "wksp_default"
@@ -61,6 +61,7 @@ type Api struct {
 	latencyWinManager *latencywin.OpLatencyWindowsManager
 }
 
+// Record ...
 type Record struct {
 	VideoDir  string `json:"video_dir,omitempty"`
 	ImagesDir string `json:"images_dir,omitempty"`
@@ -122,7 +123,7 @@ func (a *Api) domready(ctx context.Context) {
 // 	return rtn
 // }
 
-// 获取设备列表
+// ListDevices 获取设备列表
 func (a *Api) ListDevices() ([]*adb.Device, error) {
 	devices, err := adb.Devices()
 	if err != nil {
@@ -132,6 +133,7 @@ func (a *Api) ListDevices() ([]*adb.Device, error) {
 	return devices, nil
 }
 
+// UserAction ...
 type UserAction struct {
 	Auto  bool   `json:"auto"`
 	Type  string `json:"type"`
@@ -142,6 +144,7 @@ type UserAction struct {
 	Speed int    `json:"speed"`
 }
 
+// CropInfo ...
 type CropInfo struct {
 	Top    int `json:"top"`
 	Left   int `json:"left"`
@@ -149,12 +152,14 @@ type CropInfo struct {
 	Height int `json:"height"`
 }
 
+// DeviceInfo ...
 type DeviceInfo struct {
 	DeviceName   string `json:"device_name"`
 	ScreenWidth  int    `json:"screen_width"`
 	ScreenHeight int    `json:"screen_height"`
 }
 
+// UserScene ...
 type UserScene struct {
 	Name                string     `json:"name"`
 	Key                 string     `json:"key"`
@@ -164,7 +169,7 @@ type UserScene struct {
 	Action              UserAction `json:"action"`
 }
 
-// 获取设备列表
+// ListScens 获取设备列表
 func (a *Api) ListScens() ([]UserScene, error) {
 	log.Infof("list scenes")
 	var userScenes []UserScene
@@ -188,6 +193,7 @@ func (a *Api) ListScens() ([]UserScene, error) {
 	return userScenes, nil
 }
 
+// SetScene ...
 func (a *Api) SetScene(userScene UserScene) {
 	log.Infof("set scene content: %v", userScene)
 	var val bytes.Buffer
@@ -201,6 +207,7 @@ func (a *Api) SetScene(userScene UserScene) {
 	a.store.set([]byte(sceneKeyPrefix+name), val.Bytes())
 }
 
+// DeleteScene ...
 func (a *Api) DeleteScene(key string) {
 	log.Infof("delete scene name: %s", key)
 	if key == "" {
@@ -213,7 +220,7 @@ func (a *Api) DeleteScene(key string) {
 	a.store.del([]byte(sceneKeyPrefix + key))
 }
 
-// 检查 app 依赖包环境信息
+// IsAppReady 检查 app 依赖包环境信息
 func (a *Api) IsAppReady() error {
 	p, err := adb.IsAdbReady()
 	if err != nil {
@@ -245,7 +252,7 @@ func (a *Api) IsAppReady() error {
 	return nil
 }
 
-// 获取屏幕信息
+// GetDisplay 获取屏幕信息
 func (a *Api) GetDisplay(serial string) (*adb.Display, error) {
 	device := adb.GetDevice(serial)
 	display, err := device.DisplaySize()
@@ -255,6 +262,7 @@ func (a *Api) GetDisplay(serial string) (*adb.Display, error) {
 	return display, nil
 }
 
+// GetPhysicalSize ...
 func (a *Api) GetPhysicalSize(serial string) (*adb.Display, error) {
 	device := adb.GetDevice(serial)
 	display, err := device.PhysicalSize()
@@ -264,6 +272,7 @@ func (a *Api) GetPhysicalSize(serial string) (*adb.Display, error) {
 	return display, nil
 }
 
+// SetAutoSwipeOn ...
 func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 	autorun = true
 	devices, err := adb.Devices()
@@ -284,7 +293,7 @@ func (a *Api) SetAutoSwipeOn(sw adb.SwipeEvent, interval int) error {
 	return nil
 }
 
-// 加载截图
+// LoadScreenshot 加载截图
 func (a *Api) LoadScreenshot(serial string) (core.ImageInfo, error) {
 	var img core.ImageInfo
 	device := adb.GetDevice(serial)
@@ -314,6 +323,7 @@ func (a *Api) LoadScreenshot(serial string) (core.ImageInfo, error) {
 	return mInfo, nil
 }
 
+// SetAutoSwipeOff ...
 func (a *Api) SetAutoSwipeOff() error {
 	autorun = false
 	return nil
@@ -329,7 +339,7 @@ func (a *Api) IsPointerLocationOn(serial string) (bool, error) {
 	return on, nil
 }
 
-// 开启指针位置显示
+// SetPointerLocationOn 开启指针位置显示
 func (a *Api) SetPointerLocationOn(serial string) error {
 	device := adb.GetDevice(serial)
 	if err := device.SetPointerLocationOn(); err == nil {
@@ -347,15 +357,17 @@ func (a *Api) SetPointerLocationOn(serial string) error {
 	return nil
 }
 
-// 关闭指针位置显示
+// SetPointerLocationOff 关闭指针位置显示
 func (a *Api) SetPointerLocationOff(serial string) error {
 	log.Info("set pointer location off")
 	device := adb.GetDevice(serial)
 	return device.SetPointerLocationOff()
 }
 
+// CallBack ...
 type CallBack func() error
 
+// StartRecord ...
 func (a *Api) StartRecord(serial string, recordSecond int, userAction UserAction, actionCallback CallBack) (rerr error) {
 	defer func() {
 		if rerr != nil {
@@ -396,6 +408,7 @@ func (a *Api) StartRecord(serial string, recordSecond int, userAction UserAction
 	return
 }
 
+// AutoInput ...
 func (a *Api) AutoInput(serial string, userAction UserAction) error {
 	if userAction.Type == "swipe" {
 
@@ -415,20 +428,21 @@ func (a *Api) AutoInput(serial string, userAction UserAction) error {
 	return nil
 }
 
-// 发送拖动事件
+// InputSwipe 发送拖动事件
 func (a *Api) InputSwipe(serial string, sw adb.SwipeEvent) error {
 	log.Infof("get input swipe event： %v on %s", sw, serial)
 	device := adb.GetDevice(serial)
 	return device.InputSwipe(sw)
 }
 
-// 发送点击事件
+// InputTap 发送点击事件
 func (a *Api) InputTap(serial string, tap adb.TapEvent) error {
 	log.Infof("get input tap event： %v on %s", tap, serial)
 	device := adb.GetDevice(serial)
 	return device.InputTap(tap)
 }
 
+// StopRunner ...
 func (a *Api) StopRunner() error {
 	a.cmdRunner.CancelFunc()
 	return nil
@@ -465,10 +479,12 @@ func (a *Api) Start(serial string, recordSecond int, userAction UserAction) erro
 	return nil
 }
 
+// StopTransform ...
 func (a *Api) StopTransform() error {
 	return nil
 }
 
+// ListRecords ...
 func (a *Api) ListRecords() ([]fs.RecordFile, error) {
 	root, _ := fs.GetExecuteRoot()
 	workDir := filepath.Join(root, "cache", "mobile")
@@ -490,7 +506,7 @@ func (a *Api) StartWithVideo(videoPath string) error {
 	return nil
 }
 
-// 停止 scrcpy server
+// StopScrcpyServer 停止 scrcpy server
 func (a *Api) StopScrcpyServer(serial string) error {
 	device := adb.GetDevice(serial)
 	err := device.KillScrcyServer()
@@ -515,6 +531,8 @@ func (a *Api) StopScrcpyServer(serial string) error {
 //
 //		return a.Cmd.Kill()
 //	}
+
+// Transform ...
 func (a *Api) Transform(videoPath string) error {
 	//srcVideoPath := filepath.Join(a.VideoDir, recordFile)
 	a.VideoDir, a.ImagesDir = fs.CreateWorkDir()
@@ -536,6 +554,7 @@ func (a *Api) Transform(videoPath string) error {
 	return nil
 }
 
+// StartTransform ...
 func (a *Api) StartTransform() (rerr error) {
 	defer func() {
 		if rerr != nil {
@@ -557,6 +576,7 @@ func (a *Api) StartTransform() (rerr error) {
 	return
 }
 
+// GetFirstImageInfo ...
 func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	firstImage := filepath.Join(a.ImagesDir, firstImageFile)
 	mInfo, err := core.GetImageInfo(firstImage)
@@ -571,12 +591,14 @@ func (a *Api) GetFirstImageInfo() (core.ImageInfo, error) {
 	return mInfo, nil
 }
 
+// Threshold ...
 type Threshold struct {
 	PointerThreshold    float64 `json:"pointer_threshold"`
 	BlackWhiteThreshold int     `json:"black_white_threshold"`
 	SceneThreshold      int     `json:"scene_threshold"`
 }
 
+// StartAnalyse ...
 func (a *Api) StartAnalyse(imageRect, touchRect core.ImageRectInfo, threshold Threshold) error {
 	// log.Infof("current rect: %v", imageRect)
 	// log.Infof("workdir: %s", a.ImagesDir)
@@ -613,6 +635,7 @@ func (a *Api) emitData(eventName string, data interface{}) {
 //	a.Cmd.Kill()
 //}
 
+// GetImageFiles ...
 func (a *Api) GetImageFiles() ([]string, error) {
 	var imgs []string
 	imgs, err := fs.GetImageFiles(a.ImagesDir, imgs)
@@ -625,11 +648,28 @@ func (a *Api) GetImageFiles() ([]string, error) {
 
 // UploadFile 文件上传
 func (a *Api) UploadFile(filePath string) error {
-	err := upload.UploadFile(filePath)
+
+	f, err := os.Open(filePath)
 	if err != nil {
-		log.Errorf("upload file failed: %s", err)
+		log.Errorf("open file failed, err: %v", err)
 		return err
 	}
+	defer f.Close()
+
+	userSecret, err := a.getUserSecret()
+	client := token.ClientInfo{
+		Name:     appname,
+		Version:  lighttestVer.Version,
+		Username: userSecret.Username,
+	}
+	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
+	log.Infof("prepare upload file: %s, base name: %s", filePath, filepath.Base(filePath))
+	uploadPath, err := svc.UploadFile(client, userSecret.Key, filepath.Base(filePath), f)
+	if err != nil {
+		log.Errorf("upload file failed, err: %v", err)
+		return err
+	}
+	log.Infof("upload success, path: %s", uploadPath)
 	return nil
 }
 
@@ -656,31 +696,29 @@ type UpdateInfo struct {
 	Err           string `json:"err,omitempty"`
 }
 
-// 获取当前版本号
+// GetCurrentVersion 获取当前版本号
 func (a *Api) GetCurrentVersion() string {
 	return lighttestVer.Version
 }
 
+// UserSecrect ...
 type UserSecrect struct {
 	Username string `json:"username"`
 	Key      string `json:"key"`
 }
 
-// CheckUpdate ...
-func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
-	// userInfo, err := upload.GetUserInfo()
+func (a *Api) getUserSecret() (UserSecrect, error) {
 	val, err := a.store.get([]byte(userSecrectKey))
 	if err != nil {
 		log.Errorf("get user secrect failed: %v", err)
-		return lighttestservice.UserInfo{}, err
+		return UserSecrect{}, err
 	}
 	if val == nil {
 		log.Warn("user not exists")
-		return lighttestservice.UserInfo{}, errors.New("user not exists")
+		return UserSecrect{}, errors.New("user not exists")
 	}
 
 	userSecrect := UserSecrect{}
-	// dec := gob.NewDecoder(bytes.NewBuffer(val))
 	err = json.Unmarshal(val, &userSecrect)
 	if err != nil {
 		log.Errorf("user unmarshal failed: %v", err)
@@ -689,26 +727,50 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 	// 	log.Error("user not exists")
 	// 	return lighttestservice.UserInfo{}, err
 	// }
+	return userSecrect, nil
+}
+
+// CheckUser ...
+func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
+	userSecrect, err := a.getUserSecret()
+	if err != nil {
+		return lighttestservice.UserInfo{}, err
+	}
+
 	if userSecrect.Username == "" || userSecrect.Key == "" {
 		log.Error("username or key is empty")
 		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
 	}
-	userInfo, err := upload.CheckUserValid(userSecrect.Username, userSecrect.Key)
+
+	userSecret, err := a.getUserSecret()
+	client := token.ClientInfo{
+		Name:     appname,
+		Version:  lighttestVer.Version,
+		Username: userSecret.Username,
+	}
+	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
+	userInfo, err := svc.GetUserInfo(client, userSecrect.Key)
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
 	}
 	return userInfo, nil
 }
 
-// CheckUpdate ...
+// SaveUser ...
 func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, error) {
-	// userInfo, err := upload.GetUserInfo()
 	if userSecrect.Username == "" || userSecrect.Key == "" {
 		log.Errorf("username or key is empty")
 		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
 	}
 
-	userInfo, err := upload.CheckUserValid(userSecrect.Username, userSecrect.Key)
+	userSecret, err := a.getUserSecret()
+	client := token.ClientInfo{
+		Name:     appname,
+		Version:  lighttestVer.Version,
+		Username: userSecret.Username,
+	}
+	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
+	userInfo, err := svc.GetUserInfo(client, userSecrect.Key)
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
 	}
@@ -757,10 +819,12 @@ func (a *Api) DoUpdate(version string) {
 	}()
 }
 
+// ClearMobleCache ...
 func (a *Api) ClearMobleCache() {
 	fs.ClearCacheDir("mobile")
 }
 
+// ClearPCCache ...
 func (a *Api) ClearPCCache() {
 	fs.ClearCacheDir("pc")
 }

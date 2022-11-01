@@ -32,10 +32,10 @@ CompileWinAmd64:
     - $CommitShortSHA = $env:CI_COMMIT_SHORT_SHA
     - $BuildTimestamp = [DateTimeOffset]::Now.ToUnixTimeSeconds()
     - $LDFLAGS = "-X 'gitlab.vrviu.com/epc/lighttest-lib/version.Version=$Version' -X 'gitlab.vrviu.com/epc/lighttest-lib/version.CommitShortSHA=$CommitShortSHA' -X 'gitlab.vrviu.com/epc/lighttest-lib/version.BuildTimastamp=$BuildTimestamp'"
-    - wails build -s -platform windows/amd64 -ldflags $LDFLAGS -o latency.exe -webview2 embed
+    - wails build -s -platform windows/amd64 -ldflags $LDFLAGS -o op-latency.exe -webview2 embed
   artifacts:
     paths:
-      - build/bin/latency.exe
+      - build/bin/op-latency.exe
     expire_in: 24 hrs
 
 DocGenerate:
@@ -66,9 +66,9 @@ PubBin:
     LIGHTTEST_MYSQL_PORT: 21009
     LIB_WINDOWS_PATH: .\lib\windows
   script:
-    - '$LATENCY_PKG = "latency-win-$env:CI_COMMIT_TAG"'
+    - '$LATENCY_PKG = "op-latency-win-$env:CI_COMMIT_TAG"'
     - "mkdir $LATENCY_PKG"
-    - 'cp .\build\bin\latency.exe $LATENCY_PKG\'
+    - 'cp .\build\bin\op-latency.exe $LATENCY_PKG\'
     - 'mkdir $LATENCY_PKG\lib\'
     - 'cp -r $env:LIB_WINDOWS_PATH\* $LATENCY_PKG\lib\'
     # docs
@@ -78,11 +78,11 @@ PubBin:
     - 'mkdir $LATENCY_PKG\lib\rscapture'
     - 'curl.exe -k --output $LATENCY_PKG\lib\rscapture\rscapture.exe --header "PRIVATE-TOKEN: $env:EPC_TOKEN" "https://$env:CI_SERVER_HOST/api/v4/projects/895/jobs/artifacts/master/raw/target/release/rscapture-wgc.exe?job=Compile"'
     - Compress-Archive -Path .\$LATENCY_PKG\* -DestinationPath .\$LATENCY_PKG.zip
-    - 'curl.exe -k --header "JOB-TOKEN: $env:CI_JOB_TOKEN" --upload-file .\$LATENCY_PKG.zip "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/packages/generic/latency-$env:CI_COMMIT_TAG/$env:CI_COMMIT_TAG/$LATENCY_PKG.zip"'
+    - 'curl.exe -k --header "JOB-TOKEN: $env:CI_JOB_TOKEN" --upload-file .\$LATENCY_PKG.zip "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/packages/generic/op-latency-$env:CI_COMMIT_TAG/$env:CI_COMMIT_TAG/$LATENCY_PKG.zip"'
 
-    - '$oss_obj_key = "lighttest/latency/$LATENCY_PKG.zip"'
+    - '$oss_obj_key = "lighttest/op-latency/$LATENCY_PKG.zip"'
     - '& $env:OSSUTIL --config-file $env:OSSUTIL_CONF cp .\$LATENCY_PKG.zip oss://$env:OSS_BUCKET/$oss_obj_key'
-    - $sql_query = [string]::Format("INSERT INTO release_info (name, os, arch, version, bucket, object_key) values ('latency', 'windows', 'amd64', '{0}', '{1}', '{2}');", $env:CI_COMMIT_TAG, $env:OSS_BUCKET, $OSS_OBJ_KEY)
+    - $sql_query = [string]::Format("INSERT INTO release_info (name, os, arch, version, bucket, object_key) values ('op-latency', 'windows', 'amd64', '{0}', '{1}', '{2}');", $env:CI_COMMIT_TAG, $env:OSS_BUCKET, $OSS_OBJ_KEY)
     - "& $env:MYSQL_CLIENT -h $env:LIGHTTEST_MYSQL_HOST -P $env:LIGHTTEST_MYSQL_PORT -uroot --password=$env:LIGHTTEST_MYSQL_PASSWORD lighttest_service -e $sql_query"
   only:
     - tags

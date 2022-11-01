@@ -9,6 +9,9 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
 	gitlab.vrviu.com/epc/lighttest-lib v0.3.1
+	go.etcd.io/bbolt v1.3.6
+	golang.org/x/sync v0.0.0-20220907140024-f12130a52804
+	golang.org/x/sys v0.0.0-20220913175220-63ea55921009
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
@@ -54,11 +57,8 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
-	golang.org/x/sync v0.0.0-20220907140024-f12130a52804
-	golang.org/x/sys v0.0.0-20220913175220-63ea55921009
 	golang.org/x/text v0.3.7 // indirect
 )
 
