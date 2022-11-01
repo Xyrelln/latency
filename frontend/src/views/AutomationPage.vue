@@ -588,7 +588,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                     <span>图片信息</span>
                   </el-col>
                   <el-col :span="8" class="info-line">
-                    原始图片 width: {{ imageInfo.width }} height: {{ imageInfo.height }}  预览图 width:{{ previewImageInfo.width}} height: {{previewImageInfo.height}}  缩放比例: {{ imageZoom }}
+                    原始图片 width: {{ imageInfo.width }} height: {{ imageInfo.height }}  预览图 width:{{ previewImageInfo.width}} height: {{previewImageInfo.height}}
                   </el-col>
                 </el-row>
               </el-main>

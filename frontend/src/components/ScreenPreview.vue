@@ -53,15 +53,11 @@ const defaultImageHolder = './assets/images/placeholder.png'
 const selectBoxStyle = reactive({
   width: '100px', 
   height: '100px',
-  left: '300px',
-  top: '300px'
 })
 
 const selectBoxTouchStyle = reactive({
   width: '100px', 
   height: '100px',
-  left: '200px',
-  top: '200px'
 })
 
 const scalePercent = ref(70)
@@ -88,6 +84,7 @@ const minCropBox = { width: 20, height: 20}
  * @param e 
  */
 const mouseDownHandler = function (e:MouseEvent) {
+  console.log("mouseDownHandler")
   e.stopPropagation()
 
   // Get the current mouse position
@@ -112,7 +109,7 @@ const mouseDownHandler = function (e:MouseEvent) {
  * @param e 
  */
 const mouseMoveHandler = function (e: MouseEvent) {
-  // console.log("mouseMoveHandler")
+  console.log("mouseMoveHandler")
   // How far the mouse has been moved
   const dx = e.clientX - location.x;
   const dy = e.clientY - location.y;
@@ -122,13 +119,13 @@ const mouseMoveHandler = function (e: MouseEvent) {
   const height = location.h + dy
 
   // limit min box width and height
-  if (width < minCropBox.width) {
+  if (location.w  < minCropBox.width) {
     selectBoxStyle.width = `${minCropBox.width}px`;
   } else {
     selectBoxStyle.width = `${width}px`;
   }
 
-  if (height < minCropBox.height) {
+  if (location.h < minCropBox.height) {
     selectBoxStyle.height = `${minCropBox.height}px`;
   } else {
     selectBoxStyle.height = `${height}px`;
@@ -139,15 +136,16 @@ const mouseMoveHandler = function (e: MouseEvent) {
  * 鼠标松开事件处理
  */
 const mouseUpHandler = function () {
+  console.log("mouseUpHandler")
   // Remove the handlers of `mousemove` and `mouseup`
   document.removeEventListener('mousemove', mouseMoveHandler);
   document.removeEventListener('mouseup', mouseUpHandler);
 
-  const styles = window.getComputedStyle(selectBoxRef.value);
+  // const styles = window.getComputedStyle(selectBoxRef.value);
 
-  console.log("mouseUpHandler")
-  console.log(selectBoxRef.value.offsetWidth, selectBoxRef.value.offsetHeight)
-  console.log(styles.width, styles.height)
+  // console.log("mouseUpHandler")
+  // console.log(selectBoxRef.value.offsetWidth, selectBoxRef.value.offsetHeight)
+  // console.log(styles.width, styles.height)
 
   emit('crop-change', {
     left: selectBoxRef.value.offsetLeft - previewImgRef.value.offsetLeft, 
@@ -241,12 +239,7 @@ const actionBoxInit = () => {
       ty = ev.offsetY
       tTimeStamp = ev.timeStamp
     }
-    // console.log("actionBoxInit")
-    // console.log(ev)
-    // console.log(previewImgDivRef.value.offsetLeft)
-    // console.log(previewImgDivRef.value.offsetTop)
-    // const styles = window.getComputedStyle(previewImgDivRef.value);
-    // console.log(styles)
+
     document.onmouseup = (ev:any) => {
       document.onmousemove = null;
       if (actionType === 'click') {
@@ -468,112 +461,13 @@ const narrowPreviewBox = () => {
 const handleResize = (e: MouseEvent) => {
   
 }
-// const  makeResizableDiv = (div: string) => {
-//   const element = document.querySelector(div);
-//   const resizers = document.querySelectorAll(div + ' .resizer')
-
-//   if (element === null || resizers == null) {
-//     return
-//   }
-//   const minimum_size = 20;
-//   let original_width = 0;
-//   let original_height = 0;
-//   let original_x = 0;
-//   let original_y = 0;
-//   let original_mouse_x = 0;
-//   let original_mouse_y = 0;
-//   for (let i = 0;i < resizers.length; i++) {
-//     const currentResizer = resizers[i];
-//     currentResizer.addEventListener('mousedown', function(e) {
-//       e.preventDefault()
-//       original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
-//       original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
-//       original_x = element.getBoundingClientRect().left;
-//       original_y = element.getBoundingClientRect().top;
-//       original_mouse_x = e.pageX;
-//       original_mouse_y = e.pageY;
-//       window.addEventListener('mousemove', resize)
-//       window.addEventListener('mouseup', stopResize)
-//     })
-    
-//     function resize(e) {
-//       if (currentResizer.classList.contains('bottom-right')) {
-//         const width = original_width + (e.pageX - original_mouse_x);
-//         const height = original_height + (e.pageY - original_mouse_y)
-//         if (width > minimum_size) {
-//           element.style.width = width + 'px'
-//         }
-//         if (height > minimum_size) {
-//           element.style.height = height + 'px'
-//         }
-//       }
-//       else if (currentResizer.classList.contains('bottom-left')) {
-//         const height = original_height + (e.pageY - original_mouse_y)
-//         const width = original_width - (e.pageX - original_mouse_x)
-//         if (height > minimum_size) {
-//           element.style.height = height + 'px'
-//         }
-//         if (width > minimum_size) {
-//           element.style.width = width + 'px'
-//           element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
-//         }
-//       }
-//       else if (currentResizer.classList.contains('top-right')) {
-//         const width = original_width + (e.pageX - original_mouse_x)
-//         const height = original_height - (e.pageY - original_mouse_y)
-//         if (width > minimum_size) {
-//           element.style.width = width + 'px'
-//         }
-//         if (height > minimum_size) {
-//           element.style.height = height + 'px'
-//           element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
-//         }
-//       }
-//       else {
-//         const width = original_width - (e.pageX - original_mouse_x)
-//         const height = original_height - (e.pageY - original_mouse_y)
-//         if (width > minimum_size) {
-//           element.style.width = width + 'px'
-//           element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
-//         }
-//         if (height > minimum_size) {
-//           element.style.height = height + 'px'
-//           element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
-//         }
-//       }
-//     }
-    
-//     function stopResize() {
-//       // console.log(element.style.left, element.style.top, element.style.width, element.style.height)
-//       window.removeEventListener('mousemove', resize)
-//     }
-//   }
-// }
-
 
 
 onMounted(()=>{
   selectBoxInit()
-  selectBoxTouchInit()
+  // selectBoxTouchInit()
   actionBoxInit()
-  // makeResizableDiv('.resizable')
 })
-
-// onUpdated(() => {
-//   console.log('onUpdated')
-//   console.log(props.cropInfo)
-//   updateSelectBoxStyle()
-// })
-
-// watch(props.pageInfo, (val: ImagePage) => {
-//   if (val.currentPage === 0) {
-//     // console.log(previousPageRef.value.style)
-//     previousPageRef.value.style.opacity = 0.5
-//   } else if (val.currentPage === props.pageInfo.total) {
-//     nextPageRef.value.style.opacity = 0.5
-//   }
-// })
-
 
 defineExpose({
   getPreviewImgSize,
