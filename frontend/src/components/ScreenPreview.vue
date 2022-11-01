@@ -465,7 +465,7 @@ const handleResize = (e: MouseEvent) => {
 
 onMounted(()=>{
   selectBoxInit()
-  // selectBoxTouchInit()
+  selectBoxTouchInit()
   actionBoxInit()
 })
 
