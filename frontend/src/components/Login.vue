@@ -56,7 +56,7 @@ const rules = {
 const submitForm = ()=> {
   loginFormFef.value.validate(async(v:boolean) =>{
     if (v) {
-      const userSecrect = app.UserSecrect.createFrom({
+      const userSecrect = app.userSecret.createFrom({
         username: form.username,
         key: form.password,
       })

@@ -59,7 +59,7 @@ export function LoadScreenshot(arg1:string):Promise<core.ImageInfo>;
 
 export function OpenImageInExplorer(arg1:number):Promise<void>;
 
-export function SaveUser(arg1:app.UserSecrect):Promise<lighttestservice.UserInfo>;
+export function SaveUser(arg1:app.userSecret):Promise<lighttestservice.UserInfo>;
 
 export function SetAutoSwipeOff():Promise<Error>;
 
