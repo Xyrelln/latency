@@ -40,7 +40,7 @@ const (
 	recordFile               = "rec.mp4"
 	firstImageFile           = "0001.png"
 	sceneKeyPrefix           = "scene_"
-	userSecrectKey           = "userSecrect"
+	userSecretKey            = "userSecret"
 )
 
 var autorun = true
@@ -705,48 +705,47 @@ func (a *Api) GetCurrentVersion() string {
 	return lighttestVer.Version
 }
 
-// UserSecrect ...
-type UserSecrect struct {
+// userSecret ...
+type userSecret struct {
 	Username string `json:"username"`
 	Key      string `json:"key"`
 }
 
-func (a *Api) getUserSecret() (UserSecrect, error) {
-	val, err := a.store.get([]byte(userSecrectKey))
+func (a *Api) getUserSecret() (userSecret, error) {
+	val, err := a.store.get([]byte(userSecretKey))
 	if err != nil {
 		log.Errorf("get user secrect failed: %v", err)
-		return UserSecrect{}, err
+		return userSecret{}, err
 	}
 	if val == nil {
 		log.Warn("user not exists")
-		return UserSecrect{}, errors.New("user not exists")
+		return userSecret{}, errors.New("user not exists")
 	}
 
-	userSecrect := UserSecrect{}
-	err = json.Unmarshal(val, &userSecrect)
+	userSecret := userSecret{}
+	err = json.Unmarshal(val, &userSecret)
 	if err != nil {
 		log.Errorf("user unmarshal failed: %v", err)
 	}
-	// if err = dec.Decode(&userSecrect); err != nil {
+	// if err = dec.Decode(&userSecret); err != nil {
 	// 	log.Error("user not exists")
 	// 	return lighttestservice.UserInfo{}, err
 	// }
-	return userSecrect, nil
+	return userSecret, nil
 }
 
 // CheckUser ...
 func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
-	userSecrect, err := a.getUserSecret()
+	userSecret, err := a.getUserSecret()
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
 	}
 
-	if userSecrect.Username == "" || userSecrect.Key == "" {
+	if userSecret.Username == "" || userSecret.Key == "" {
 		log.Error("username or key is empty")
 		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
 	}
 
-	userSecret, err := a.getUserSecret()
 	version := lighttestVer.Version
 	if version == "" {
 		version = "DEBUG"
@@ -757,7 +756,7 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 		Username: userSecret.Username,
 	}
 	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
-	userInfo, err := svc.GetUserInfo(client, userSecrect.Key)
+	userInfo, err := svc.GetUserInfo(client, userSecret.Key)
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
 	}
@@ -765,13 +764,12 @@ func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
 }
 
 // SaveUser ...
-func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, error) {
-	if userSecrect.Username == "" || userSecrect.Key == "" {
+func (a *Api) SaveUser(u userSecret) (lighttestservice.UserInfo, error) {
+	if u.Username == "" || u.Key == "" {
 		log.Errorf("username or key is empty")
 		return lighttestservice.UserInfo{}, errors.New("username or key is empty")
 	}
 
-	userSecret, err := a.getUserSecret()
 	version := lighttestVer.Version
 	if version == "" {
 		version = "DEBUG"
@@ -779,26 +777,30 @@ func (a *Api) SaveUser(userSecrect UserSecrect) (lighttestservice.UserInfo, erro
 	client := token.ClientInfo{
 		Name:     appName,
 		Version:  version,
-		Username: userSecret.Username,
+		Username: u.Username,
 	}
+	fmt.Printf("username: %s\n", u.Username)
 	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
-	userInfo, err := svc.GetUserInfo(client, userSecrect.Key)
+	fmt.Printf("clientInfo: %s\n", client.Username)
+	userInfo, err := svc.GetUserInfo(client, u.Key)
 	if err != nil {
+		fmt.Printf("get user info err: %v", err)
 		return lighttestservice.UserInfo{}, err
 	}
 	// var val bytes.Buffer
 	// enc := gob.NewEncoder(&val)
-	// enc.Encode(userSecrect)
-	encoded, err := json.Marshal(userSecrect)
+	// enc.Encode(userSecret)
+	encoded, err := json.Marshal(u)
 	if err != nil {
 		log.Errorf("user info marshal failed: %v", err)
 		return lighttestservice.UserInfo{}, err
 	}
-	err = a.store.set([]byte(userSecrectKey), encoded)
+	err = a.store.set([]byte(userSecretKey), encoded)
 	if err != nil {
 		log.Errorf("write user info to store failed: %v", err)
 		return lighttestservice.UserInfo{}, err
 	}
+	fmt.Printf("err is nil")
 	return userInfo, nil
 }
 
