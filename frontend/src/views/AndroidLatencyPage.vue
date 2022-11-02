@@ -570,6 +570,8 @@ const handleCalc = () => {
     return
   }
 
+ 
+
   // const pImgSize = imagePreviewRef.value.getPreviewImgSize()
   handleGetPreviewImage()
   const rectinfo = core.ImageRectInfo.createFrom({
@@ -597,7 +599,8 @@ const handleCalc = () => {
     scene_threshold: settingForm.diffScore,
   })
   StartAnalyse(rectinfo, rectTouchinfo, threshold)
-  NProgress.start()
+  handleResetStatus()
+  // NProgress.start()
   // delayTimes.value = 0 
   // calcButtonDisable.value = true
 }
@@ -627,6 +630,8 @@ function handleResetStatus() {
   if (NProgress.isStarted()) {
     NProgress.done()
   }
+
+  result.latency = 0
   // imagePreviewRef.value.setCalcButtonDisable(true)
   // imagePreviewRef.value.setImagePlaceHolder()
   // imagePreviewRef.value.setDefaultTime()

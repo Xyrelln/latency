@@ -600,7 +600,7 @@ type Threshold struct {
 
 // StartAnalyse ...
 func (a *Api) StartAnalyse(imageRect, touchRect core.ImageRectInfo, threshold Threshold) error {
-	// log.Infof("current rect: %v", imageRect)
+	log.Infof("current scene rect: %v, touch rect: %v, threshold: %v", imageRect, touchRect, threshold)
 	// log.Infof("workdir: %s", a.ImagesDir)
 	// a.emitInfo(eventAnalyseStart)
 	// responseTimes, _ := core.CalcTime(a.ImagesDir, imageRect, diffScore)
