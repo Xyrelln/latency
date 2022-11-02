@@ -70,7 +70,7 @@ func RecordVideo(ctx context.Context, serial, recFile string) (data []byte, err 
 }
 
 func ScrcpyStart(serial, recFile string, recordSecond int) (*CmdRunner, error) {
-	var timeOut = 10
+	var timeOut = 20
 	ctx, cancelFn := context.WithTimeout(context.Background(), time.Duration(recordSecond+timeOut)*time.Second)
 
 	go func() {
