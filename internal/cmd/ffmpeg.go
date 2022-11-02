@@ -65,7 +65,7 @@ func VideoToImage(ctx context.Context, srcVideoPath, destImagePath string) (data
 }
 
 func FFmpegStart(srcVideoPath, destImagePath string, callback CallbackFunc) (*CmdRunner, error) {
-	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
 
 	go func() {
 		VideoToImage(ctx, srcVideoPath, destImagePath)
