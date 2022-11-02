@@ -175,7 +175,7 @@ const settingForm = reactive({
   prepareTimeout: 3,
   develop: false,
   autoUpload: false,
-  pointLocation: true,
+  // pointLocation: true,
 })
 
 provide('threshold', settingForm.diffScore)
@@ -463,11 +463,9 @@ async function handleStart() {
 
   // 查看指针开启状态
 
-  if (settingForm.pointLocation) {
-    const pStatus = await isPointerLocationOn()
-    if (!pStatus) {
-      await setPointerLocationOn()
-    }
+  const pStatus = await isPointerLocationOn()
+  if (!pStatus) {
+    await setPointerLocationOn()
   }
   
   // 获取屏幕分辨率
@@ -699,9 +697,7 @@ async function addEventLister() {
     })
   })
   EventsOn("latency:record_filish", ()=>{
-    if (settingForm.pointLocation) {
-      setPointerLocationOff()
-    }
+    setPointerLocationOff()
     
     processStatus.value = 0
     ElNotification({
@@ -1030,9 +1026,9 @@ onUnmounted(()=>{
                   <el-form-item label="场景时间" prop="sceneStart">
                     <el-input v-model.number="settingForm.sceneStart"/>
                   </el-form-item>
-                  <el-form-item label="指针位置">
+                  <!-- <el-form-item label="指针位置">
                     <el-switch v-model="settingForm.pointLocation" />
-                  </el-form-item>
+                  </el-form-item> -->
                   <el-form-item label="自动上传">
                     <el-switch v-model="settingForm.autoUpload" />
                   </el-form-item>
