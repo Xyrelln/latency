@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 )
 
 var ErrScrcpyNotFound = errors.New("scrcpy command not found on PATH")
@@ -70,8 +69,10 @@ func RecordVideo(ctx context.Context, serial, recFile string) (data []byte, err 
 }
 
 func ScrcpyStart(serial, recFile string, recordSecond int) (*CmdRunner, error) {
-	var timeOut = 20
-	ctx, cancelFn := context.WithTimeout(context.Background(), time.Duration(recordSecond+timeOut)*time.Second)
+	// var timeOut = 20
+	// ctx, cancelFn := context.WithTimeout(context.Background(), time.Duration(recordSecond+timeOut)*time.Second)
+
+	ctx, cancelFn := context.WithCancel(context.Background())
 
 	go func() {
 		RecordVideo(ctx, serial, recFile)
