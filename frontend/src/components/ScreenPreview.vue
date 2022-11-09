@@ -60,7 +60,7 @@ const selectBoxTouchStyle = reactive({
   height: '100px',
 })
 
-const scalePercent = ref(70)
+const scalePercent = ref(60)
 
 const previewBoxStyle = computed(()=> {
   return {

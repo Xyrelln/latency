@@ -138,7 +138,7 @@ defineExpose({
       </el-button-group>
     </el-row>
 
-    <el-scrollbar style="height: 50vh;">
+    <el-scrollbar style="height: calc(100vh - 340px);">
       <div class="infinite-list">
         <!-- <div v-for="i in count" :key="i" class="infinite-list-item">
           202209271606{{ i }}  200 待上传

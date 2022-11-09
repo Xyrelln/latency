@@ -487,8 +487,8 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 </script>
 
 <template>
-    <!-- <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)"> -->
-      <div class="automatin-main">
+  <div class="automatin-main">
+    <el-scrollbar style="height: 100%;">
         <el-tabs 
           v-model="tabName"
           class="platform-tabs"
@@ -606,8 +606,9 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
             </el-scrollbar>
           </el-tab-pane>
         </el-tabs>
-      </div>
-    <!-- </el-scrollbar> -->
+     
+    </el-scrollbar>
+  </div>
 </template>
 
 <style scoped>
@@ -684,7 +685,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 }
 
 .automatin-main {
-  height: calc(100vh - 88px);
+  /* height: calc(100vh - 88px); */
   /* margin: 0 7px; */
   padding: 7px;
   border: 1px solid #cbd5e0;
