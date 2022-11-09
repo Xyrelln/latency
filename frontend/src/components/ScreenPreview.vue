@@ -60,7 +60,7 @@ const selectBoxTouchStyle = reactive({
   height: '100px',
 })
 
-const scalePercent = ref(60)
+const scalePercent = ref(100)
 
 const previewBoxStyle = computed(()=> {
   return {
@@ -463,6 +463,10 @@ const handleResize = (e: MouseEvent) => {
   
 }
 
+const setScalePercent = (value: number) => {
+  scalePercent.value = value
+}
+
 
 onMounted(()=>{
   selectBoxInit()
@@ -476,6 +480,7 @@ defineExpose({
   updateSelectBoxTouchStyle,
   switchSelectBoxShow,
   switchSelectBoxTouchShow,
+  setScalePercent,
 })
 
 </script>

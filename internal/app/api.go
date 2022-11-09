@@ -383,27 +383,31 @@ func (a *Api) StartRecord(serial string, recordSecond int, userAction UserAction
 	runner, rerr := cmd.ScrcpyStart(serial, recFile, recordSecond)
 	a.cmdRunner = runner
 
-	// record file exists check
-	// go func() {
+	// 通过文件大小判断录制是否启动， 如唱过 15*200=3s 后仍然大小检测失败， 则默认回调
+	actionCallbackRun := false
 	var nums [15][0]int
 	interval := 200
+	fileSizeThreshold := int64(1024 * 10)
 
 	for range nums {
-		isExists := fs.FileSizeGreaterThan(recFile, 1024*10)
+		isExists := fs.FileSizeGreaterThan(recFile, fileSizeThreshold)
 		if isExists {
 			log.Info("record file exists: %s", recFile)
 			a.emitInfo(eventRecordFileExists)
 
 			if userAction.Auto {
 				a.AutoInput(serial, userAction)
-				actionCallback()
 			}
-
+			actionCallbackRun = true
+			actionCallback()
 			break
 		}
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 	}
-	// }()
+
+	if !actionCallbackRun {
+		actionCallback()
+	}
 
 	return
 }
@@ -450,6 +454,7 @@ func (a *Api) StopRunner() error {
 
 // Start 启动延迟测试
 func (a *Api) Start(serial string, recordSecond int, userAction UserAction) error {
+	// 两种模式，自动和手动， 自动情况检查文件达到一定值后发送自动化指令
 
 	err := a.StartRecord(serial, recordSecond, userAction, func() error {
 		time.Sleep(time.Duration(recordSecond) * time.Second)
@@ -460,6 +465,7 @@ func (a *Api) Start(serial string, recordSecond int, userAction UserAction) erro
 		}
 		return nil
 	})
+
 	if err != nil {
 		a.emitInfo(eventRecordStartError)
 		return err
@@ -490,7 +496,7 @@ func (a *Api) ListRecords() ([]fs.RecordFile, error) {
 	workDir := filepath.Join(root, "cache", "mobile")
 	files, err := fs.GetRecordFiles(workDir)
 	if err != nil {
-		log.Errorf("ListRecords error: %v", err)
+		log.Warnf("ListRecords error: %v", err)
 		return []fs.RecordFile{}, nil
 	}
 	return files, nil

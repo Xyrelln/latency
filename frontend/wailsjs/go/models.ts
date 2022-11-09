@@ -1,31 +1,26 @@
-export namespace adb {
+export namespace lighttestservice {
 	
-	export class Device {
-	    serial: string;
-	    state: number;
-	    abi?: string;
-	    usb?: string;
-	    product: string;
-	    model: string;
-	    device: string;
-	    transport_id: number;
+	export class UserInfo {
+	    username: string;
+	    client: string;
+	    description: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Device(source);
+	        return new UserInfo(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.serial = source["serial"];
-	        this.state = source["state"];
-	        this.abi = source["abi"];
-	        this.usb = source["usb"];
-	        this.product = source["product"];
-	        this.model = source["model"];
-	        this.device = source["device"];
-	        this.transport_id = source["transport_id"];
+	        this.username = source["username"];
+	        this.client = source["client"];
+	        this.description = source["description"];
 	    }
 	}
+
+}
+
+export namespace adb {
+	
 	export class Display {
 	    width: number;
 	    height: number;
@@ -76,6 +71,32 @@ export namespace adb {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.x = source["x"];
 	        this.y = source["y"];
+	    }
+	}
+	export class Device {
+	    serial: string;
+	    state: number;
+	    abi?: string;
+	    usb?: string;
+	    product: string;
+	    model: string;
+	    device: string;
+	    transport_id: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Device(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.abi = source["abi"];
+	        this.usb = source["usb"];
+	        this.product = source["product"];
+	        this.model = source["model"];
+	        this.device = source["device"];
+	        this.transport_id = source["transport_id"];
 	    }
 	}
 
@@ -161,22 +182,6 @@ export namespace latencywin {
 
 export namespace app {
 	
-	export class VersionInfo {
-	    version: string;
-	    commitShortSHA: string;
-	    buildTimestamp: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new VersionInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.commitShortSHA = source["commitShortSHA"];
-	        this.buildTimestamp = source["buildTimestamp"];
-	    }
-	}
 	export class UserAction {
 	    auto: boolean;
 	    type: string;
@@ -201,6 +206,54 @@ export namespace app {
 	        this.speed = source["speed"];
 	    }
 	}
+	export class WinOpLatencyResult {
+	    latency: number;
+	    responseIndex: number;
+	    responseTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WinOpLatencyResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latency = source["latency"];
+	        this.responseIndex = source["responseIndex"];
+	        this.responseTime = source["responseTime"];
+	    }
+	}
+	export class UpdateInfo {
+	    latestVersion: string;
+	    needUpdate: boolean;
+	    err?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latestVersion = source["latestVersion"];
+	        this.needUpdate = source["needUpdate"];
+	        this.err = source["err"];
+	    }
+	}
+	export class DeviceInfo {
+	    device_name: string;
+	    screen_width: number;
+	    screen_height: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeviceInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.device_name = source["device_name"];
+	        this.screen_width = source["screen_width"];
+	        this.screen_height = source["screen_height"];
+	    }
+	}
 	export class CropInfo {
 	    top: number;
 	    left: number;
@@ -219,20 +272,42 @@ export namespace app {
 	        this.height = source["height"];
 	    }
 	}
-	export class DeviceInfo {
-	    device_name: string;
-	    screen_width: number;
-	    screen_height: number;
+	export class GetImageResp {
+	    length: number;
+	    currentIndex: number;
+	    screenshotTime: string;
+	    imageFilePath: string;
+	    imageWidth: number;
+	    imageHeight: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new DeviceInfo(source);
+	        return new GetImageResp(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.device_name = source["device_name"];
-	        this.screen_width = source["screen_width"];
-	        this.screen_height = source["screen_height"];
+	        this.length = source["length"];
+	        this.currentIndex = source["currentIndex"];
+	        this.screenshotTime = source["screenshotTime"];
+	        this.imageFilePath = source["imageFilePath"];
+	        this.imageWidth = source["imageWidth"];
+	        this.imageHeight = source["imageHeight"];
+	    }
+	}
+	export class VersionInfo {
+	    version: string;
+	    commitShortSHA: string;
+	    buildTimestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VersionInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.commitShortSHA = source["commitShortSHA"];
+	        this.buildTimestamp = source["buildTimestamp"];
 	    }
 	}
 	export class UserScene {
@@ -275,7 +350,6 @@ export namespace app {
 		    return a;
 		}
 	}
-	
 	export class userSecret {
 	    username: string;
 	    key: string;
@@ -290,62 +364,6 @@ export namespace app {
 	        this.key = source["key"];
 	    }
 	}
-	
-	export class WinOpLatencyResult {
-	    latency: number;
-	    responseIndex: number;
-	    responseTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new WinOpLatencyResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latency = source["latency"];
-	        this.responseIndex = source["responseIndex"];
-	        this.responseTime = source["responseTime"];
-	    }
-	}
-	export class UpdateInfo {
-	    latestVersion: string;
-	    needUpdate: boolean;
-	    err?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.latestVersion = source["latestVersion"];
-	        this.needUpdate = source["needUpdate"];
-	        this.err = source["err"];
-	    }
-	}
-	export class GetImageResp {
-	    length: number;
-	    currentIndex: number;
-	    screenshotTime: string;
-	    imageFilePath: string;
-	    imageWidth: number;
-	    imageHeight: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new GetImageResp(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.length = source["length"];
-	        this.currentIndex = source["currentIndex"];
-	        this.screenshotTime = source["screenshotTime"];
-	        this.imageFilePath = source["imageFilePath"];
-	        this.imageWidth = source["imageWidth"];
-	        this.imageHeight = source["imageHeight"];
-	    }
-	}
-	
 	export class Threshold {
 	    pointer_threshold: number;
 	    black_white_threshold: number;
@@ -409,27 +427,6 @@ export namespace core {
 	        this.width = source["width"];
 	        this.height = source["height"];
 	        this.size = source["size"];
-	    }
-	}
-
-}
-
-export namespace lighttestservice {
-	
-	export class UserInfo {
-	    username: string;
-	    client: string;
-	    description: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.username = source["username"];
-	        this.client = source["client"];
-	        this.description = source["description"];
 	    }
 	}
 

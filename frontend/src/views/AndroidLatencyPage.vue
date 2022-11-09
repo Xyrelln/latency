@@ -795,7 +795,7 @@ async function addEventLister() {
 }
 
 const updateCropInfo = () => {
-  if (selectedScene.value === undefined) {
+  if (selectedScene.value === undefined && latencyForm.auto === true) {
     ElMessage({
       type: 'warning',
       message: '场景信息为空',
@@ -823,6 +823,10 @@ const updateCropInfo = () => {
   imagePreviewRef.value.switchSelectBoxTouchShow(true)
 }
 
+const isVerticalScreen = () => {
+  return imageInfo.width < imageInfo.height
+}
+
 async function getFirstImage(){
   await GetFirstImageInfo().then((res: core.ImageInfo) => {
     console.log('getFirstImage')
@@ -830,6 +834,11 @@ async function getFirstImage(){
     imageInfo.width = res.width
     imageInfo.height = res.height
 
+    if (isVerticalScreen()) {
+      imagePreviewRef.value.setScalePercent(50)
+    } else {
+      imagePreviewRef.value.setScalePercent(100)
+    }
 
     calcButtonDisable.value = false
     
@@ -1044,7 +1053,23 @@ onUnmounted(()=>{
         </el-tabs>
     </el-aside>
     <el-main class="main-content">
-      <div>
+      <el-row justify="center" class="result-row">
+        <el-col :span="8" class="info-line">
+          <span>动作: </span>
+          <span v-if="latencyForm.scene.action.type==='click'">点击 x: {{ latencyForm.scene.action.x}} y: {{ latencyForm.scene.action.y }}</span>
+          <span v-if="latencyForm.scene.action.type==='swipe'">滑动 x: {{ latencyForm.scene.action.x}} y:{{ latencyForm.scene.action.y}} tx: {{ latencyForm.scene.action.tx }} ty:{{ latencyForm.scene.action.ty }}  s: {{ latencyForm.scene.action.speed }}</span>
+        </el-col>
+        <el-col :span="8" class="info-line">
+          <span class="touch-area">触控区域:</span>
+          x: {{ latencyForm.scene.crop_touch_coordinate.left }} y: {{ latencyForm.scene.crop_touch_coordinate.top }}  w: {{ latencyForm.scene.crop_touch_coordinate.width }}  h: {{ latencyForm.scene.crop_touch_coordinate.height }}
+        </el-col>
+        <el-col :span="8" class="info-line">
+          <span class="watch-area">观察区域:</span>
+          x: {{ latencyForm.scene.crop_coordinate.left }} y: {{ latencyForm.scene.crop_coordinate.top }}  w: {{ latencyForm.scene.crop_coordinate.width }}  h: {{ latencyForm.scene.crop_coordinate.height }}
+        </el-col>
+      </el-row>
+      <el-scrollbar style="height: calc(100vh - 130px)">
+        <div>
           <ScreenPreview
             ref="imagePreviewRef"
             :imageInfo="imageInfo"
@@ -1072,39 +1097,7 @@ onUnmounted(()=>{
             计算延迟（图片 {{ imagePageInfo.currentPage }}）</el-button>
           <!-- <el-button>打开当前截图</el-button> -->
         </el-row>
-        <el-row justify="center" class="result-row">
-          <el-col :span="4" class="info-line">
-            <span>动作</span>
-          </el-col>
-          <el-col :span="12" class="info-line">
-            <span v-if="latencyForm.scene.action.type==='click'">点击 x: {{ latencyForm.scene.action.x}} y: {{ latencyForm.scene.action.y }}</span>
-            <span v-if="latencyForm.scene.action.type==='swipe'">滑动 x: {{ latencyForm.scene.action.x}} y:{{ latencyForm.scene.action.y}} tx: {{ latencyForm.scene.action.tx }} ty:{{ latencyForm.scene.action.ty }}  speed: {{ latencyForm.scene.action.speed }}</span>
-          </el-col>
-        </el-row>
-        <el-row justify="center" class="result-row">
-          <el-col :span="4" class="info-line">
-            <span>触控区域</span>
-          </el-col>
-          <el-col :span="12" class="info-line">
-            left: {{ latencyForm.scene.crop_touch_coordinate.left }} top: {{ latencyForm.scene.crop_touch_coordinate.top }}  width: {{ latencyForm.scene.crop_touch_coordinate.width }}  height: {{ latencyForm.scene.crop_touch_coordinate.height }}
-          </el-col>
-        </el-row>
-        <el-row justify="center" class="result-row">
-          <el-col :span="4" class="info-line">
-            <span>观察区域</span>
-          </el-col>
-          <el-col :span="12" class="info-line">
-            left: {{ latencyForm.scene.crop_coordinate.left }} top: {{ latencyForm.scene.crop_coordinate.top }}  width: {{ latencyForm.scene.crop_coordinate.width }}  height: {{ latencyForm.scene.crop_coordinate.height }}
-          </el-col>
-        </el-row>
-        <el-row justify="center" class="result-row">
-          <el-col :span="4" class="info-line">
-            <span>图片信息</span>
-          </el-col>
-          <el-col :span="12" class="info-line">
-            source width: {{ imageInfo.width }} height: {{ imageInfo.height }}  preview width:{{ imagePreviewInfo.width}} height: {{imagePreviewInfo.height}}
-          </el-col>
-        </el-row>
+        
 
         <el-row justify="center" class="result-row">
           <el-col :span="4" class="info-line">
@@ -1120,6 +1113,7 @@ onUnmounted(()=>{
             <el-button link>结束图片</el-button>
           </el-col>
         </el-row>
+      </el-scrollbar>
 
         <el-dialog
           v-model="loadExtVideoVisible"
@@ -1209,5 +1203,18 @@ onUnmounted(()=>{
 
 .panel-container {
   height: inherit;
+}
+
+.touch-area {
+  color: rgb(46,211,111);
+}
+
+.watch-area {
+  color: rgb(246,77,62);
+}
+
+.result-row {
+  background-color: #ebeef0;
+  margin-bottom: 7px;
 }
 </style>

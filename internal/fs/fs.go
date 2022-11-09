@@ -335,7 +335,7 @@ type RecordFile struct {
 func GetRecordFiles(parentPath string) ([]RecordFile, error) {
 	files, err := os.ReadDir(parentPath)
 	if err != nil {
-		log.Warnf("GetRecordFile err: %v", err)
+		log.Warnf("get record file err: %v", err)
 		return []RecordFile{}, nil
 	}
 	var recordFiles []RecordFile

@@ -371,6 +371,10 @@ const handleUserAction = (action: any) => {
 const handleLoadImage = (val: number) => {}
 const handleCalcWithCurrent = () => {}
 
+const isVerticalScreen = () => {
+  return imageInfo.width < imageInfo.height
+}
+
 const handleLoadScreenshot = async () => {
   NProgress.start()
   await setPointerLocationOn()
@@ -378,6 +382,12 @@ const handleLoadScreenshot = async () => {
     imageInfo.path = res.path
     imageInfo.width = res.width
     imageInfo.height = res.height
+
+    if (isVerticalScreen()) {
+      imagePreviewRef.value.setScalePercent(50)
+    } else {
+      imagePreviewRef.value.setScalePercent(100)
+    }
 
     // const pImgSize = imagePreviewRef.value.getPreviewImgSize()
     handleGetPreviewImgSize()
@@ -488,14 +498,13 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 
 <template>
   <div class="automatin-main">
-    <el-scrollbar style="height: 100%;">
+   
         <el-tabs 
           v-model="tabName"
           class="platform-tabs"
           @tab-click="handleTabClick"
           >
           <el-tab-pane label="录制" name="record">
-            <el-scrollbar>
             <el-row justify="space-between" style="display:flex">
               <el-col class="button-row" :span="12">
                 <el-select
@@ -541,60 +550,40 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 
             <el-container>
               <el-main class="main-content">
-                <div>
-                  <ScreenPreview
-                    ref="imagePreviewRef"
-                    :imageInfo="imageInfo"
-                    :cropInfo="cropInfo"
-                    :cropTouchInfo="cropTouchInfo"
-                    :pageInfo="imagePageInfo"
-                    @crop-change="handleCropChange"
-                    @page-change="handlePageChange"
-                    @open-folder="handleOpenFolder"
-                    @user-action="handleUserAction"
-                    @crop-touch-change="handleCropTouchChange"
-                    @scale-change="handleScaleChange"
-                    />
-                </div>
-
-                <el-row justify="center" class="result-row">
-                </el-row>
-                <el-row justify="center" class="result-row">
-                  <el-col :span="4" class="info-line">
-                    <span>动作</span>
-                  </el-col>
-                  <el-col :span="8" class="info-line">
-                    <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
-                    <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  speed: {{ userAction.speed }}</span>
-                  </el-col>
-                </el-row>
-                <el-row justify="center" class="result-row">
-                  <el-col :span="4" class="info-line">
-                    <span>触控区域</span>
-                  </el-col>
-                  <el-col :span="8" class="info-line">
-                    left: {{ realCropTouchInfo.left }} top: {{ realCropTouchInfo.top }}  width: {{ realCropTouchInfo.width }}  height: {{ realCropTouchInfo.height }}
-                  </el-col>
-                </el-row>
-                <el-row justify="center" class="result-row">
-                  <el-col :span="4" class="info-line">
-                    <span>观察区域</span>
-                  </el-col>
-                  <el-col :span="8" class="info-line">
-                    left: {{ realCropInfo.left }} top: {{ realCropInfo.top }}  width: {{ realCropInfo.width }}  height: {{ realCropInfo.height }}
-                  </el-col>
-                </el-row>
-                <el-row justify="center" class="result-row">
-                  <el-col :span="4" class="info-line">
-                    <span>图片信息</span>
-                  </el-col>
-                  <el-col :span="8" class="info-line">
-                    source width: {{ imageInfo.width }} height: {{ imageInfo.height }}  preview width:{{ previewImageInfo.width}} height: {{previewImageInfo.height}}
-                  </el-col>
-                </el-row>
+                  <el-row class="result-row">
+                      <el-col :span="8" class="info-line">
+                        <span>动作: </span>
+                        <span v-if="userAction.type==='click'">点击 x: {{ realUserAction.x}} y: {{ realUserAction.y }}</span>
+                        <span v-if="userAction.type==='swipe'">滑动 x: {{ realUserAction.x}} y:{{ realUserAction.y}} tx: {{ realUserAction.tx }} ty:{{ realUserAction.ty }}  s: {{ userAction.speed }}</span>
+                      </el-col>
+                      <el-col :span="8" class="info-line">
+                        <span class="touch-area">触控区域:</span>
+                        x: {{ realCropTouchInfo.left }} y: {{ realCropTouchInfo.top }}  w: {{ realCropTouchInfo.width }}  h: {{ realCropTouchInfo.height }}
+                      </el-col>
+                      <el-col :span="8" class="info-line">
+                        <span class="watch-area">观察区域</span>
+                        x: {{ realCropInfo.left }} y: {{ realCropInfo.top }}  w: {{ realCropInfo.width }}  h: {{ realCropInfo.height }}
+                      </el-col>
+                  </el-row>
+                  <el-scrollbar style="height: calc(100vh - 88px)">
+                    <div>
+                      <ScreenPreview
+                        ref="imagePreviewRef"
+                        :imageInfo="imageInfo"
+                        :cropInfo="cropInfo"
+                        :cropTouchInfo="cropTouchInfo"
+                        :pageInfo="imagePageInfo"
+                        @crop-change="handleCropChange"
+                        @page-change="handlePageChange"
+                        @open-folder="handleOpenFolder"
+                        @user-action="handleUserAction"
+                        @crop-touch-change="handleCropTouchChange"
+                        @scale-change="handleScaleChange"
+                        />
+                    </div>
+                </el-scrollbar>
               </el-main>
             </el-container>
-          </el-scrollbar>
           </el-tab-pane>
 
           <el-tab-pane label="管理" name="manage">
@@ -606,8 +595,6 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
             </el-scrollbar>
           </el-tab-pane>
         </el-tabs>
-     
-    </el-scrollbar>
   </div>
 </template>
 
@@ -660,7 +647,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 .info-line {
   border: solid 1px #e6e6e6;
   opacity: 0.6;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 18px;
   display:table-cell;
   vertical-align:middle;
@@ -691,4 +678,22 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
   border: 1px solid #cbd5e0;
 }
 
+.describ-text {
+  display: inline-block;
+  width: 100%;
+  height: 120px;
+}
+
+.touch-area {
+  color: rgb(46,211,111);
+}
+
+.watch-area {
+  color: rgb(246,77,62);
+}
+
+.result-row {
+  background-color: #ebeef0;
+  margin-bottom: 7px;
+}
 </style>
