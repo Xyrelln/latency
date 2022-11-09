@@ -925,7 +925,7 @@ onUnmounted(()=>{
 </script>
 
 <template>
-  <el-container>
+  <el-container class="panel-container">
     <el-aside class="aside-content" width="240px">
         <el-row class="row-item">
           <el-form :model="latencyForm">
@@ -1004,7 +1004,7 @@ onUnmounted(()=>{
         <el-tabs 
             v-model="latencyTabName" 
             class="platform-tabs">
-            <el-tab-pane label="记录" name="list">
+            <el-tab-pane label="记录" name="list" class="menu-tab">
               <FileRecord 
                ref="fileRecordRef"
                @load-extVideo="handleLoadExtVideo"
@@ -1157,7 +1157,7 @@ onUnmounted(()=>{
   border: solid 1px #e6e6e6;
   padding: 0.5rem;
   border-radius: 4px;
-  height: 80vh;
+  /* height: 80vh; */
   /* box-shadow: 0 0 6px RGBA(0, 0, 0, 0.2); */
 }
 
@@ -1198,5 +1198,16 @@ onUnmounted(()=>{
 
 .button-row {
   margin: 7px 0;
+}
+.menu-tab {
+  height: inherit;
+}
+
+.platform-tabs {
+  height: inherit;
+}
+
+.panel-container {
+  height: inherit;
 }
 </style>

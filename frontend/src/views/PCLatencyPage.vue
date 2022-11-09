@@ -388,7 +388,7 @@ onUnmounted(()=>{
 </script>
 
 <template>
-  <el-container>
+  <el-container class="panel-container">
     <el-aside class="aside-content" width="240px">
         <el-row class="row-item">
           <el-form :model="latencyForm">
@@ -463,11 +463,11 @@ onUnmounted(()=>{
                     <!-- <el-form-item label="自动上传">
                       <el-switch v-model="latencyForm.auto_upload" />
                     </el-form-item> -->
-                    <el-form-item label="调式">
-                      <el-button @click="handleReload">重载页面</el-button>
-                    </el-form-item>
                     <el-form-item label="缓存">
                       <el-button @click="handleClearCache">清理数据</el-button>
+                    </el-form-item>
+                    <el-form-item label="调式">
+                      <el-button @click="handleReload">重载页面</el-button>
                     </el-form-item>
                 </el-form>
                 </el-row>
@@ -594,5 +594,9 @@ onUnmounted(()=>{
 
 .button-row {
   margin: 7px 0;
+}
+
+.panel-container {
+  height: inherit;
 }
 </style>

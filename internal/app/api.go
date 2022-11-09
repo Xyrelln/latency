@@ -102,7 +102,7 @@ func (a *Api) shutdown(ctx context.Context) {
 }
 
 func (a *Api) domready(ctx context.Context) {
-	a.IsAppReady()
+	// a.IsAppReady()
 }
 
 // func (a *Api) getCurrentState() *workspaceState {

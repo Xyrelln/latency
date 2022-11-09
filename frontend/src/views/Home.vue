@@ -121,19 +121,19 @@ onUnmounted(()=>{
 </script>
 
 <template>
-  <el-container>
+  <el-container class="main-container">
     <el-tabs type="border-card" v-model="topTabName" class="top-tabs" >
-      <el-tab-pane label="延迟测试-PC" name="latency-pc">
+      <el-tab-pane label="延迟测试-PC" name="latency-pc" class="latency-panel">
         <PCLatencyPage></PCLatencyPage>
       </el-tab-pane>
-      <el-tab-pane label="延迟测试-Android" name="latency">
+      <el-tab-pane label="延迟测试-Android" name="latency" class="latency-panel">
         <AndroidLatencyPage></AndroidLatencyPage>
       </el-tab-pane>
-      <el-tab-pane label="场景配置-Android" name="automation">
+      <el-tab-pane label="场景配置-Android" name="automation" class="latency-panel">
         <AutomationPage></AutomationPage>
         <!-- <Automation></Automation> -->
       </el-tab-pane>
-      <el-tab-pane label="关于" name="about">
+      <el-tab-pane label="关于" name="about" class="latency-panel">
         <AboutPage></AboutPage>
       </el-tab-pane>
     </el-tabs>
@@ -165,9 +165,23 @@ onUnmounted(()=>{
     
 </template>
 
-<style scoped>
+<style>
 .top-tabs {
   width: 100vw;
-  /* height: 96vh; */
+  /* width: calc(100vw - 14px); */
+  /* height: inherit; */
+}
+.latency-panel {
+  height: inherit;
+}
+
+.el-tabs--border-card>.el-tabs__content {
+  padding: 7px !important;
+  height: calc(100vh - 74px);
+}
+
+.main-container {
+  width: 100vw;
+  height: 100vh;
 }
 </style>

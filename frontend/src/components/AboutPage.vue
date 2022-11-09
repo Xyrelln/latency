@@ -23,8 +23,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)">
-    <div class="describe">
+  <!-- <el-scrollbar style="height: calc(100vh - 100px);width: calc(100vw - 60px)"> -->
+    <div class="describe-main">
       <el-row>
         <el-col :span="4">
           版权所有
@@ -42,11 +42,17 @@ onMounted(() => {
         </el-col>
       </el-row>
     </div>
-  </el-scrollbar>
+  <!-- </el-scrollbar> -->
   
 </template>
 
-<style>
-
+<style scoped>
+.describe-main {
+  /* width: 100vw; */
+  height: calc(100vh - 88px);
+  /* margin: 0 7px; */
+  padding: 7px;
+  border: 1px solid #cbd5e0;
+}
 
 </style>

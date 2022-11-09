@@ -16,7 +16,7 @@ type myFormatter struct {
 }
 
 func (f *myFormatter) Format(entry *log.Entry) ([]byte, error) {
-	return []byte(fmt.Sprintf("[%s][%s][%s:%d] %s\n", entry.Time.Format(time.RFC3339), strings.ToUpper(entry.Level.String()), entry.Caller.File, entry.Caller.Line, entry.Message)), nil
+	return []byte(fmt.Sprintf("[%s][%s][%s:%d] %s\n", entry.Time.Format(time.RFC3339), strings.ToUpper(entry.Level.String()), filepath.Base(entry.Caller.File), entry.Caller.Line, entry.Message)), nil
 }
 
 // SetupLog ...
@@ -28,8 +28,8 @@ func init() {
 	logdir := filepath.Dir(p)
 	log.SetOutput(&lumberjack.Logger{
 		Filename:   fmt.Sprintf("%s/latency-mobile.log", logdir),
-		MaxSize:    100, // megabytes
-		MaxBackups: 3,
+		MaxSize:    5, // megabytes
+		MaxBackups: 10,
 		MaxAge:     28, // days
 		LocalTime:  true,
 	})
