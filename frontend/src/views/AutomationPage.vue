@@ -548,8 +548,8 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
 
             </el-row>
 
-            <el-container>
-              <el-main class="main-content">
+            <!-- <el-container>
+              <el-main class="main-content"> -->
                   <el-row class="result-row">
                       <el-col :span="8" class="info-line">
                         <span>动作: </span>
@@ -565,8 +565,8 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                         x: {{ realCropInfo.left }} y: {{ realCropInfo.top }}  w: {{ realCropInfo.width }}  h: {{ realCropInfo.height }}
                       </el-col>
                   </el-row>
-                  <el-scrollbar style="height: calc(100vh - 88px)">
-                    <div>
+                  <el-scrollbar style="height: calc(100vh - 216px)">
+                    <!-- <div> -->
                       <ScreenPreview
                         ref="imagePreviewRef"
                         :imageInfo="imageInfo"
@@ -580,10 +580,10 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
                         @crop-touch-change="handleCropTouchChange"
                         @scale-change="handleScaleChange"
                         />
-                    </div>
+                    <!-- </div> -->
                 </el-scrollbar>
-              </el-main>
-            </el-container>
+              <!-- </el-main>
+            </el-container> -->
           </el-tab-pane>
 
           <el-tab-pane label="管理" name="manage">
@@ -676,6 +676,7 @@ const handleTabClick = (tab: TabsPaneContext, event: Event) => {
   /* margin: 0 7px; */
   padding: 7px;
   border: 1px solid #cbd5e0;
+  border-radius: 4px;
 }
 
 .describ-text {

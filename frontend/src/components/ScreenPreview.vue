@@ -64,8 +64,10 @@ const scalePercent = ref(100)
 
 const previewBoxStyle = computed(()=> {
   return {
-    'max-width': scalePercent.value +'%',
-    'max-height': scalePercent.value +'%',
+    // 'max-width': scalePercent.value +'%',
+    // 'max-height': scalePercent.value +'%',
+    'width': scalePercent.value +'%',
+    'height': scalePercent.value +'%',
   }
 })
 
@@ -491,8 +493,7 @@ defineExpose({
       <!-- <el-col> -->
         <!-- <span>标识检测区域</span> -->
         <div>
-          <!-- <span>绿色边框： 触控区域</span>
-          <span>红色边框： 内容区域</span> -->
+          <!-- empty div -->
         </div>
         <div ref="previewImgDivRef" class="out-img-box" :style="previewBoxStyle">
         <!-- <div ref="previewImgDivRef" class="out-img-box"> -->
@@ -522,32 +523,17 @@ defineExpose({
           <div ref="resizeLeftRef" class="resizer resizer-l"></div>
         </div>
 
-        <!-- <div class='resizable'> -->
         <div ref="selectBoxTouchRef" :style="selectBoxTouchStyle" class="s-move-content-header resizers" id="select-box" v-show="isSelectBoxTouchShow">
           <div ref="resizeTopTouchRef" class="resizer-touch resizer-t top-left"></div>
           <div ref="resizeRightTouchRef" class="resizer-touch resizer-r top-right"></div>
           <div ref="resizeBottomTouchRef" class="resizer-touch resizer-b bottom-left"></div>
           <div ref="resizeLeftTouchRef" class="resizer-touch resizer-l bottom-right"></div>
         </div>
-      <!-- </div> -->
 
-        <!-- <div class='resizable'>
-          <div class='resizers'>
-            <div class='resizer top-left'></div>
-            <div class='resizer top-right'></div>
-            <div class='resizer bottom-left'></div>
-            <div class='resizer bottom-right'></div>
-          </div>
-        </div> -->
-          
-      <!-- </el-col> -->
+       
+
     </el-row>
-    <!-- <el-row justify="center">
-      <el-col :span="6"><span>left: </span></el-col>
-      <el-col :span="6"><span>top: </span></el-col>
-      <el-col :span="6"><span>width: </span></el-col>
-      <el-col :span="6"><span>height: </span></el-col>
-    </el-row> -->
+
     <el-row v-if="props.pageInfo.total > 1" justify="center">
         <el-pagination
           :currentPage="props.pageInfo.currentPage"
@@ -613,8 +599,10 @@ defineExpose({
 }
 
 .preview-img {
-    max-width: 100%;
-    max-height: 100%;
+    /* max-width: 100%;
+    max-height: 100%; */
+    width: 100%;
+    height: 100%;
     /* max-width: 500px;
     max-height: 500px; */
     vertical-align: middle;
@@ -731,53 +719,5 @@ img {
 .foler-open-icon:hover {
   cursor: pointer;
 }
-
-/* new test */
-/* .resizable {
-  background: white;
-  width: 100px;
-  height: 100px;
-  position: absolute;
-  top: 100px;
-  left: 100px;
-}
-
-.resizable .resizers{
-  width: 100%;
-  height: 100%;
-  border: 3px solid #4286f4;
-  box-sizing: border-box;
-}
-
-.resizable .resizers .resizer{
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: white;
-  border: 3px solid #4286f4;
-  position: absolute;
-}
-
-.resizable .resizers .resizer.top-left {
-  left: -5px;
-  top: -5px;
-  cursor: nwse-resize; 
-}
-.resizable .resizers .resizer.top-right {
-  right: -5px;
-  top: -5px;
-  cursor: nesw-resize;
-}
-.resizable .resizers .resizer.bottom-left {
-  left: -5px;
-  bottom: -5px;
-  cursor: nesw-resize;
-}
-.resizable .resizers .resizer.bottom-right {
-  right: -5px;
-  bottom: -5px;
-  cursor: nwse-resize;
-} */
-
 
 </style>

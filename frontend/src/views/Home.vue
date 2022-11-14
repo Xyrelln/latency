@@ -131,7 +131,6 @@ onUnmounted(()=>{
       </el-tab-pane>
       <el-tab-pane label="场景配置-Android" name="automation" class="latency-panel">
         <AutomationPage></AutomationPage>
-        <!-- <Automation></Automation> -->
       </el-tab-pane>
       <el-tab-pane label="关于" name="about" class="latency-panel">
         <AboutPage></AboutPage>
@@ -174,6 +173,10 @@ onUnmounted(()=>{
 .latency-panel {
   height: inherit;
 }
+
+/* .automation-panel {
+  height: 80vh;
+} */
 
 .el-tabs--border-card>.el-tabs__content {
   padding: 7px !important;
