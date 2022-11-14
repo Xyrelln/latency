@@ -480,6 +480,7 @@ onUnmounted(()=>{
         </el-tabs>
     </el-aside>
     <el-main class="main-content">
+      <el-scrollbar style="height: calc(100vh - 94px)">
         <div>
           <ScreenPreview
             ref="imagePreviewRef"
@@ -532,6 +533,7 @@ onUnmounted(()=>{
           <el-col :span="4" class="info-line">
           </el-col>
         </el-row>
+      </el-scrollbar>
     </el-main>
   </el-container>
 </template>

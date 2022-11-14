@@ -170,6 +170,10 @@ export function Transform(arg1) {
   return window['go']['app']['Api']['Transform'](arg1);
 }
 
+export function UploadErrorLog() {
+  return window['go']['app']['Api']['UploadErrorLog']();
+}
+
 export function UploadFile(arg1) {
   return window['go']['app']['Api']['UploadFile'](arg1);
 }

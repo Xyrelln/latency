@@ -39,6 +39,15 @@ func init() {
 	log.SetReportCaller(true)
 }
 
+func GetLogFilePath() string {
+	p, err := os.Executable()
+	if err != nil {
+		fmt.Print(err)
+	}
+	logdir := filepath.Dir(p)
+	return fmt.Sprintf("%s/latency-mobile.log", logdir)
+}
+
 // WailsLogger ...
 type WailsLogger struct{}
 

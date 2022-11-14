@@ -20,12 +20,12 @@ import (
 
 	latencywin "op-latency-mobile/internal/latency_win"
 
+	loggerUtil "op-latency-mobile/internal/logger"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
-	// lighttestServ "gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
-	// lighttestToken "gitlab.vrviu.com/epc/lighttest-lib/token"
 	"gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
 	"gitlab.vrviu.com/epc/lighttest-lib/token"
 	lighttestUpdate "gitlab.vrviu.com/epc/lighttest-lib/update"
@@ -652,6 +652,11 @@ func (a *Api) GetImageFiles() ([]string, error) {
 	return imgs, nil
 }
 
+func (a *Api) UploadErrorLog() {
+	logFile := loggerUtil.GetLogFilePath()
+	go a.UploadFile(logFile)
+}
+
 // UploadFile 文件上传
 func (a *Api) UploadFile(filePath string) error {
 
@@ -663,6 +668,9 @@ func (a *Api) UploadFile(filePath string) error {
 	defer f.Close()
 
 	userSecret, err := a.getUserSecret()
+	if err != nil {
+		log.Errorf("get user secret failed, err: %v", err)
+	}
 	version := lighttestVer.Version
 	if version == "" {
 		version = "DEBUG"
