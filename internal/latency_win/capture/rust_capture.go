@@ -4,9 +4,12 @@
 package capture
 
 import (
+	"encoding/json"
 	"fmt"
+
 	// "image"
 	// _ "image/jpeg" // register
+	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,21 +28,25 @@ type RustCapture struct {
 }
 
 // CaptureScreenshots ...
-func (rsc *RustCapture) CaptureScreenshots(frames int, windowName string) (imgs []ScreenshotWithTs, err error) {
+func (rsc *RustCapture) CaptureScreenshots(frames int, windowHandle int) (imgs []ScreenshotWithTs, err error) {
 	var cmd *exec.Cmd
-	// screenshotDir := filepath.Join(rsc.OutputDir, time.Now().Format(time.RFC3339))
-	if windowName == "" {
-		cmd = exec.Command(rsc.ExePath,
-			"-f", fmt.Sprintf("%d", frames),
-			"-o", rsc.OutputDir,
-		)
-	} else {
-		cmd = exec.Command(rsc.ExePath,
-			"-f", fmt.Sprintf("%d", frames),
-			"-o", rsc.OutputDir,
-			"-w", windowName,
-		)
-	}
+	cmd = exec.Command(rsc.ExePath,
+		"-f", fmt.Sprintf("%d", frames),
+		"-o", rsc.OutputDir,
+		"--window-handle", fmt.Sprintf("%d", windowHandle),
+	)
+	// if windowName == "" {
+	// 	cmd = exec.Command(rsc.ExePath,
+	// 		"-f", fmt.Sprintf("%d", frames),
+	// 		"-o", rsc.OutputDir,
+	// 	)
+	// } else {
+	// 	cmd = exec.Command(rsc.ExePath,
+	// 		"-f", fmt.Sprintf("%d", frames),
+	// 		"-o", rsc.OutputDir,
+	// 		"-w", windowName,
+	// 	)
+	// }
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	// cmd.Stdout = os.Stdout
@@ -52,8 +59,14 @@ func (rsc *RustCapture) CaptureScreenshots(frames int, windowName string) (imgs 
 	return rsc.loadScreenshotsResult(rsc.OutputDir)
 }
 
+// WindowInfo ...
+type WindowInfo struct {
+	Title  string `json:"title"`
+	Handle int    `json:"handle"`
+}
+
 // ListCapturableWindows ...
-func (rsc *RustCapture) ListCapturableWindows() (windowNames []string, err error) {
+func (rsc *RustCapture) ListCapturableWindows() (windowNames []WindowInfo, err error) {
 	cmd := exec.Command(rsc.ExePath, "-l")
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 
@@ -63,7 +76,17 @@ func (rsc *RustCapture) ListCapturableWindows() (windowNames []string, err error
 	}
 	out := strings.TrimSpace(string(b))
 	lines := strings.Split(out, "\n")
-	return lines, nil
+
+	res := make([]WindowInfo, 0, len(lines))
+	for _, line := range lines {
+		var info WindowInfo
+		if err := json.Unmarshal([]byte(line), &info); err == nil {
+			res = append(res, info)
+		} else {
+			log.Errorf("unmarshal rscapture window info error: %v", err)
+		}
+	}
+	return res, nil
 }
 
 func (rsc *RustCapture) loadScreenshotsResult(dir string) (imgs []ScreenshotWithTs, err error) {

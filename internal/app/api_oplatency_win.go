@@ -161,7 +161,7 @@ func (a *Api) OpenImageInExplorer(index int) {
 }
 
 // ListCaptureWindows ...
-func (a *Api) ListCaptureWindows() []string {
+func (a *Api) ListCaptureWindows() []capture.WindowInfo {
 	exeRoot, err := fs.GetExecuteRoot()
 	if err != nil {
 		log.Errorf("get exe root error: %v", err)
@@ -170,6 +170,10 @@ func (a *Api) ListCaptureWindows() []string {
 
 	rscap := capture.RustCapture{ExePath: filepath.Join(exeRoot, "lib", "rscapture", "rscapture.exe")}
 	winList, err := rscap.ListCapturableWindows()
+	// for _, w := range winList {
+	// 	fmt.Printf("window: %s\n", w)
+	// }
+	// fmt.Println("############################")
 	if err != nil {
 		log.Errorf("get capture windows error: %v", err)
 		return nil

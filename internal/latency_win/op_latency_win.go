@@ -27,10 +27,10 @@ type InputConf struct {
 
 // Config ...
 type Config struct {
-	InputConf     InputConf `json:"inputConf,omitempty"`
-	CaptureWindow string    `json:"captureWindow"`
-	Frames        int       `json:"frames,omitempty"`
-	StartKey      string    `json:"startKey"`
+	InputConf           InputConf `json:"inputConf,omitempty"`
+	CaptureWindowHandle int       `json:"captureWindow"`
+	Frames              int       `json:"frames,omitempty"`
+	StartKey            string    `json:"startKey"`
 }
 
 // OpLatency ...
@@ -94,7 +94,7 @@ func OpLatency(cfg Config, workdir string, printFunc func(string)) (capture.Scre
 	}
 	screenshotC := make(chan capture.ScreenshotSeq, 1)
 	errg.Go(func() error {
-		imgs, err := rsCap.CaptureScreenshots(cfg.Frames, cfg.CaptureWindow)
+		imgs, err := rsCap.CaptureScreenshots(cfg.Frames, cfg.CaptureWindowHandle)
 		if err != nil {
 			return fmt.Errorf("截图错误\n%w", err)
 		}
