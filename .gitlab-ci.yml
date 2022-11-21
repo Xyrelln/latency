@@ -90,7 +90,7 @@ PubBin:
 PubToDCenter:
   stage: delivery
   when: manual
-  image: default.registry.tke.com/vrviu/package-navigation:45d9075c
+  image: default.registry.tke.com/vrviu/package-navigation:5927263e
   dependencies:
     - CompileWinAmd64
     - DocGenerate
