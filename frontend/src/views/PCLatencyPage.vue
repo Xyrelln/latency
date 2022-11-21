@@ -33,7 +33,7 @@ const latencyTabName = ref('setting')
 const isRunning = ref(false)
 
 const latencyForm = reactive({
-  capture_window: { handle: 0},
+  capture_window: 0,
   operate_method: 'keyboard',
   operate_key: 'KeyA',
   auto: false,
@@ -210,7 +210,7 @@ const handleStart = () => {
   
   const config = latencywin.Config.createFrom({
     inputConf: input_config,
-    captureWindow: latencyForm.capture_window.handle,
+    captureWindow: latencyForm.capture_window,
     frames: latencyForm.frame_count,
     startKey: latencyForm.start_hotkey,
   })
@@ -404,7 +404,7 @@ onUnmounted(()=>{
                   v-for="item in capture_windows"
                   :key="item.handle"
                   :label="item.title + '(' + item.handle + ')'"
-                  :value="item"
+                  :value="item.handle"
                 />
               </el-select>
             </el-form-item>
