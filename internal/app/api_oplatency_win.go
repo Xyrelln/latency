@@ -160,8 +160,14 @@ func (a *Api) OpenImageInExplorer(index int) {
 	cmd.Start()
 }
 
+// CaptureWindowInfo ...
+type CaptureWindowInfo struct {
+	Title  string `json:"title,omitempty"`
+	Handle int    `json:"handle,omitempty"`
+}
+
 // ListCaptureWindows ...
-func (a *Api) ListCaptureWindows() []capture.WindowInfo {
+func (a *Api) ListCaptureWindows() []CaptureWindowInfo {
 	exeRoot, err := fs.GetExecuteRoot()
 	if err != nil {
 		log.Errorf("get exe root error: %v", err)
@@ -170,13 +176,14 @@ func (a *Api) ListCaptureWindows() []capture.WindowInfo {
 
 	rscap := capture.RustCapture{ExePath: filepath.Join(exeRoot, "lib", "rscapture", "rscapture.exe")}
 	winList, err := rscap.ListCapturableWindows()
-	// for _, w := range winList {
-	// 	fmt.Printf("window: %s\n", w)
-	// }
-	// fmt.Println("############################")
 	if err != nil {
 		log.Errorf("get capture windows error: %v", err)
 		return nil
 	}
-	return winList
+
+	res := make([]CaptureWindowInfo, 0, len(winList))
+	for _, w := range winList {
+		res = append(res, CaptureWindowInfo{Title: w.Title, Handle: w.Handle})
+	}
+	return res
 }

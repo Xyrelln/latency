@@ -12,10 +12,10 @@ type InputConf struct {
 
 // Config ...
 type Config struct {
-	InputConf     InputConf `json:"inputConf,omitempty"`
-	CaptureWindow string    `json:"captureWindow"`
-	Frames        int       `json:"frames,omitempty"`
-	StartKey      string    `json:"startKey"`
+	InputConf           InputConf `json:"inputConf,omitempty"`
+	CaptureWindowHandle int       `json:"captureWindow"`
+	Frames              int       `json:"frames,omitempty"`
+	StartKey            string    `json:"startKey"`
 }
 
 // OpLatencyWindowsManager ...
