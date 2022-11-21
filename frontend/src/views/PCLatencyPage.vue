@@ -33,7 +33,7 @@ const latencyTabName = ref('setting')
 const isRunning = ref(false)
 
 const latencyForm = reactive({
-  capture_window: '',
+  capture_window: { handle: 0},
   operate_method: 'keyboard',
   operate_key: 'KeyA',
   auto: false,
@@ -43,7 +43,8 @@ const latencyForm = reactive({
   auto_upload: false,
 })
 
-const capture_windows = reactive({value: []})
+// const capture_windows = reactive({value: []})
+const capture_windows = ref<Array<app.CaptureWindowInfo>>([])
 
 const cropInfo:CropArea = reactive({
   top: 50,
@@ -209,7 +210,7 @@ const handleStart = () => {
   
   const config = latencywin.Config.createFrom({
     inputConf: input_config,
-    captureWindow: latencyForm.capture_window,
+    captureWindow: latencyForm.capture_window.handle,
     frames: latencyForm.frame_count,
     startKey: latencyForm.start_hotkey,
   })
@@ -400,9 +401,9 @@ onUnmounted(()=>{
                 placeholder="请选择录制窗口"
                 size="default">
                 <el-option
-                  v-for="item in capture_windows.value"
-                  :key="item"
-                  :label="item"
+                  v-for="item in capture_windows"
+                  :key="item.handle"
+                  :label="item.title + '(' + item.handle + ')'"
                   :value="item"
                 />
               </el-select>

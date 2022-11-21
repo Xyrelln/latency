@@ -67,8 +67,8 @@ func (a *Api) OpenImageInExplorer(index int) {
 
 // CaptureWindowInfo ...
 type CaptureWindowInfo struct {
-	Title  string `json:"title,omitempty"`
-	Handle int    `json:"handle,omitempty"`
+	Title  string `json:"title"`
+	Handle int    `json:"handle"`
 }
 
 // ListCaptureWindows ...
