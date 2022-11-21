@@ -33,7 +33,7 @@ const latencyTabName = ref('setting')
 const isRunning = ref(false)
 
 const latencyForm = reactive({
-  capture_window: 0,
+  capture_window: "",
   operate_method: 'keyboard',
   operate_key: 'KeyA',
   auto: false,
