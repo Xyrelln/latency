@@ -83,7 +83,7 @@ func (rsc *RustCapture) ListCapturableWindows() (windowNames []WindowInfo, err e
 		if err := json.Unmarshal([]byte(line), &info); err == nil {
 			res = append(res, info)
 		} else {
-			log.Errorf("unmarshal rscapture window info error: %v", err)
+			log.Errorf("unmarshal rscapture window line: %s error: %v", line, err)
 		}
 	}
 	return res, nil
