@@ -99,6 +99,8 @@ PubToDCenter:
     NAME: op-latency-$VER
   script:
     - /usr/local/app/package-navigation -c /usr/local/app/config.yaml -m load --project_id ${CI_PROJECT_ID} --package_name $NAME --package_version $VER
+  artifacts:
+    - package-navigation.log
 # PubMacArm:
 #   stage: delivery
 #   tags:
