@@ -100,7 +100,9 @@ PubToDCenter:
   script:
     - /usr/local/app/package-navigation -c /usr/local/app/config.yaml -m load --project_id ${CI_PROJECT_ID} --package_name $NAME --package_version $VER
   artifacts:
-    - package-navigation.log
+    paths:
+      - package-navigation.log
+    expire_in: 1 days
 # PubMacArm:
 #   stage: delivery
 #   tags:
