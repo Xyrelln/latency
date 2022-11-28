@@ -8,7 +8,7 @@ require (
 	github.com/moutend/go-hook v0.1.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wailsapp/wails/v2 v2.0.0
-	gitlab.vrviu.com/epc/lighttest-lib v0.3.1
+	gitlab.vrviu.com/epc/lighttest-lib v0.4.0
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/sync v0.0.0-20220907140024-f12130a52804
 	golang.org/x/sys v0.0.0-20220913175220-63ea55921009
@@ -33,7 +33,7 @@ require (
 	github.com/vcaesar/imgo v0.30.0 // indirect
 	github.com/vcaesar/keycode v0.10.0 // indirect
 	github.com/vcaesar/tt v0.20.0 // indirect
-	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
+	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 

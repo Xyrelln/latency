@@ -17,15 +17,14 @@ import (
 	"op-latency-mobile/internal/core"
 	"op-latency-mobile/internal/ffprobe"
 	"op-latency-mobile/internal/fs"
-
 	latencywin "op-latency-mobile/internal/latency_win"
-
 	loggerUtil "op-latency-mobile/internal/logger"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"gitlab.vrviu.com/epc/lighttest-lib/internalenv"
 	"gitlab.vrviu.com/epc/lighttest-lib/lighttestservice"
 	"gitlab.vrviu.com/epc/lighttest-lib/token"
 	lighttestUpdate "gitlab.vrviu.com/epc/lighttest-lib/update"
@@ -748,8 +747,18 @@ func (a *Api) getUserSecret() (userSecret, error) {
 	return userSecret, nil
 }
 
+const (
+	lighttestInternalAddr = "http://lighttest-internal.epc.vrviu.com/"
+)
+
 // CheckUser ...
 func (a *Api) CheckUser() (lighttestservice.UserInfo, error) {
+	err := internalenv.IsInternalEnv(lighttestInternalAddr) // 内网环境跳过校验直接成功
+	if err == nil {
+		log.Info("vrviu internal env, skip validate")
+		return lighttestservice.UserInfo{}, nil
+	}
+
 	userSecret, err := a.getUserSecret()
 	if err != nil {
 		return lighttestservice.UserInfo{}, err
@@ -793,12 +802,10 @@ func (a *Api) SaveUser(u userSecret) (lighttestservice.UserInfo, error) {
 		Version:  version,
 		Username: u.Username,
 	}
-	fmt.Printf("username: %s\n", u.Username)
+
 	svc := lighttestservice.LightTestService{Endpoint: lighttestServiceEndpoint}
-	fmt.Printf("clientInfo: %s\n", client.Username)
 	userInfo, err := svc.GetUserInfo(client, u.Key)
 	if err != nil {
-		fmt.Printf("get user info err: %v", err)
 		return lighttestservice.UserInfo{}, err
 	}
 	// var val bytes.Buffer
@@ -814,7 +821,6 @@ func (a *Api) SaveUser(u userSecret) (lighttestservice.UserInfo, error) {
 		log.Errorf("write user info to store failed: %v", err)
 		return lighttestservice.UserInfo{}, err
 	}
-	fmt.Printf("err is nil")
 	return userInfo, nil
 }
 
